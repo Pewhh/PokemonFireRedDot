@@ -24,3 +24,8 @@ ViridianCity_Mart_Text_GotToBuySomePotions::
     .string "You never know when your POKéMON\n"
     .string "will need quick healing.$"
 
+ViridianCity_Mart_Text_NicknamingIsFun::
+    .string "Coming up with nicknames is fun,\n"
+    .string "but it's not so easy to do.\p"
+    .string "Clever names are nice, but simple\n"
+    .string "names are easier to remember.$"    

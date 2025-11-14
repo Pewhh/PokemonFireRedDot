@@ -1,10 +1,6 @@
 ViridianCity_House_MapScripts::
 	.byte 0
 
-ViridianCity_House_EventScript_BaldingMan::
-	msgbox ViridianCity_House_Text_NicknamingIsFun, MSGBOX_NPC
-	end
-
 ViridianCity_House_EventScript_LittleGirl::
 	msgbox ViridianCity_House_Text_MyDaddyLovesMonsToo, MSGBOX_NPC
 	end
@@ -22,3 +18,35 @@ ViridianCity_House_EventScript_Speary::
 ViridianCity_House_EventScript_NicknameSign::
 	msgbox ViridianCity_House_Text_SpearowNameSpeary, MSGBOX_SIGN
 	end
+
+ViridianCity_House_EventScript_FishingGuru::
+	lock
+	faceplayer
+	goto_if_set FLAG_GOT_OLD_ROD, ViridianCity_House_EventScript_AlreadyGotOldRod
+	msgbox ViridianCity_House_Text_ImFishingGuruDoYouLikeToFish, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, YES, ViridianCity_House_EventScript_GiveOldRod
+	msgbox ViridianCity_House_Text_OhThatsSoDisappointing
+	release
+	end
+
+ViridianCity_House_EventScript_AlreadyGotOldRod::
+	msgbox ViridianCity_House_Text_HowAreTheFishBiting
+	release
+	end
+
+ViridianCity_House_EventScript_GiveOldRod::
+	checkitemspace ITEM_OLD_ROD
+	goto_if_eq VAR_RESULT, FALSE, ViridianCity_House_EventScript_NoRoomForOldRod
+	additem ITEM_OLD_ROD
+	msgbox ViridianCity_House_Text_TakeThisAndFish
+	msgreceiveditem ViridianCity_House_Text_ReceivedOldRodFromFishingGuru, ITEM_OLD_ROD
+	setflag FLAG_GOT_OLD_ROD
+	msgbox ViridianCity_House_Text_FishingIsAWayOfLife
+	release
+	end
+
+ViridianCity_House_EventScript_NoRoomForOldRod::
+	msgbox ViridianCity_House_Text_NoRoomForNiceGift
+	release
+	end
+

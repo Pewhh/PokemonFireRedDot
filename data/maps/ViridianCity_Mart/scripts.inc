@@ -83,3 +83,7 @@ ViridianCity_Mart_EventScript_Woman::
 ViridianCity_Mart_EventScript_Youngster::
 	msgbox ViridianCity_Mart_Text_GotToBuySomePotions, MSGBOX_NPC
 	end
+
+ViridianCity_Mart_EventScript_BaldingMan::
+	msgbox ViridianCity_House_Text_NicknamingIsFun, MSGBOX_NPC
+	end

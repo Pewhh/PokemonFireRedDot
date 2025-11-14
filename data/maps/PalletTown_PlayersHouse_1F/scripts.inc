@@ -1,6 +1,106 @@
 PalletTown_PlayersHouse_1F_MapScripts::
 	.byte 0
 
+PalletTown_PlayersHouse_1F_EventScript_RunningShoesMomTriggerTop::
+	lockall
+	setvar VAR_TEMP_1, 0
+	call PalletTown_PlayersHouse_1F_EventScript_MomGiveRunningShoes
+	releaseall
+	end
+
+PalletTown_PlayersHouse_1F_EventScript_RunningShoesMomTriggerBottom::
+	lockall
+	setvar VAR_TEMP_1, 1
+	call PalletTown_PlayersHouse_1F_EventScript_MomGiveRunningShoes
+	releaseall
+	end
+
+PalletTown_PlayersHouse_1F_EventScript_MomGiveRunningShoes::
+    textcolor NPC_TEXT_COLOR_FEMALE
+	call_if_eq VAR_TEMP_1, 0, PalletTown_PlayersHouse_1F_EventScript_MomNoticePlayer
+	call_if_eq VAR_TEMP_1, 1, PalletTown_PlayersHouse_1F_EventScript_MomNoticePlayer
+	waitse
+	playse SE_PIN
+	applymovement LOCALID_MOM, Common_Movement_ExclamationMark
+	waitmovement 0
+	applymovement LOCALID_MOM, Common_Movement_Delay48
+	waitmovement 0
+	msgbox PalletTown_PlayersHouse_1F_Text_OhSon
+	call_if_eq VAR_TEMP_1, 0, PalletTown_PlayersHouse_1F_EventScript_MomApproachPlayer0
+	call_if_eq VAR_TEMP_1, 1, PalletTown_PlayersHouse_1F_EventScript_MomApproachPlayer1
+	msgbox PalletTown_PlayersHouse_1F_Text_DeliveringRunningShoes
+	textcolor NPC_TEXT_COLOR_NEUTRAL
+	playfanfare MUS_OBTAIN_KEY_ITEM
+	message PalletTown_PlayersHouse_1F_ReceivedRunningShoesFromMom
+	waitmessage
+	waitfanfare
+	msgbox PalletTown_PlayersHouse_1F_Text_SwitchedShoesWithRunningShoes
+    special DisableMsgBoxWalkaway
+	signmsg
+	msgbox PalletTown_PlayersHouse_1F_Text_ExplainRunningShoes
+	normalmsg
+	call EventScript_RestorePrevTextColor
+	closemessage
+	call_if_eq VAR_TEMP_1, 0, PalletTown_PlayersHouse_1F_EventScript_MomReturn0
+	call_if_eq VAR_TEMP_1, 1, PalletTown_PlayersHouse_1F_EventScript_MomReturn1
+	setflag FLAG_SYS_B_DASH
+	setvar VAR_MAP_SCENE_PALLET_MOM, 1
+	return
+
+PalletTown_PlayersHouse_1F_EventScript_MomNoticePlayer::
+    applymovement LOCALID_MOM, Common_Movement_WalkInPlaceFasterUp
+	waitmovement 0
+	return
+
+PalletTown_PlayersHouse_1F_EventScript_MomApproachPlayer0::
+	closemessage
+	applymovement LOCALID_MOM, PalletTown_PlayersHouse_1F_Movement_MomApproachPlayer0
+	waitmovement 0
+	applymovement LOCALID_PLAYER, Common_Movement_WalkInPlaceFasterDown
+	waitmovement 0
+	return
+
+PalletTown_PlayersHouse_1F_EventScript_MomApproachPlayer1::
+	closemessage
+	applymovement LOCALID_MOM, PalletTown_PlayersHouse_1F_Movement_MomApproachPlayer1
+	waitmovement 0
+	applymovement LOCALID_PLAYER, Common_Movement_WalkInPlaceFasterDown
+	waitmovement 0
+	return
+
+PalletTown_PlayersHouse_1F_Movement_MomApproachPlayer0::
+    delay_4
+	walk_right
+	walk_up
+	step_end
+
+PalletTown_PlayersHouse_1F_Movement_MomApproachPlayer1::
+    delay_4
+	walk_right
+	walk_right
+	walk_in_place_faster_up
+	step_end
+
+PalletTown_PlayersHouse_1F_EventScript_MomReturn0::
+    applymovement LOCALID_MOM, PalletTown_PlayersHouse_1F_Movement_MomReturn0
+	waitmovement 0
+	return
+
+PalletTown_PlayersHouse_1F_EventScript_MomReturn1::
+    applymovement LOCALID_MOM, PalletTown_PlayersHouse_1F_Movement_MomReturn1
+	waitmovement 0
+	return	
+
+PalletTown_PlayersHouse_1F_Movement_MomReturn0::
+    walk_down
+	walk_left
+	step_end
+
+PalletTown_PlayersHouse_1F_Movement_MomReturn1::
+    walk_left
+	walk_left
+	step_end
+
 PalletTown_PlayersHouse_1F_EventScript_Mom::
 	lock
 	faceplayer

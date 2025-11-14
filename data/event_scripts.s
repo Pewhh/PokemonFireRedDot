@@ -904,6 +904,15 @@ Text_RestoredPkmnToFullHealth::
 
 	.include "data/text/surf.inc"
 
+Text_TakeYourPkmnForFewSecondsFast::
+	.string "Okay, I'll take your POKéMON for a\n"
+	.string "few seconds.$"
+
+Text_RestoredPkmnToFullHealthFast::
+	.string "Thank you for waiting.\n"
+	.string "We've restored your POKéMON to\l"
+	.string "full health.$"
+
 @ Unused, from R/S
 Text_DoorOpenedFarAway::
 	.string "どこか　とおくの　とびらが\n"
@@ -1014,7 +1023,6 @@ EventScript_ResetAllMapFlags::
 	setflag FLAG_HIDE_OAK_IN_HIS_LAB
 	setflag FLAG_HIDE_OAK_IN_PALLET_TOWN
 	setflag FLAG_HIDE_BILL_HUMAN_SEA_COTTAGE
-	setflag FLAG_HIDE_PEWTER_CITY_RUNNING_SHOES_GUY
 	setflag FLAG_HIDE_POKEHOUSE_FUJI
 	setflag FLAG_HIDE_LIFT_KEY
 	setflag FLAG_HIDE_SILPH_SCOPE

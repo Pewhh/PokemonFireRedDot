@@ -1,11 +1,12 @@
 EventScript_PkmnCenterNurse::
 	goto_if_questlog EventScript_ReleaseEnd
+    goto_if_set FLAG_USED_POKECENTER_ONCE, EventScript_PkmnCenterNurse_Fast
 	message Text_WelcomeWantToHealPkmn
 	waitmessage
 	multichoice 19, 8, MULTICHOICE_YES_NO, FALSE | (TRUE << 1)
 	switch VAR_RESULT
 	case 0, EventScript_PkmnCenterNurse_HealPkmn
-	case 1 EventScript_PkmnCenterNurse_Goodbye
+	case 1, EventScript_PkmnCenterNurse_Goodbye
 	case SCR_MENU_CANCEL, EventScript_PkmnCenterNurse_Goodbye
 	end
 
@@ -15,6 +16,7 @@ EventScript_PkmnCenterNurse_HealPkmn::
 	waitmessage
 	call EventScript_PkmnCenterNurse_TakeAndHealPkmn
 	special SetUsedPkmnCenterQuestLogEvent
+	setflag FLAG_USED_POKECENTER_ONCE
 	goto EventScript_PkmnCenterNurse_CheckTrainerTowerAndUnionRoom
 	end
 
@@ -64,3 +66,13 @@ Movement_Bow::
 	nurse_joy_bow
 	delay_4
 	step_end
+
+EventScript_PkmnCenterNurse_Fast::
+    incrementgamestat GAME_STAT_USED_POKECENTER
+	message Text_TakeYourPkmnForFewSecondsFast
+	waitmessage
+	call EventScript_PkmnCenterNurse_TakeAndHealPkmn
+	special SetUsedPkmnCenterQuestLogEvent
+	goto EventScript_PkmnCenterNurse_CheckTrainerTowerAndUnionRoom
+	end
+

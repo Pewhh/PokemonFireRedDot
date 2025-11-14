@@ -906,7 +906,7 @@ static void PokeballGlowEffect_PlaceBalls(struct Sprite *sprite)
     u8 spriteId;
     if (sprite->sTimer == 0 || (--sprite->sTimer) == 0)
     {
-        sprite->sTimer = 25;
+        sprite->sTimer = 18;
         spriteId = CreateSpriteAtEnd(&sSpriteTemplate_PokeballGlow, sPokeballCoordOffsets[sprite->sCounter].x + sprite->x2, sPokeballCoordOffsets[sprite->sCounter].y + sprite->y2, 0xFF);
         gSprites[spriteId].oam.priority = 2;
         gSprites[spriteId].sGlowEffectSpriteId = sprite->sSpriteId;
@@ -916,7 +916,7 @@ static void PokeballGlowEffect_PlaceBalls(struct Sprite *sprite)
     }
     if (sprite->sNumMons == 0)
     {
-        sprite->sTimer = 32;
+        sprite->sTimer = 24;
         sprite->sState++;
     }
 }
@@ -926,7 +926,7 @@ static void PokeballGlowEffect_TryPlaySe(struct Sprite *sprite)
     if ((--sprite->sTimer) == 0)
     {
         sprite->sState++;
-        sprite->sTimer = 8;
+        sprite->sTimer = 6;
         sprite->sCounter = 0;
         sprite->sNumFlashed = 0;
         if (sprite->sPlayHealSe)
@@ -939,7 +939,7 @@ static void PokeballGlowEffect_FlashFirstThree(struct Sprite *sprite)
     u8 phase;
     if ((--sprite->sTimer) == 0)
     {
-        sprite->sTimer = 8;
+        sprite->sTimer = 6;
         sprite->sCounter++;
         sprite->sCounter &= 3;
         if (sprite->sCounter == 0)
@@ -957,7 +957,7 @@ static void PokeballGlowEffect_FlashFirstThree(struct Sprite *sprite)
     if (sprite->sNumFlashed >= 3)
     {
         sprite->sState++;
-        sprite->sTimer = 8;
+        sprite->sTimer = 6;
         sprite->sCounter = 0;
     }
 }
@@ -967,13 +967,13 @@ static void PokeballGlowEffect_FlashLast(struct Sprite *sprite)
     u8 phase;
     if ((--sprite->sTimer) == 0)
     {
-        sprite->sTimer = 8;
+        sprite->sTimer = 6;
         sprite->sCounter++;
         sprite->sCounter &= 3;
         if (sprite->sCounter == 3)
         {
             sprite->sState++;
-            sprite->sTimer = 30;
+            sprite->sTimer = 22;
         }
     }
     phase = sprite->sCounter;
