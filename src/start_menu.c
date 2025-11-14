@@ -711,7 +711,7 @@ static u8 SaveDialogCB_PrintAskSaveText(void)
     RemoveStartMenuWindow();
     DestroyHelpMessageWindow(0);
     PrintSaveStats();
-    PrintSaveTextWithFollowupFunc(gText_WouldYouLikeToSaveTheGame, SaveDialogCB_AskSavePrintYesNoMenu);
+    PrintSaveTextWithFollowupFunc(gText_SavingDontTurnOffThePower, SaveDialogCB_DoSave);
     return SAVECB_RETURN_CONTINUE;
 }
 
