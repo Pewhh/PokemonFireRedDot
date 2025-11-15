@@ -506,12 +506,19 @@ static void PlayerNotOnBikeMoving(u8 direction, u16 heldKeys)
         return;
     }
 
-    if (gPlayerAvatar.flags & PLAYER_AVATAR_FLAG_SURFING)
-    {
-        // Same speed as running
-        PlayerWalkFast(direction);
-        return;
-    }
+if (gPlayerAvatar.flags & PLAYER_AVATAR_FLAG_SURFING)
+{
+    // segurar B = surf “turbo” (um degrau acima)
+    if ((heldKeys & B_BUTTON) && FlagGet(FLAG_SYS_B_DASH))
+        PlayerWalkFaster(direction);   // turbo no surf
+    else
+        PlayerWalkFast(direction);     // surf normal
+
+    // Não marque DASH na água (nada de poeira/sons de corrida)
+    // gPlayerAvatar.flags |= PLAYER_AVATAR_FLAG_DASH; // deixe comentado
+
+    return;
+}
 
     if ((heldKeys & B_BUTTON) && FlagGet(FLAG_SYS_B_DASH)
         && !IsRunningDisallowed(gObjectEvents[gPlayerAvatar.objectEventId].currentMetatileBehavior))
