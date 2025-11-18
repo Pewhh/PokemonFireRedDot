@@ -55,13 +55,32 @@
     },
     {
       "x": 3,
-      "y": 9,
+      "y": 8,
       "elevation": 0,
       "dest_map": "MAP_PALLET_TOWN",
       "dest_warp_id": "0"
     }
   ],
-  "coord_events": [],
+  "coord_events": [
+    {
+      "type": "trigger",
+      "x": 9,
+      "y": 2,
+      "elevation": 0,
+      "var": "VAR_MAP_SCENE_PALLET_MOM",
+      "var_value": "0",
+      "script": "PalletTown_PlayersHouse_1F_EventScript_MomGiveRunningShoes"
+    },
+    {
+      "type": "trigger",
+      "x": 10,
+      "y": 3,
+      "elevation": 0,
+      "var": "VAR_MAP_SCENE_PALLET_MOM",
+      "var_value": "0",
+      "script": "PalletTown_PlayersHouse_1F_EventScript_MomGiveRunningShoes"
+    }
+  ],
   "bg_events": [
     {
       "type": "sign",
