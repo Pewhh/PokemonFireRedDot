@@ -23,6 +23,7 @@
 #include "constants/moves.h"
 #include "constants/songs.h"
 #include "constants/sound.h"
+#include "battle_setup.h"
 
 static void PlayerHandleGetMonData(void);
 static void PlayerHandleSetMonData(void);

@@ -68,6 +68,8 @@
 #include "constants/quest_log.h"
 #include "constants/songs.h"
 #include "constants/sound.h"
+#include "battle_setup.h"
+#include "constants/trainers.h"
 
 #define PARTY_PAL_SELECTED     (1 << 0)
 #define PARTY_PAL_FAINTED      (1 << 1)
@@ -4431,6 +4433,16 @@ void ItemUseCB_Medicine(u8 taskId, TaskFunc task)
     u16 item = gSpecialVar_ItemId;
     bool8 canHeal, cannotUse;
 
+    if ((FlagGet(FLAG_HARDCORE) || FlagGet(FLAG_EXPERT))
+    && GetMonData(mon, MON_DATA_DEAD))
+    {
+    DisplayPartyMenuMessage(gText_WontHaveEffect, TRUE);
+    ScheduleBgCopyTilemapToVram(2);
+    gTasks[taskId].func = (gPartyMenu.menuType == PARTY_MENU_TYPE_FIELD)
+                            ? Task_ReturnToChooseMonAfterText
+                            : task;     // << aqui usamos o parâmetro “task”
+    return;
+    }
     if (NotUsingHPEVItemOnShedinja(mon, item) == FALSE)
     {
         cannotUse = TRUE;
@@ -4505,6 +4517,14 @@ void ItemUseCB_MedicineStep(u8 taskId, TaskFunc func)
     bool8 canHeal;
     bool8 cannotHeal;
 
+    if ((FlagGet(FLAG_HARDCORE) || FlagGet(FLAG_EXPERT))
+    && GetMonData(mon, MON_DATA_DEAD))
+    {
+    DisplayPartyMenuMessage(gText_WontHaveEffect, TRUE);
+    ScheduleBgCopyTilemapToVram(2);
+    gTasks[taskId].func = func; // ou finalize conforme o fluxo local
+    return;
+    }    
     if (NotUsingHPEVItemOnShedinja(mon, item) == FALSE)
         cannotHeal = TRUE;
     else
@@ -5052,7 +5072,9 @@ void ItemUseCB_RareCandy(u8 taskId, TaskFunc func)
     u16 item = gSpecialVar_ItemId;
     bool8 noEffect;
 
-    if (GetMonData(mon, MON_DATA_LEVEL) != MAX_LEVEL)
+    if ((GetMonData(mon, MON_DATA_LEVEL) != MAX_LEVEL
+    && !levelCappedNuzlocke(GetMonData(mon, MON_DATA_LEVEL)))
+    && !(FlagGet(FLAG_HARD) || (FlagGet(FLAG_HARDCORE) || (FlagGet(FLAG_EXPERT) && GetMonData(mon, MON_DATA_DEAD)))))
         noEffect = PokemonItemUseNoEffect(mon, item, gPartyMenu.slotId, 0);
     else
         noEffect = TRUE;
@@ -5271,17 +5293,21 @@ void ItemUseCB_SacredAsh(u8 taskId, TaskFunc func)
 static void UseSacredAsh(u8 taskId)
 {
     struct Pokemon *mon = &gPlayerParty[gPartyMenu.slotId];
-    u16 hp;
+    u16 hp = GetMonData(mon, MON_DATA_HP); // já pega o HP do mon
 
-    if (GetMonData(mon, MON_DATA_SPECIES) == SPECIES_NONE)
+    // Bloqueia em modos HARDCORE/EXPERT se o mon estiver desmaiado (HP == 0)
+    if ((FlagGet(FLAG_HARDCORE) || FlagGet(FLAG_EXPERT)) && hp == 0)
     {
-        gTasks[taskId].func = Task_SacredAshLoop;
+        DisplayPartyMenuMessage(gText_WontHaveEffect, TRUE);
+        ScheduleBgCopyTilemapToVram(2);
+        gTasks[taskId].func = Task_ClosePartyMenuAfterText; // defina o fluxo de saída
         return;
     }
-    hp = GetMonData(mon, MON_DATA_HP);
-    if (ExecuteTableBasedItemEffect_(gPartyMenu.slotId, gSpecialVar_ItemId, 0))
+
+    // Se o slot estiver vazio, segue para o loop do item/efeito
+    if (GetMonData(mon, MON_DATA_SPECIES) == SPECIES_NONE)
     {
-        gTasks[taskId].func = Task_SacredAshLoop;
+        gTasks[taskId].func = Task_SacredAshLoop; // use o seu loop/callback correto aqui
         return;
     }
     PlaySE(SE_USE_ITEM);

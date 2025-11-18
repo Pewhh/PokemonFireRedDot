@@ -17,6 +17,7 @@
 #include "reshow_battle_screen.h"
 #include "constants/songs.h"
 #include "constants/items.h"
+#include "battle_setup.h"
 
 static void OakOldManHandleGetMonData(void);
 static void OakOldManHandleGetRawMonData(void);

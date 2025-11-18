@@ -33,5 +33,9 @@ void ShowTrainerCantBattleSpeech(void);
 void PlayTrainerEncounterMusic(void);
 const u8 *GetTrainerALoseText(void);
 const u8 *GetTrainerWonSpeech(void);
+u8  getLevelCap(void);
+bool8 levelCappedNuzlocke(u8 level);
+bool8 ExpertPartyLimitActive(void);
+u8  GetOpponentPartyLimit(void);
 
 #endif // GUARD_BATTLE_SETUP_H

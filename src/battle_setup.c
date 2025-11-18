@@ -33,6 +33,8 @@
 #include "constants/songs.h"
 #include "constants/pokemon.h"
 #include "constants/trainers.h"
+#include "battle_setup.h"
+#include "title_screen.h"
 
 enum {
     TRANSITION_TYPE_NORMAL,
@@ -1067,4 +1069,114 @@ const u8 *GetTrainerWonSpeech(void)
 static const u8 *GetTrainerCantBattleSpeech(void)
 {
     return ReturnEmptyStringIfNull(sTrainerCannotBattleSpeech);
+}
+
+u8 getLevelCap(void)
+{
+    u8 cap;
+    
+    if (!(FlagGet(FLAG_HARD) || FlagGet(FLAG_HARDCORE)) || FlagGet(FLAG_EXPERT))
+        return 100;
+
+    cap = 100;
+    
+    if (!FlagGet(FLAG_BADGE01_GET))
+    {
+        cap = 14;  // Brock
+    }
+    else if (!FlagGet(FLAG_BADGE02_GET))
+    {
+        cap = 21;  // Misty
+    }
+    else if (!FlagGet(FLAG_BADGE03_GET))
+    {
+        cap = 25;  // Lt. Surge
+    }
+    else if (!FlagGet(FLAG_BADGE04_GET))
+    {
+        cap = 29;  // Erika
+    }
+    else if (!FlagGet(FLAG_BADGE05_GET))
+    {
+        cap = 43;  // Koga
+    }
+    else if (!FlagGet(FLAG_BADGE06_GET))
+    {
+        cap = 43;  // Sabrina (mantém 43 para jogos balanceados)
+    }
+    else if (!FlagGet(FLAG_BADGE07_GET))
+    {
+        cap = 47;  // Blaine
+    }
+    else if (!FlagGet(FLAG_BADGE08_GET))
+    {
+        cap = 50;  // Giovanni
+    }
+    else
+    {
+        // Pós-8 insígnias → Elite 4/Champion. Use um teto seguro.
+        cap = 63;  // Campeão ~63 em FRLG
+    }
+
+    return cap;
+}
+
+bool8 levelCappedNuzlocke(u8 level)
+{
+    u8 cap;
+    
+    if (!(FlagGet(FLAG_HARD) || FlagGet(FLAG_HARDCORE)) || FlagGet(FLAG_EXPERT))
+        return FALSE;
+    
+    cap = getLevelCap();
+    if (level >= cap)
+        return TRUE;
+    return FALSE;    
+}
+
+static bool8 IsGymLeaderOpponent(void)
+{
+    switch (gTrainerBattleOpponent_A)
+    {
+    case TRAINER_LEADER_BROCK:
+    case TRAINER_LEADER_MISTY:
+    case TRAINER_LEADER_LT_SURGE:
+    case TRAINER_LEADER_ERIKA:
+    case TRAINER_LEADER_KOGA:
+    case TRAINER_LEADER_SABRINA:
+    case TRAINER_LEADER_BLAINE:
+    case TRAINER_LEADER_GIOVANNI:
+        return TRUE;
+    default:
+        return FALSE;
+    }
+}
+
+bool8 ExpertPartyLimitActive(void)
+{
+    if (!FlagGet(FLAG_EXPERT))
+        return FALSE;
+    if (!(gBattleTypeFlags & BATTLE_TYPE_TRAINER))
+        return FALSE;
+
+    return IsGymLeaderOpponent();
+}
+
+u8 GetOpponentPartyLimit(void)
+{
+    if (!ExpertPartyLimitActive())
+        return PARTY_SIZE; // 6 (ou o valor do seu projeto)
+
+    switch (gTrainerBattleOpponent_A)
+    {
+    case TRAINER_LEADER_BROCK:    return 2;
+    case TRAINER_LEADER_MISTY:    return 3;
+    case TRAINER_LEADER_LT_SURGE: return 3;
+    case TRAINER_LEADER_ERIKA:    return 4;
+    case TRAINER_LEADER_KOGA:     return 4;
+    case TRAINER_LEADER_SABRINA:  return 5;
+    case TRAINER_LEADER_BLAINE:   return 5;
+    case TRAINER_LEADER_GIOVANNI: return 5;
+    default:                      return PARTY_SIZE; // segurança
+    }
 }

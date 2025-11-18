@@ -53,6 +53,8 @@
 #include "constants/region_map_sections.h"
 #include "constants/songs.h"
 #include "constants/sound.h"
+#include "title_screen.h"
+#include "save.h"
 
 #define PLAYER_LINK_STATE_IDLE 0x80
 #define PLAYER_LINK_STATE_BUSY 0x81
@@ -245,6 +247,12 @@ static const u16 sWhiteOutMoneyLossBadgeFlagIDs[] = {
 static void DoWhiteOut(void)
 {
     RunScriptImmediately(EventScript_ResetEliteFourEnd);
+    VarSet(VAR_FORCEANIM, 0);
+    if (FlagGet(FLAG_HARDCORE) || FlagGet(FLAG_EXPERT))
+    {
+        ClearSaveData();
+        DoSoftReset();
+    }
     RemoveMoney(&gSaveBlock1Ptr->money, ComputeWhiteOutMoneyLoss());
     HealPlayerParty();
     Overworld_ResetStateAfterWhitingOut();

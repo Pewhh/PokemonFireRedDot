@@ -20,6 +20,7 @@
 #include "constants/songs.h"
 #include "constants/moves.h"
 #include "constants/pokemon.h"
+#include "battle_setup.h"
 
 struct PokedudeTextScriptHeader
 {

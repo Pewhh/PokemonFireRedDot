@@ -241,3 +241,18 @@ gOakSpeech_Text_LetsGo::
     .string "about to unfold!\p"
     .string "A world of dreams and adventures\n"
     .string "with POKéMON awaits! Let's go!$"
+
+gText_Oak_Nuzlocke::
+    .string "Select difficulty.$"
+
+gText_Oak_AreYouSure_Normal::
+    .string "Are you sure?\nClassic POKEMON rules.$"
+
+gText_Oak_AreYouSure_Hard::
+    .string "Are you sure? No items in battle,\nSet Mode, GYM level caps.$"
+
+gText_Oak_AreYouSure_Hardcore::
+    .string "Are you sure? Hard mode,\nbut POKEMON can't be revived.$"
+
+gText_Oak_AreYouSure_Expert::
+    .string "Are you sure? Hardcore +\nparty limits vs bosses.$"    

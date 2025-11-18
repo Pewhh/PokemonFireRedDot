@@ -36,6 +36,7 @@
 #include "constants/abilities.h"
 #include "constants/pokemon.h"
 #include "constants/maps.h"
+#include "battle_setup.h"
 
 extern const u8 *const gBattleScriptsForMoveEffects[];
 
@@ -2870,6 +2871,31 @@ static void Cmd_tryfaintmon(void)
             gHitMarker |= HITMARKER_FAINTED(gActiveBattler);
             BattleScriptPush(gBattlescriptCurrInstr + 7);
             gBattlescriptCurrInstr = BS_ptr;
+            gHitMarker |= HITMARKER_FAINTED(gActiveBattler);
+            BattleScriptPush(gBattlescriptCurrInstr + 7);
+            gBattlescriptCurrInstr = BS_ptr;
+
+            if (GetBattlerSide(gActiveBattler) == B_SIDE_PLAYER)
+            {
+                // === HARDCORE/EXPERT: marcar DEAD ao desmaiar — START ===
+                if (FlagGet(FLAG_HARDCORE) || FlagGet(FLAG_EXPERT)) {
+                    bool8 dead = TRUE;
+                    SetMonData(&gPlayerParty[gBattlerPartyIndexes[gActiveBattler]], MON_DATA_DEAD, &dead);
+                }
+                // === HARDCORE/EXPERT: marcar DEAD — END ===
+
+                gHitMarker |= HITMARKER_PLAYER_FAINTED;
+                if (gBattleResults.playerFaintCounter < 255)
+                    gBattleResults.playerFaintCounter++;
+                AdjustFriendshipOnBattleFaint(gActiveBattler);
+            }
+            else
+           {
+                if (gBattleResults.opponentFaintCounter < 255)
+                    gBattleResults.opponentFaintCounter++;
+                gBattleResults.lastOpponentSpecies = GetMonData(&gEnemyParty[gBattlerPartyIndexes[gActiveBattler]], MON_DATA_SPECIES);
+               *(u8 *)(&gBattleStruct->lastAttackerToFaintOpponent) = gBattlerAttacker;
+           }            
             if (GetBattlerSide(gActiveBattler) == B_SIDE_PLAYER)
             {
                 gHitMarker |= HITMARKER_PLAYER_FAINTED;

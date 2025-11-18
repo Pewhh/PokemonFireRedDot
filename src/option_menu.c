@@ -10,6 +10,8 @@
 #include "strings.h"
 #include "field_fadetransition.h"
 #include "gba/m4a_internal.h"
+#include "constants/flags.h"
+#include "event_data.h"
 
 // can't include the one in menu_helpers.h since Task_OptionMenu needs bool32 for matching
 bool32 IsActiveOverworldLinkBusy(void);
@@ -160,6 +162,12 @@ static const u8 *const sBattleSceneOptions[] =
 static const u8 *const sBattleStyleOptions[] =
 {
     gText_BattleStyleShift,
+    gText_BattleStyleSet
+};
+
+static const u8 *const sBattleStyleOptions2[] =
+{
+    gText_BattleStyleSet,
     gText_BattleStyleSet
 };
 
@@ -484,7 +492,10 @@ static void BufferOptionMenuString(u8 selection)
         AddTextPrinterParameterized3(1, FONT_NORMAL, x, y, dst, -1, sBattleSceneOptions[sOptionMenuPtr->option[selection]]);
         break;
     case MENUITEM_BATTLESTYLE:
-        AddTextPrinterParameterized3(1, FONT_NORMAL, x, y, dst, -1, sBattleStyleOptions[sOptionMenuPtr->option[selection]]);
+        if (FlagGet(FLAG_HARD) || FlagGet(FLAG_HARDCORE) || FlagGet(FLAG_EXPERT))
+            AddTextPrinterParameterized3(1, FONT_NORMAL, x, y, dst, -1, sBattleStyleOptions2[sOptionMenuPtr->option[selection]]);
+        else
+            AddTextPrinterParameterized3(1, FONT_NORMAL, x, y, dst, -1, sBattleStyleOptions[sOptionMenuPtr->option[selection]]);
         break;
     case MENUITEM_SOUND:
         AddTextPrinterParameterized3(1, FONT_NORMAL, x, y, dst, -1, sSoundOptions[sOptionMenuPtr->option[selection]]);
