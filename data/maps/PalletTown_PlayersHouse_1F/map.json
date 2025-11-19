@@ -69,7 +69,7 @@
       "elevation": 0,
       "var": "VAR_MAP_SCENE_PALLET_MOM",
       "var_value": "0",
-      "script": "PalletTown_PlayersHouse_1F_EventScript_MomGiveRunningShoes"
+      "script": "PalletTown_PlayersHouse_1F_EventScript_MomApproachPlayer0"
     },
     {
       "type": "trigger",
@@ -78,7 +78,7 @@
       "elevation": 0,
       "var": "VAR_MAP_SCENE_PALLET_MOM",
       "var_value": "0",
-      "script": "PalletTown_PlayersHouse_1F_EventScript_MomGiveRunningShoes"
+      "script": "PalletTown_PlayersHouse_1F_EventScript_MomApproachPlayer1"
     }
   ],
   "bg_events": [

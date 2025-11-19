@@ -942,7 +942,7 @@ static void CB2_EndTrainerBattle(void)
         }
         else if (IsPlayerDefeated(gBattleOutcome) == TRUE)
         {
-            SetMainCallback2(CB2_WhiteOut);
+                SetMainCallback2(CB2_WhiteOut);
         }
         else
         {
@@ -1071,67 +1071,96 @@ static const u8 *GetTrainerCantBattleSpeech(void)
     return ReturnEmptyStringIfNull(sTrainerCannotBattleSpeech);
 }
 
+static u8 GetMaxLevelForTrainer(u16 trainerId)
+{
+    u8 i, maxLvl = 0;
+    u8 count = gTrainers[trainerId].partySize;
+
+    switch (gTrainers[trainerId].partyFlags)
+    {
+    case 0: // NoItemDefaultMoves
+    {
+        const struct TrainerMonNoItemDefaultMoves *party = gTrainers[trainerId].party.NoItemDefaultMoves;
+        for (i = 0; i < count; i++)
+            if (party[i].lvl > maxLvl) maxLvl = party[i].lvl;
+        break;
+    }
+    case F_TRAINER_PARTY_CUSTOM_MOVESET:
+    {
+        const struct TrainerMonNoItemCustomMoves *party = gTrainers[trainerId].party.NoItemCustomMoves;
+        for (i = 0; i < count; i++)
+            if (party[i].lvl > maxLvl) maxLvl = party[i].lvl;
+        break;
+    }
+    case F_TRAINER_PARTY_HELD_ITEM:
+    {
+        const struct TrainerMonItemDefaultMoves *party = gTrainers[trainerId].party.ItemDefaultMoves;
+        for (i = 0; i < count; i++)
+            if (party[i].lvl > maxLvl) maxLvl = party[i].lvl;
+        break;
+    }
+    case F_TRAINER_PARTY_CUSTOM_MOVESET | F_TRAINER_PARTY_HELD_ITEM:
+    {
+        const struct TrainerMonItemCustomMoves *party = gTrainers[trainerId].party.ItemCustomMoves;
+        for (i = 0; i < count; i++)
+            if (party[i].lvl > maxLvl) maxLvl = party[i].lvl;
+        break;
+    }
+    }
+
+    return maxLvl;
+}
+
 u8 getLevelCap(void)
 {
+    u16 nextLeader = TRAINER_CHAMPION_FIRST_CHARMANDER; // default seguro
     u8 cap;
-    
-    if (!(FlagGet(FLAG_HARD) || FlagGet(FLAG_HARDCORE)) || FlagGet(FLAG_EXPERT))
+
+    // Sem modos ativos (HARD/HARDCORE/EXPERT) ou já Campeão → sem cap
+    if (!(FlagGet(FLAG_HARD) || FlagGet(FLAG_HARDCORE) || FlagGet(FLAG_EXPERT)) || FlagGet(FLAG_IS_CHAMPION))
         return 100;
 
-    cap = 100;
-    
+    // Decide o "próximo chefe" pelo progresso de insígnias/flags
     if (!FlagGet(FLAG_BADGE01_GET))
-    {
-        cap = 14;  // Brock
-    }
+        nextLeader = TRAINER_LEADER_BROCK;
     else if (!FlagGet(FLAG_BADGE02_GET))
-    {
-        cap = 21;  // Misty
-    }
+        nextLeader = TRAINER_LEADER_MISTY;
     else if (!FlagGet(FLAG_BADGE03_GET))
-    {
-        cap = 25;  // Lt. Surge
-    }
+        nextLeader = TRAINER_LEADER_LT_SURGE;
     else if (!FlagGet(FLAG_BADGE04_GET))
-    {
-        cap = 29;  // Erika
-    }
+        nextLeader = TRAINER_LEADER_ERIKA;
     else if (!FlagGet(FLAG_BADGE05_GET))
-    {
-        cap = 43;  // Koga
-    }
+        nextLeader = TRAINER_LEADER_KOGA;
     else if (!FlagGet(FLAG_BADGE06_GET))
-    {
-        cap = 43;  // Sabrina (mantém 43 para jogos balanceados)
-    }
+        nextLeader = TRAINER_LEADER_SABRINA;   // use o ID que você de fato usa aqui
     else if (!FlagGet(FLAG_BADGE07_GET))
-    {
-        cap = 47;  // Blaine
-    }
+        nextLeader = TRAINER_LEADER_BLAINE;
     else if (!FlagGet(FLAG_BADGE08_GET))
-    {
-        cap = 50;  // Giovanni
-    }
+        nextLeader = TRAINER_LEADER_GIOVANNI;
     else
-    {
-        // Pós-8 insígnias → Elite 4/Champion. Use um teto seguro.
-        cap = 63;  // Campeão ~63 em FRLG
-    }
+        nextLeader = TRAINER_CHAMPION_FIRST_CHARMANDER; // pós-8 insígnias
+
+    // Cap = maior nível do time desse treinador-alvo
+    cap = GetMaxLevelForTrainer(nextLeader);
+
+    // fallback defensivo: se algo vier 0, usa um valor razoável
+    if (cap == 0)
+        cap = 63;
 
     return cap;
 }
 
+static inline bool8 LevelCapIsActive(void)
+{
+    return (FlagGet(FLAG_HARD) || FlagGet(FLAG_HARDCORE) || FlagGet(FLAG_EXPERT));
+}
+
 bool8 levelCappedNuzlocke(u8 level)
 {
-    u8 cap;
-    
-    if (!(FlagGet(FLAG_HARD) || FlagGet(FLAG_HARDCORE)) || FlagGet(FLAG_EXPERT))
+    if (!LevelCapIsActive())
         return FALSE;
-    
-    cap = getLevelCap();
-    if (level >= cap)
-        return TRUE;
-    return FALSE;    
+
+    return (level >= getLevelCap());
 }
 
 static bool8 IsGymLeaderOpponent(void)

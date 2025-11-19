@@ -3783,7 +3783,7 @@ static void CursorCB_Enter(u8 taskId)
         {
             PlaySE(SE_SELECT);
             gSelectedOrderFromParty[i] = gPartyMenu.slotId + 1;
-            DisplayPartyPokemonDescriptionText(i + PARTYBOX_DESC_FIRST, &sPartyMenuBoxes[gPartyMenu.slotId], 1);
+                DisplayPartyPokemonDescriptionText(i + PARTYBOX_DESC_FIRST, &sPartyMenuBoxes[gPartyMenu.slotId], 1);
             if (i == (maxBattlers - 1))
                 MoveCursorToConfirm();
             DisplayPartyMenuStdMessage(PARTY_MSG_CHOOSE_MON);
@@ -5072,10 +5072,15 @@ void ItemUseCB_RareCandy(u8 taskId, TaskFunc func)
     u16 item = gSpecialVar_ItemId;
     bool8 noEffect;
 
-    if ((GetMonData(mon, MON_DATA_LEVEL) != MAX_LEVEL
-    && !levelCappedNuzlocke(GetMonData(mon, MON_DATA_LEVEL)))
-    && !(FlagGet(FLAG_HARD) || (FlagGet(FLAG_HARDCORE) || (FlagGet(FLAG_EXPERT) && GetMonData(mon, MON_DATA_DEAD)))))
+    if ((FlagGet(FLAG_HARDCORE) || FlagGet(FLAG_EXPERT)) && GetMonData(mon, MON_DATA_DEAD))
+    {
+        noEffect = TRUE;
+    }
+    // Permite usar se NÃO estiver no 100 e NÃO estiver no level cap
+    else if (GetMonData(mon, MON_DATA_LEVEL) != MAX_LEVEL && !levelCappedNuzlocke(GetMonData(mon, MON_DATA_LEVEL)))
+    {
         noEffect = PokemonItemUseNoEffect(mon, item, gPartyMenu.slotId, 0);
+    }
     else
         noEffect = TRUE;
     PlaySE(SE_SELECT);
@@ -5099,6 +5104,15 @@ static void ItemUseCB_RareCandyStep(u8 taskId, TaskFunc func)
     struct PartyMenuInternal *ptr = sPartyMenuInternal;
     s16 *arrayPtr = ptr->data;
     u8 level;
+
+    if (levelCappedNuzlocke(GetMonData(mon, MON_DATA_LEVEL)))
+    {
+        gPartyMenuUseExitCallback = FALSE;
+        DisplayPartyMenuMessage(gText_WontHaveEffect, TRUE);
+        ScheduleBgCopyTilemapToVram(2);
+        gTasks[taskId].func = func;
+        return;
+    }
 
     GetMonLevelUpWindowStats(mon, arrayPtr);
     ExecuteTableBasedItemEffect_(gPartyMenu.slotId, gSpecialVar_ItemId, 0);

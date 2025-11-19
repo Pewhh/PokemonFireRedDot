@@ -1336,3 +1336,4 @@ const u8 gText_DelAllCancelOk[] = _("DEL. ALL{CLEAR_TO 0x57}CANCEL{CLEAR_TO 0xA4
 const u8 gText_Hard[]     = _("HARD");
 const u8 gText_Hardcore[] = _("HARDCORE");
 const u8 gText_Expert[]   = _("EXPERT");
+
