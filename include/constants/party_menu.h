@@ -101,14 +101,15 @@
 #define PARTY_MSG_NOT_ENOUGH_HP             16
 #define PARTY_MSG_THREE_MONS_ARE_NEEDED     17
 #define PARTY_MSG_TWO_MONS_ARE_NEEDED       18
-#define PARTY_MSG_MONS_CANT_BE_SAME         19
-#define PARTY_MSG_NO_SAME_HOLD_ITEMS        20
-#define PARTY_MSG_UNUSED                    21
-#define PARTY_MSG_DO_WHAT_WITH_MON          22
-#define PARTY_MSG_RESTORE_WHICH_MOVE        23
-#define PARTY_MSG_BOOST_PP_WHICH_MOVE       24
-#define PARTY_MSG_DO_WHAT_WITH_ITEM         25
-#define PARTY_MSG_DO_WHAT_WITH_MAIL         26
+#define PARTY_MSG_NOT_ENOUGH_MONS_SELECTED  19
+#define PARTY_MSG_MONS_CANT_BE_SAME         20
+#define PARTY_MSG_NO_SAME_HOLD_ITEMS        21
+#define PARTY_MSG_UNUSED                    22
+#define PARTY_MSG_DO_WHAT_WITH_MON          23
+#define PARTY_MSG_RESTORE_WHICH_MOVE        24
+#define PARTY_MSG_BOOST_PP_WHICH_MOVE       25
+#define PARTY_MSG_DO_WHAT_WITH_ITEM         26
+#define PARTY_MSG_DO_WHAT_WITH_MAIL         27
 #define PARTY_MSG_NONE                      127
 
 // IDs for DisplayPartyPokemonDescriptionText, to display a message in the party pokemon's box
@@ -122,6 +123,8 @@
 #define PARTYBOX_DESC_ABLE_2      7
 #define PARTYBOX_DESC_NOT_ABLE_2  8
 #define PARTYBOX_DESC_LEARNED     9
+#define PARTYBOX_DESC_FOURTH      10
+#define PARTYBOX_DESC_FIFTH       11
 
 #define SELECTWINDOW_ACTIONS  0
 #define SELECTWINDOW_ITEM     1
@@ -133,6 +136,7 @@ enum
     CHOOSE_MONS_FOR_CABLE_CLUB_BATTLE,
     CHOOSE_MONS_FOR_BATTLE_TOWER,
     CHOOSE_MONS_FOR_UNION_ROOM_BATTLE,
+    CHOOSE_MONS_FOR_GYM_LEADER,
 };
 
 #endif // GUARD_CONSTANTS_PARTY_MENU_H

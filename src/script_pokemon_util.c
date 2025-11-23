@@ -7,12 +7,15 @@
 #include "overworld.h"
 #include "party_menu.h"
 #include "pokedex.h"
+#include "battle_setup.h"
+#include "battle.h"
 #include "script_pokemon_util.h"
 #include "constants/items.h"
 #include "constants/pokemon.h"
 
 static void CB2_ReturnFromChooseHalfParty(void);
 static void CB2_ReturnFromChooseBattleTowerParty(void);
+static void CB2_ReturnFromChooseGymLeaderParty(void);
 
 void HealPlayerParty(void)
 {
@@ -168,12 +171,51 @@ void ChooseHalfPartyForBattle(void)
     InitChooseMonsForBattle(CHOOSE_MONS_FOR_CABLE_CLUB_BATTLE);
 }
 
+void ChooseGymLeaderBattleParty(void)
+{
+    u16 trainerId = gSpecialVar_0x8004;
+    u8 partyCount;
+
+    if (!FlagGet(FLAG_EXPERT) || !IsGymLeaderTrainer(trainerId))
+    {
+        SetExpertGymBattleConfig(TRAINER_NONE, 0);
+        gSpecialVar_Result = TRUE;
+        return;
+    }
+
+    partyCount = gTrainers[trainerId].partySize;
+    if (partyCount > 5)
+        partyCount = 5;
+
+    SetPartySelectionMaxMons(partyCount);
+    SetExpertGymBattleConfig(trainerId, partyCount);
+
+    gMain.savedCallback = CB2_ReturnFromChooseGymLeaderParty;
+    InitChooseMonsForBattle(CHOOSE_MONS_FOR_GYM_LEADER);
+}
+
 static void CB2_ReturnFromChooseHalfParty(void)
 {
     switch (gSelectedOrderFromParty[0])
     {
     case 0:
         gSpecialVar_Result = FALSE;
+        break;
+    default:
+        gSpecialVar_Result = TRUE;
+        break;
+    }
+
+    SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
+}
+
+static void CB2_ReturnFromChooseGymLeaderParty(void)
+{
+    switch (gSelectedOrderFromParty[0])
+    {
+    case 0:
+        gSpecialVar_Result = FALSE;
+        SetExpertGymBattleConfig(TRAINER_NONE, 0);
         break;
     default:
         gSpecialVar_Result = TRUE;

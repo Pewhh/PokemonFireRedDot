@@ -37,5 +37,7 @@ u8  getLevelCap(void);
 bool8 levelCappedNuzlocke(u8 level);
 bool8 ExpertPartyLimitActive(void);
 u8  GetOpponentPartyLimit(void);
+bool8 IsGymLeaderTrainer(u16 trainerId);
+void SetExpertGymBattleConfig(u16 trainerId, u8 selectionCount);
 
 #endif // GUARD_BATTLE_SETUP_H

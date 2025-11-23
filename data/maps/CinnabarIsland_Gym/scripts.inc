@@ -46,12 +46,15 @@ CinnabarIsland_Gym_OnLoadOpenDoor6::
 	return
 
 CinnabarIsland_Gym_EventScript_Blaine::
-	famechecker FAMECHECKER_BLAINE, FCPICKSTATE_COLORED, UpdatePickStateFromSpecialVar8005
-	trainerbattle_single TRAINER_LEADER_BLAINE, CinnabarIsland_Gym_Text_BlaineIntro, CinnabarIsland_Gym_Text_BlaineDefeat, CinnabarIsland_Gym_EventScript_DefeatedBlaine, NO_MUSIC
-	goto_if_unset FLAG_GOT_TM38_FROM_BLAINE, CinnabarIsland_Gym_EventScript_GiveTM38
-	msgbox CinnabarIsland_Gym_Text_BlainePostBattle
-	release
-	end
+        famechecker FAMECHECKER_BLAINE, FCPICKSTATE_COLORED, UpdatePickStateFromSpecialVar8005
+        setvar VAR_0x8004, TRAINER_LEADER_BLAINE
+        call EventScript_ChooseExpertGymBattleParty
+        goto_if_eq VAR_RESULT, FALSE, CinnabarIsland_Gym_EventScript_BlaineCancelBattle
+        trainerbattle_single TRAINER_LEADER_BLAINE, CinnabarIsland_Gym_Text_BlaineIntro, CinnabarIsland_Gym_Text_BlaineDefeat, CinnabarIsland_Gym_EventScript_DefeatedBlaine, NO_MUSIC
+        goto_if_unset FLAG_GOT_TM38_FROM_BLAINE, CinnabarIsland_Gym_EventScript_GiveTM38
+        msgbox CinnabarIsland_Gym_Text_BlainePostBattle
+        release
+        end
 
 CinnabarIsland_Gym_EventScript_DefeatedBlaine::
 	famechecker FAMECHECKER_BLAINE, 1
@@ -75,9 +78,13 @@ CinnabarIsland_Gym_EventScript_GiveTM38::
 	end
 
 CinnabarIsland_Gym_EventScript_NoRoomForTM38::
-	msgbox CinnabarIsland_Gym_Text_MakeSpaceForThis
-	release
-	end
+        msgbox CinnabarIsland_Gym_Text_MakeSpaceForThis
+        release
+        end
+
+CinnabarIsland_Gym_EventScript_BlaineCancelBattle::
+        release
+        end
 
 CinnabarIsland_Gym_EventScript_Erik::
 	trainerbattle_single TRAINER_SUPER_NERD_ERIK, CinnabarIsland_Gym_Text_ErikIntro, CinnabarIsland_Gym_Text_ErikDefeat

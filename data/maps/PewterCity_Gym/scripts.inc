@@ -2,10 +2,13 @@ PewterCity_Gym_MapScripts::
 	.byte 0
 
 PewterCity_Gym_EventScript_Brock::
-	famechecker FAMECHECKER_BROCK, FCPICKSTATE_COLORED, UpdatePickStateFromSpecialVar8005
-	trainerbattle_single TRAINER_LEADER_BROCK, PewterCity_Gym_Text_BrockIntro, PewterCity_Gym_Text_BrockDefeat, PewterCity_Gym_EventScript_DefeatedBrock, NO_MUSIC
-	goto_if_unset FLAG_GOT_TM39_FROM_BROCK, PewterCity_Gym_EventScript_GiveTM39
-	msgbox PewterCity_Gym_Text_BrockPostBattle
+        famechecker FAMECHECKER_BROCK, FCPICKSTATE_COLORED, UpdatePickStateFromSpecialVar8005
+        setvar VAR_0x8004, TRAINER_LEADER_BROCK
+        call EventScript_ChooseExpertGymBattleParty
+        goto_if_eq VAR_RESULT, FALSE, PewterCity_Gym_EventScript_BrockCancelBattle
+        trainerbattle_single TRAINER_LEADER_BROCK, PewterCity_Gym_Text_BrockIntro, PewterCity_Gym_Text_BrockDefeat, PewterCity_Gym_EventScript_DefeatedBrock, NO_MUSIC
+        goto_if_unset FLAG_GOT_TM39_FROM_BROCK, PewterCity_Gym_EventScript_GiveTM39
+        msgbox PewterCity_Gym_Text_BrockPostBattle
 	release
 	end
 
@@ -77,6 +80,10 @@ PewterCity_Gym_EventScript_GymStatue::
 	end
 
 PewterCity_Gym_EventScript_GymStatuePostVictory::
-	msgbox PewterCity_Gym_Text_GymStatuePlayerWon
-	releaseall
-	end
+        msgbox PewterCity_Gym_Text_GymStatuePlayerWon
+        releaseall
+        end
+
+PewterCity_Gym_EventScript_BrockCancelBattle::
+        release
+        end

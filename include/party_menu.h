@@ -9,9 +9,9 @@ struct PartyMenu
 {
     MainCallback exitCallback;
     TaskFunc task;
-    u8 menuType:4;
-    u8 layout:2;
-    u8 chooseMonsBattleType:2;
+    u8 menuType;
+    u8 layout;
+    u8 chooseMonsBattleType;
     s8 slotId;
     s8 slotId2;
     u8 action;
@@ -23,7 +23,7 @@ extern struct PartyMenu gPartyMenu;
 extern bool8 gPartyMenuUseExitCallback;
 extern u8 gSelectedMonPartyId;
 extern MainCallback gPostMenuFieldCallback;
-extern u8 gSelectedOrderFromParty[3];
+extern u8 gSelectedOrderFromParty[PARTY_SIZE];
 extern u8 gBattlePartyCurrentOrder[PARTY_SIZE / 2];
 
 extern void (*gItemUseCB)(u8, TaskFunc);
@@ -33,6 +33,8 @@ void AnimatePartySlot(u8 slot, u8 animNum);
 bool8 IsMultiBattle(void);
 u8 GetCursorSelectionMonId(void);
 u8 GetPartyMenuType(void);
+void SetPartySelectionMaxMons(u8 count);
+u8 GetPartySelectionMaxMons(void);
 void Task_HandleChooseMonInput(u8 taskId);
 u8 *GetMonNickname(struct Pokemon *mon, u8 *dest);
 u8 DisplayPartyMenuMessage(const u8 *str, bool8 keepOpen);

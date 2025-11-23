@@ -204,12 +204,15 @@ VermilionCity_Gym_EventScript_SetBeamsOn::
 	return
 
 VermilionCity_Gym_EventScript_LtSurge::
-	famechecker FAMECHECKER_LTSURGE, FCPICKSTATE_COLORED, UpdatePickStateFromSpecialVar8005
-	trainerbattle_single TRAINER_LEADER_LT_SURGE, VermilionCity_Gym_Text_LtSurgeIntro, VermilionCity_Gym_Text_LtSurgeDefeat, VermilionCity_Gym_EventScript_DefeatedLtSurge, NO_MUSIC
-	goto_if_unset FLAG_GOT_TM34_FROM_SURGE, VermilionCity_Gym_EventScript_GiveTM34
-	msgbox VermilionCity_Gym_Text_LtSurgePostBattle
-	release
-	end
+        famechecker FAMECHECKER_LTSURGE, FCPICKSTATE_COLORED, UpdatePickStateFromSpecialVar8005
+        setvar VAR_0x8004, TRAINER_LEADER_LT_SURGE
+        call EventScript_ChooseExpertGymBattleParty
+        goto_if_eq VAR_RESULT, FALSE, VermilionCity_Gym_EventScript_LtSurgeCancelBattle
+        trainerbattle_single TRAINER_LEADER_LT_SURGE, VermilionCity_Gym_Text_LtSurgeIntro, VermilionCity_Gym_Text_LtSurgeDefeat, VermilionCity_Gym_EventScript_DefeatedLtSurge, NO_MUSIC
+        goto_if_unset FLAG_GOT_TM34_FROM_SURGE, VermilionCity_Gym_EventScript_GiveTM34
+        msgbox VermilionCity_Gym_Text_LtSurgePostBattle
+        release
+        end
 
 VermilionCity_Gym_EventScript_DefeatedLtSurge::
 	famechecker FAMECHECKER_LTSURGE, 1
@@ -236,9 +239,13 @@ VermilionCity_Gym_EventScript_GiveTM34::
 	end
 
 VermilionCity_Gym_EventScript_NoRoomForTM34::
-	msgbox VermilionCity_Gym_Text_MakeRoomInYourBag
-	release
-	end
+        msgbox VermilionCity_Gym_Text_MakeRoomInYourBag
+        release
+        end
+
+VermilionCity_Gym_EventScript_LtSurgeCancelBattle::
+        release
+        end
 
 VermilionCity_Gym_EventScript_Dwayne::
 	trainerbattle_single TRAINER_SAILOR_DWAYNE, VermilionCity_Gym_Text_DwayneIntro, VermilionCity_Gym_Text_DwayneDefeat

@@ -2,12 +2,15 @@ CeruleanCity_Gym_MapScripts::
 	.byte 0
 
 CeruleanCity_Gym_EventScript_Misty::
-	famechecker FAMECHECKER_MISTY, FCPICKSTATE_COLORED, UpdatePickStateFromSpecialVar8005
-	trainerbattle_single TRAINER_LEADER_MISTY, CeruleanCity_Gym_Text_MistyIntro, CeruleanCity_Gym_Text_MistyDefeat, CeruleanCity_Gym_EventScript_MistyDefeated, NO_MUSIC
-	goto_if_unset FLAG_GOT_TM03_FROM_MISTY, CeruleanCity_Gym_EventScript_GiveTM03
-	msgbox CeruleanCity_Gym_Text_ExplainTM03
-	release
-	end
+        famechecker FAMECHECKER_MISTY, FCPICKSTATE_COLORED, UpdatePickStateFromSpecialVar8005
+        setvar VAR_0x8004, TRAINER_LEADER_MISTY
+        call EventScript_ChooseExpertGymBattleParty
+        goto_if_eq VAR_RESULT, FALSE, CeruleanCity_Gym_EventScript_MistyCancelBattle
+        trainerbattle_single TRAINER_LEADER_MISTY, CeruleanCity_Gym_Text_MistyIntro, CeruleanCity_Gym_Text_MistyDefeat, CeruleanCity_Gym_EventScript_MistyDefeated, NO_MUSIC
+        goto_if_unset FLAG_GOT_TM03_FROM_MISTY, CeruleanCity_Gym_EventScript_GiveTM03
+        msgbox CeruleanCity_Gym_Text_ExplainTM03
+        release
+        end
 
 CeruleanCity_Gym_EventScript_MistyDefeated::
 	famechecker FAMECHECKER_MISTY, 1
@@ -29,9 +32,13 @@ CeruleanCity_Gym_EventScript_GiveTM03::
 	end
 
 CeruleanCity_Gym_EventScript_NoRoomForTM03::
-	msgbox CeruleanCity_Gym_Text_BetterMakeRoomForThis
-	release
-	end
+        msgbox CeruleanCity_Gym_Text_BetterMakeRoomForThis
+        release
+        end
+
+CeruleanCity_Gym_EventScript_MistyCancelBattle::
+        release
+        end
 
 CeruleanCity_Gym_EventScript_Diana::
 	trainerbattle_single TRAINER_PICNICKER_DIANA, CeruleanCity_Gym_Text_DianaIntro, CeruleanCity_Gym_Text_DianaDefeat

@@ -367,6 +367,8 @@ static bool8 HasPartySlotAlreadyBeenSelected(u8 slot);
 static void Task_ContinueChoosingMonsForBattle(u8 taskId);
 static void BufferBattlePartyOrder(u8 *partyBattleOrder, u8 flankId);
 static void BufferBattlePartyOrderBySide(u8 *partyBattleOrder, u8 flankId, u8 battlerId);
+static u8 CountSelectedBattleMons(void);
+static u8 GetPartySelectionDescriptionId(u8 position);
 static void Task_InitMultiPartnerPartySlideIn(u8 taskId);
 static void Task_WaitAfterMultiPartnerPartySlideIn(u8 taskId);
 static void SlideMultiPartyMenuBoxSpritesOneStep(u8 taskId);
@@ -412,9 +414,10 @@ EWRAM_DATA MainCallback gPostMenuFieldCallback = NULL;
 static EWRAM_DATA u16 *sSlot1TilemapBuffer = NULL; // for switching party slots
 static EWRAM_DATA u16 *sSlot2TilemapBuffer = NULL;
 static EWRAM_DATA struct Pokemon *sSacredAshQuestLogMonBackup = NULL;
-EWRAM_DATA u8 gSelectedOrderFromParty[3] = {0};
+EWRAM_DATA u8 gSelectedOrderFromParty[PARTY_SIZE] = {0};
 static EWRAM_DATA u16 sPartyMenuItemId = ITEM_NONE;
 ALIGNED(4) EWRAM_DATA u8 gBattlePartyCurrentOrder[PARTY_SIZE / 2] = {0}; // bits 0-3 are the current pos of Slot 1, 4-7 are Slot 2, and so on
+static EWRAM_DATA u8 sPartyMenuBattleMonLimit = 3;
 
 COMMON_DATA void (*gItemUseCB)(u8, TaskFunc) = NULL;
 
@@ -3764,16 +3767,19 @@ static void CursorCB_Enter(u8 taskId)
     u8 maxBattlers;
     u8 i;
     const u8 *str;
-    
+
+    maxBattlers = GetPartySelectionMaxMons();
+    if (maxBattlers > 5)
+        maxBattlers = 5;
+
     if (gPartyMenu.chooseMonsBattleType == CHOOSE_MONS_FOR_UNION_ROOM_BATTLE)
     {
-        maxBattlers = 2;
         str = gText_NoMoreThanTwoMayEnter;
     }
     else
     {
-        maxBattlers = 3;
-        str = gText_NoMoreThanThreeMayEnter;
+        ConvertIntToDecimalStringN(gStringVar1, maxBattlers, STR_CONV_MODE_LEFT_ALIGN, 1);
+        str = gText_NoMoreThanVar1MayEnter;
     }
     PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[0]);
     PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[1]);
@@ -3783,7 +3789,7 @@ static void CursorCB_Enter(u8 taskId)
         {
             PlaySE(SE_SELECT);
             gSelectedOrderFromParty[i] = gPartyMenu.slotId + 1;
-                DisplayPartyPokemonDescriptionText(i + PARTYBOX_DESC_FIRST, &sPartyMenuBoxes[gPartyMenu.slotId], 1);
+            DisplayPartyPokemonDescriptionText(GetPartySelectionDescriptionId(i), &sPartyMenuBoxes[gPartyMenu.slotId], 1);
             if (i == (maxBattlers - 1))
                 MoveCursorToConfirm();
             DisplayPartyMenuStdMessage(PARTY_MSG_CHOOSE_MON);
@@ -3806,35 +3812,31 @@ static void MoveCursorToConfirm(void)
 static void CursorCB_NoEntry(u8 taskId)
 {
     u8 i;
+    u8 maxBattlers = GetPartySelectionMaxMons();
 
     PlaySE(SE_SELECT);
     PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[0]);
     PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[1]);
-    for (i = 0; i < 3; ++i)
+    if (maxBattlers > 5)
+        maxBattlers = 5;
+
+    for (i = 0; i < maxBattlers; ++i)
     {
         if (gSelectedOrderFromParty[i] ==  gPartyMenu.slotId + 1)
         {
             gSelectedOrderFromParty[i] = 0;
-            switch (i)
-            {
-            case 0:
-                gSelectedOrderFromParty[0] = gSelectedOrderFromParty[1];
-                gSelectedOrderFromParty[1] = gSelectedOrderFromParty[2];
-                gSelectedOrderFromParty[2] = 0;
-                break;
-            case 1:
-                gSelectedOrderFromParty[1] = gSelectedOrderFromParty[2];
-                gSelectedOrderFromParty[2] = 0;
-                break;
-            }
+            for (; i + 1 < maxBattlers; ++i)
+                gSelectedOrderFromParty[i] = gSelectedOrderFromParty[i + 1];
+            gSelectedOrderFromParty[maxBattlers - 1] = 0;
             break;
         }
     }
     DisplayPartyPokemonDescriptionText(PARTYBOX_DESC_ABLE_3, &sPartyMenuBoxes[gPartyMenu.slotId], DRAW_MENU_BOX_AND_TEXT);
-    if (gSelectedOrderFromParty[0] != 0)
-        DisplayPartyPokemonDescriptionText(PARTYBOX_DESC_FIRST, &sPartyMenuBoxes[gSelectedOrderFromParty[0] - 1], DRAW_MENU_BOX_AND_TEXT);
-    if (gSelectedOrderFromParty[1] != 0)
-        DisplayPartyPokemonDescriptionText(PARTYBOX_DESC_SECOND, &sPartyMenuBoxes[gSelectedOrderFromParty[1] - 1], DRAW_MENU_BOX_AND_TEXT);
+    for (i = 0; i < maxBattlers; ++i)
+    {
+        if (gSelectedOrderFromParty[i] != 0)
+            DisplayPartyPokemonDescriptionText(GetPartySelectionDescriptionId(i), &sPartyMenuBoxes[gSelectedOrderFromParty[i] - 1], DRAW_MENU_BOX_AND_TEXT);
+    }
     DisplayPartyMenuStdMessage(PARTY_MSG_CHOOSE_MON);
     gTasks[taskId].func = Task_HandleChooseMonInput;
 }
@@ -5746,6 +5748,18 @@ static void TryGiveMailToSelectedMon(u8 taskId)
 void InitChooseMonsForBattle(u8 chooseMonsBattleType)
 {
     ClearSelectedPartyOrder();
+    switch (chooseMonsBattleType)
+    {
+    case CHOOSE_MONS_FOR_UNION_ROOM_BATTLE:
+        SetPartySelectionMaxMons(2);
+        break;
+    case CHOOSE_MONS_FOR_GYM_LEADER:
+        SetPartySelectionMaxMons(GetPartySelectionMaxMons());
+        break;
+    default:
+        SetPartySelectionMaxMons(3);
+        break;
+    }
     InitPartyMenu(PARTY_MENU_TYPE_CHOOSE_MULTIPLE_MONS, PARTY_LAYOUT_SINGLE, PARTY_ACTION_CHOOSE_MON, FALSE, PARTY_MSG_CHOOSE_MON, Task_HandleChooseMonInput, gMain.savedCallback);
     gPartyMenu.chooseMonsBattleType = chooseMonsBattleType;
     gPartyMenu.task = Task_ValidateChosenMonsForBattle;
@@ -5754,6 +5768,24 @@ void InitChooseMonsForBattle(u8 chooseMonsBattleType)
 void ClearSelectedPartyOrder(void)
 {
     memset(gSelectedOrderFromParty, 0, sizeof(gSelectedOrderFromParty));
+}
+
+void SetPartySelectionMaxMons(u8 count)
+{
+    if (count == 0)
+        sPartyMenuBattleMonLimit = 1;
+    else if (count > PARTY_SIZE)
+        sPartyMenuBattleMonLimit = PARTY_SIZE;
+    else
+        sPartyMenuBattleMonLimit = count;
+}
+
+u8 GetPartySelectionMaxMons(void)
+{
+    if (sPartyMenuBattleMonLimit == 0 || sPartyMenuBattleMonLimit > PARTY_SIZE)
+        return 3;
+
+    return sPartyMenuBattleMonLimit;
 }
 
 static u8 GetPartySlotEntryStatus(s8 slot)
@@ -5801,17 +5833,20 @@ static u8 CheckBattleEntriesAndGetMessage(void)
     u8 i, j;
     struct Pokemon *party = gPlayerParty;
     u8 *order = gSelectedOrderFromParty;
+    u8 requiredMons = GetPartySelectionMaxMons();
+    if (requiredMons > 5)
+        requiredMons = 5;
     
     switch (gPartyMenu.chooseMonsBattleType)
     {
     case CHOOSE_MONS_FOR_BATTLE_TOWER:
-        if (order[2] == 0)
+        if (order[requiredMons - 1] == 0)
             return PARTY_MSG_THREE_MONS_ARE_NEEDED;
-        for (i = 0; i < 2; ++i)
+        for (i = 0; i < requiredMons - 1; ++i)
         {
             sPartyMenuInternal->data[15] = GetMonData(&party[order[i] - 1], MON_DATA_SPECIES);
             sPartyMenuInternal->data[14] = GetMonData(&party[order[i] - 1], MON_DATA_HELD_ITEM);
-            for (j = i + 1; j < 3; ++j)
+            for (j = i + 1; j < requiredMons; ++j)
             {
                 if (sPartyMenuInternal->data[15] == GetMonData(&party[order[j] - 1], MON_DATA_SPECIES))
                     return PARTY_MSG_MONS_CANT_BE_SAME;
@@ -5821,11 +5856,52 @@ static u8 CheckBattleEntriesAndGetMessage(void)
         }
         break;
     case CHOOSE_MONS_FOR_UNION_ROOM_BATTLE:
-        if (order[1] == 0)
+        if (order[requiredMons - 1] == 0)
             return PARTY_MSG_TWO_MONS_ARE_NEEDED;
+        break;
+    case CHOOSE_MONS_FOR_GYM_LEADER:
+        if (CountSelectedBattleMons() < requiredMons)
+        {
+            ConvertIntToDecimalStringN(gStringVar1, requiredMons, STR_CONV_MODE_LEFT_ALIGN, 1);
+            return PARTY_MSG_NOT_ENOUGH_MONS_SELECTED;
+        }
         break;
     }
     return 0xFF;
+}
+
+static u8 CountSelectedBattleMons(void)
+{
+    u8 count = 0;
+    u8 i;
+    u8 max = GetPartySelectionMaxMons();
+
+    for (i = 0; i < max; ++i)
+    {
+        if (gSelectedOrderFromParty[i] != 0)
+            ++count;
+    }
+
+    return count;
+}
+
+static u8 GetPartySelectionDescriptionId(u8 position)
+{
+    switch (position)
+    {
+    case 0:
+        return PARTYBOX_DESC_FIRST;
+    case 1:
+        return PARTYBOX_DESC_SECOND;
+    case 2:
+        return PARTYBOX_DESC_THIRD;
+    case 3:
+        return PARTYBOX_DESC_FOURTH;
+    case 4:
+        return PARTYBOX_DESC_FIFTH;
+    default:
+        return PARTYBOX_DESC_NO_USE;
+    }
 }
 
 static bool8 HasPartySlotAlreadyBeenSelected(u8 slot)

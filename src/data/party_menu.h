@@ -621,6 +621,7 @@ static const u8 *const sActionStringTable[] =
     [PARTY_MSG_NOT_ENOUGH_HP]          = gText_NotEnoughHp,
     [PARTY_MSG_THREE_MONS_ARE_NEEDED]  = gText_ThreePkmnAreNeeded,
     [PARTY_MSG_TWO_MONS_ARE_NEEDED]    = gText_TwoPokemonAreNeeded,
+    [PARTY_MSG_NOT_ENOUGH_MONS_SELECTED] = gText_NotEnoughMonsSelected,
     [PARTY_MSG_MONS_CANT_BE_SAME]      = gText_PokemonCantBeSame,
     [PARTY_MSG_NO_SAME_HOLD_ITEMS]     = gText_NoIdenticalHoldItems,
     [PARTY_MSG_UNUSED]                 = gString_Dummy,
@@ -643,6 +644,8 @@ static const u8 *const sDescriptionStringTable[] =
     [PARTYBOX_DESC_ABLE_2]     = gText_Able3,
     [PARTYBOX_DESC_NOT_ABLE_2] = gText_NotAble2,
     [PARTYBOX_DESC_LEARNED]    = gText_Learned,
+    [PARTYBOX_DESC_FOURTH]     = gText_Fourth_PM,
+    [PARTYBOX_DESC_FIFTH]      = gText_Fifth_PM,
 };
 
 static const u8 *const sFieldMoveDescriptionTable[] =

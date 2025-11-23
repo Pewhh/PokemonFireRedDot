@@ -12,6 +12,7 @@
 #include "script_pokemon_util.h"
 #include "strings.h"
 #include "string_util.h"
+#include "party_menu.h"
 #include "event_data.h"
 #include "event_object_movement.h"
 #include "metatile_behavior.h"
@@ -72,6 +73,8 @@ static bool32 IsPlayerDefeated(u32 battleOutcome);
 static void CB2_EndTrainerBattle(void);
 static const u8 *GetIntroSpeechOfApproachingTrainer(void);
 static const u8 *GetTrainerCantBattleSpeech(void);
+static void PrepareExpertGymLeaderParty(void);
+static void RestoreExpertGymLeaderParty(void);
 
 static EWRAM_DATA u16 sTrainerBattleMode = 0;
 EWRAM_DATA u16 gTrainerBattleOpponent_A = 0;
@@ -83,6 +86,12 @@ static EWRAM_DATA u8 *sTrainerCannotBattleSpeech = NULL;
 static EWRAM_DATA u8 *sTrainerBattleEndScript = NULL;
 static EWRAM_DATA u8 *sTrainerABattleScriptRetAddr = NULL;
 static EWRAM_DATA u16 sRivalBattleFlags = 0;
+static EWRAM_DATA bool8 sExpertGymPartyRestorePending = FALSE;
+static EWRAM_DATA u8 sExpertGymSelectionCount = 0;
+static EWRAM_DATA u8 sExpertGymSelectedIndices[PARTY_SIZE] = {0};
+static EWRAM_DATA struct Pokemon sExpertGymPartyBackup[PARTY_SIZE];
+static EWRAM_DATA u8 sExpertGymPartyBackupCount = 0;
+static EWRAM_DATA u16 sExpertGymTrainerId = TRAINER_NONE;
 
 // The first transition is used if the enemy pokemon are lower level than our pokemon.
 // Otherwise, the second transition is used.
@@ -901,12 +910,15 @@ void StartTrainerBattle(void)
     if (GetTrainerBattleMode() == TRAINER_BATTLE_EARLY_RIVAL && GetRivalBattleFlags() & RIVAL_BATTLE_TUTORIAL)
         gBattleTypeFlags |= BATTLE_TYPE_FIRST_BATTLE;
     gMain.savedCallback = CB2_EndTrainerBattle;
+    PrepareExpertGymLeaderParty();
     DoTrainerBattle();
     ScriptContext_Stop();
 }
 
 static void CB2_EndTrainerBattle(void)
 {
+    RestoreExpertGymLeaderParty();
+
     if (sTrainerBattleMode == TRAINER_BATTLE_EARLY_RIVAL)
     {
         if (IsPlayerDefeated(gBattleOutcome) == TRUE)
@@ -1163,9 +1175,9 @@ bool8 levelCappedNuzlocke(u8 level)
     return (level >= getLevelCap());
 }
 
-static bool8 IsGymLeaderOpponent(void)
+bool8 IsGymLeaderTrainer(u16 trainerId)
 {
-    switch (gTrainerBattleOpponent_A)
+    switch (trainerId)
     {
     case TRAINER_LEADER_BROCK:
     case TRAINER_LEADER_MISTY:
@@ -1179,6 +1191,11 @@ static bool8 IsGymLeaderOpponent(void)
     default:
         return FALSE;
     }
+}
+
+static bool8 IsGymLeaderOpponent(void)
+{
+    return IsGymLeaderTrainer(gTrainerBattleOpponent_A);
 }
 
 bool8 ExpertPartyLimitActive(void)
@@ -1208,4 +1225,77 @@ u8 GetOpponentPartyLimit(void)
     case TRAINER_LEADER_GIOVANNI: return 5;
     default:                      return PARTY_SIZE; // segurança
     }
+}
+
+void SetExpertGymBattleConfig(u16 trainerId, u8 selectionCount)
+{
+    sExpertGymTrainerId = trainerId;
+    if (selectionCount == 0)
+        sExpertGymSelectionCount = 0;
+    else if (selectionCount > PARTY_SIZE)
+        sExpertGymSelectionCount = PARTY_SIZE;
+    else
+        sExpertGymSelectionCount = selectionCount;
+
+    sExpertGymPartyRestorePending = FALSE;
+}
+
+static void PrepareExpertGymLeaderParty(void)
+{
+    u8 i;
+
+    if (!FlagGet(FLAG_EXPERT) || sExpertGymSelectionCount == 0)
+        return;
+
+    if (!IsGymLeaderOpponent() || gTrainerBattleOpponent_A != sExpertGymTrainerId)
+        return;
+
+    sExpertGymPartyBackupCount = gPlayerPartyCount;
+    for (i = 0; i < PARTY_SIZE; i++)
+        sExpertGymPartyBackup[i] = gPlayerParty[i];
+
+    if (sExpertGymSelectionCount > 5)
+        sExpertGymSelectionCount = 5;
+
+    for (i = 0; i < sExpertGymSelectionCount; i++)
+    {
+        if (gSelectedOrderFromParty[i] == 0 || gSelectedOrderFromParty[i] > PARTY_SIZE)
+            sExpertGymSelectedIndices[i] = i;
+        else
+            sExpertGymSelectedIndices[i] = gSelectedOrderFromParty[i] - 1;
+    }
+
+    CpuFill32(0, gPlayerParty, sizeof(gPlayerParty));
+    for (i = 0; i < sExpertGymSelectionCount; i++)
+        gPlayerParty[i] = sExpertGymPartyBackup[sExpertGymSelectedIndices[i]];
+
+    gPlayerPartyCount = sExpertGymSelectionCount;
+    sExpertGymPartyRestorePending = TRUE;
+}
+
+static void RestoreExpertGymLeaderParty(void)
+{
+    u8 i;
+    struct Pokemon restoredParty[PARTY_SIZE];
+
+    if (!sExpertGymPartyRestorePending)
+        return;
+
+    CpuFill32(0, restoredParty, sizeof(restoredParty));
+
+    for (i = 0; i < sExpertGymPartyBackupCount; i++)
+        restoredParty[i] = sExpertGymPartyBackup[i];
+
+    for (i = 0; i < sExpertGymSelectionCount && i < PARTY_SIZE; i++)
+        restoredParty[sExpertGymSelectedIndices[i]] = gPlayerParty[i];
+
+    CpuFill32(0, gPlayerParty, sizeof(gPlayerParty));
+    for (i = 0; i < sExpertGymPartyBackupCount; i++)
+        gPlayerParty[i] = restoredParty[i];
+
+    gPlayerPartyCount = sExpertGymPartyBackupCount;
+    sExpertGymPartyRestorePending = FALSE;
+    sExpertGymSelectionCount = 0;
+    sExpertGymTrainerId = TRAINER_NONE;
+    CalculatePlayerPartyCount();
 }

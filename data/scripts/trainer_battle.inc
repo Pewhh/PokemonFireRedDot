@@ -32,11 +32,21 @@ EventScript_TryDoDoubleTrainerBattle::
 	goto EventScript_DoTrainerBattle
 
 EventScript_NotEnoughMonsForDoubleBattle::
-	special ShowTrainerCantBattleSpeech
-	waitmessage
-	waitbuttonpress
-	release
-	end
+        special ShowTrainerCantBattleSpeech
+        waitmessage
+        waitbuttonpress
+        release
+        end
+
+EventScript_ChooseExpertGymBattleParty::
+        setvar VAR_RESULT, TRUE
+        goto_if_set FLAG_EXPERT, EventScript_ChooseExpertGymBattleParty_Active
+        return
+
+EventScript_ChooseExpertGymBattleParty_Active::
+        special ChooseGymLeaderBattleParty
+        waitstate
+        return
 
 EventScript_NoDoubleTrainerBattle::
 	gotopostbattlescript

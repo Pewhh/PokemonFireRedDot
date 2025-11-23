@@ -2,12 +2,15 @@ ViridianCity_Gym_MapScripts::
 	.byte 0
 
 ViridianCity_Gym_EventScript_Giovanni::
-	famechecker FAMECHECKER_GIOVANNI, FCPICKSTATE_COLORED, UpdatePickStateFromSpecialVar8005
-	trainerbattle_single TRAINER_LEADER_GIOVANNI, ViridianCity_Gym_Text_GiovanniIntro, ViridianCity_Gym_Text_GiovanniDefeat, ViridianCity_Gym_EventScript_DefeatedGiovanni, NO_MUSIC
-	goto_if_unset FLAG_GOT_TM26_FROM_GIOVANNI, ViridianCity_Gym_EventScript_GiveTM26
-	msgbox ViridianCity_Gym_Text_GiovanniPostBattle
-	closemessage
-	fadescreen FADE_TO_BLACK
+        famechecker FAMECHECKER_GIOVANNI, FCPICKSTATE_COLORED, UpdatePickStateFromSpecialVar8005
+        setvar VAR_0x8004, TRAINER_LEADER_GIOVANNI
+        call EventScript_ChooseExpertGymBattleParty
+        goto_if_eq VAR_RESULT, FALSE, ViridianCity_Gym_EventScript_GiovanniCancelBattle
+        trainerbattle_single TRAINER_LEADER_GIOVANNI, ViridianCity_Gym_Text_GiovanniIntro, ViridianCity_Gym_Text_GiovanniDefeat, ViridianCity_Gym_EventScript_DefeatedGiovanni, NO_MUSIC
+        goto_if_unset FLAG_GOT_TM26_FROM_GIOVANNI, ViridianCity_Gym_EventScript_GiveTM26
+        msgbox ViridianCity_Gym_Text_GiovanniPostBattle
+        closemessage
+        fadescreen FADE_TO_BLACK
 	removeobject LOCALID_VIRIDIAN_GIOVANNI
 	fadescreen FADE_FROM_BLACK
 	release
@@ -34,9 +37,13 @@ ViridianCity_Gym_EventScript_GiveTM26::
 	end
 
 ViridianCity_Gym_EventScript_NoRoomForTM26::
-	msgbox ViridianCity_Gym_Text_YouDoNotHaveSpace
-	release
-	end
+        msgbox ViridianCity_Gym_Text_YouDoNotHaveSpace
+        release
+        end
+
+ViridianCity_Gym_EventScript_GiovanniCancelBattle::
+        release
+        end
 
 ViridianCity_Gym_EventScript_Jason::
 	trainerbattle_single TRAINER_TAMER_JASON, ViridianCity_Gym_Text_JasonIntro, ViridianCity_Gym_Text_JasonDefeat
