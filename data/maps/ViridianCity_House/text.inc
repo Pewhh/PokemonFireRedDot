@@ -48,4 +48,5 @@ ViridianCity_House_Text_NoRoomForNiceGift::
     .string "Oh, no!\p"
     .string "I had a nice gift for you, but you\n"
     .string "have no room for it!$"
+
    

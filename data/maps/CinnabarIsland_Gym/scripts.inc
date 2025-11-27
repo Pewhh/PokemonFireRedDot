@@ -46,7 +46,8 @@ CinnabarIsland_Gym_OnLoadOpenDoor6::
 	return
 
 CinnabarIsland_Gym_EventScript_Blaine::
-        famechecker FAMECHECKER_BLAINE, FCPICKSTATE_COLORED, UpdatePickStateFromSpecialVar8005
+        goto_if_set FLAG_DEFEATED_BLAINE, CinnabarIsland_Gym_EventScript_Blaine_PostVictoryFlow
+		famechecker FAMECHECKER_BLAINE, FCPICKSTATE_COLORED, UpdatePickStateFromSpecialVar8005
         setvar VAR_0x8004, TRAINER_LEADER_BLAINE
         call EventScript_ChooseExpertGymBattleParty
         goto_if_eq VAR_RESULT, FALSE, CinnabarIsland_Gym_EventScript_BlaineCancelBattle
@@ -83,6 +84,13 @@ CinnabarIsland_Gym_EventScript_NoRoomForTM38::
         end
 
 CinnabarIsland_Gym_EventScript_BlaineCancelBattle::
+        fadeoutbgm 0
+        playbgm MUS_GYM, 0
+        release
+        end
+
+CinnabarIsland_Gym_EventScript_Blaine_PostVictoryFlow::
+        msgbox CinnabarIsland_Gym_Text_BlainePostBattle
         release
         end
 

@@ -2,16 +2,17 @@ CeladonCity_Gym_MapScripts::
 	.byte 0
 
 CeladonCity_Gym_EventScript_Erika::
+        goto_if_set FLAG_DEFEATED_ERIKA, CeladonCity_Gym_EventScript_Erika_PostVictoryFlow
         famechecker FAMECHECKER_ERIKA, FCPICKSTATE_COLORED, UpdatePickStateFromSpecialVar8005
-        setvar VAR_0x8004, TRAINER_LEADER_ERIKA
+        msgbox CeladonCity_Gym_Text_ErikaIntro, MSGBOX_DEFAULT
+		setvar VAR_0x8004, TRAINER_LEADER_ERIKA
         call EventScript_ChooseExpertGymBattleParty
         goto_if_eq VAR_RESULT, FALSE, CeladonCity_Gym_EventScript_ErikaCancelBattle
-        trainerbattle_single TRAINER_LEADER_ERIKA, CeladonCity_Gym_Text_ErikaIntro, CeladonCity_Gym_Text_ErikaDefeat, CeladonCity_Gym_EventScript_DefeatedErika, NO_MUSIC
+        trainerbattle_single TRAINER_LEADER_ERIKA, gText_LetsBattle, CeladonCity_Gym_Text_ErikaDefeat, CeladonCity_Gym_EventScript_DefeatedErika, NO_MUSIC
         goto_if_unset FLAG_GOT_TM19_FROM_ERIKA, CeladonCity_Gym_EventScript_GiveTM19
-        famechecker FAMECHECKER_ERIKA, 4
         msgbox CeladonCity_Gym_Text_ErikaPostBattle
         release
-	end
+	    end
 
 CeladonCity_Gym_EventScript_DefeatedErika::
 	famechecker FAMECHECKER_ERIKA, 1
@@ -38,8 +39,15 @@ CeladonCity_Gym_EventScript_NoRoomForTM19::
         end
 
 CeladonCity_Gym_EventScript_ErikaCancelBattle::
-        release
-        end
+    fadeoutbgm 0
+	playbgm MUS_GYM, 0
+	release
+    end
+
+CeladonCity_Gym_EventScript_Erika_PostVictoryFlow::
+	msgbox CeladonCity_Gym_Text_ErikaPostBattle
+	release
+	end
 
 CeladonCity_Gym_EventScript_Kay::
 	trainerbattle_single TRAINER_LASS_KAY, CeladonCity_Gym_Text_KayIntro, CeladonCity_Gym_Text_KayDefeat

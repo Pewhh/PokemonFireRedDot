@@ -421,6 +421,7 @@ const u8 gText_Info4[] = _("せつめい");
 const u8 gText_SingleBattle[] = _("SINGLE BATTLE");
 const u8 gText_DoubleBattle[] = _("DOUBLE BATTLE");
 const u8 gText_MultiBattle[] = _("MULTI BATTLE");
+const u8 gText_LetsBattle[] = _("LET'S BATTLE!!!");
 const u8 gText_MakeAChallenge[] = _("Make a challenge.");
 const u8 gText_Info_2[] = _("INFO");
 const u8 gText_FreshWater_200[] = _("FRESH WATER{CLEAR_TO 0x57}{FONT_SMALL}¥200");

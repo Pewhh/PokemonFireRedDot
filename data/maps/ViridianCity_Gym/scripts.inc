@@ -2,7 +2,7 @@ ViridianCity_Gym_MapScripts::
 	.byte 0
 
 ViridianCity_Gym_EventScript_Giovanni::
-        famechecker FAMECHECKER_GIOVANNI, FCPICKSTATE_COLORED, UpdatePickStateFromSpecialVar8005
+		famechecker FAMECHECKER_GIOVANNI, FCPICKSTATE_COLORED, UpdatePickStateFromSpecialVar8005
         setvar VAR_0x8004, TRAINER_LEADER_GIOVANNI
         call EventScript_ChooseExpertGymBattleParty
         goto_if_eq VAR_RESULT, FALSE, ViridianCity_Gym_EventScript_GiovanniCancelBattle
@@ -11,10 +11,10 @@ ViridianCity_Gym_EventScript_Giovanni::
         msgbox ViridianCity_Gym_Text_GiovanniPostBattle
         closemessage
         fadescreen FADE_TO_BLACK
-	removeobject LOCALID_VIRIDIAN_GIOVANNI
-	fadescreen FADE_FROM_BLACK
-	release
-	end
+	    removeobject LOCALID_VIRIDIAN_GIOVANNI
+	    fadescreen FADE_FROM_BLACK
+	    release
+	    end
 
 ViridianCity_Gym_EventScript_DefeatedGiovanni::
 	famechecker FAMECHECKER_GIOVANNI, 3
@@ -42,6 +42,8 @@ ViridianCity_Gym_EventScript_NoRoomForTM26::
         end
 
 ViridianCity_Gym_EventScript_GiovanniCancelBattle::
+        fadeoutbgm 0
+        playbgm MUS_GYM, 0
         release
         end
 
