@@ -85,3 +85,26 @@ PewterCity_Museum_1F_Text_KabutopsFossil::
     .string "KABUTOPS Fossil\n"
     .string "A primitive and rare POKéMON.$"
 
+PewterCity_Museum_1F_Text_NoFossilMtMoonHere::
+    .string "You don't have Mt. Moon fossil\n"
+    .string "with you.$"
+
+PewterCity_Museum_1F_Text_WeCanReviveMtMoonFossil::
+    .string "We can revive your Mt. Moon\n"
+    .string "fossil into a living POKéMON!\p"
+    .string "Would you like us to do that?$"
+
+PewterCity_Museum_1F_Text_HandOverFossil::
+    .string "Thank you for handing over\n"
+    .string "your fossil.$"
+
+PewterCity_Museum_1F_Text_FossilMonBackToLife::
+    .string "Your fossil POKéMON is back to\n"
+    .string "life! It was {STR_VAR_1}, I think!$"
+
+PewterCity_Museum_1F_Text_ReceivedMonFromMuseum::
+    .string "{PLAYER} received the {STR_VAR_1}\n"
+    .string "from the museum.$"
+
+PewterCity_Museum_1F_Text_AmberIsCinnabar::
+    .string "AMBER is from Cinnabar Island.$"

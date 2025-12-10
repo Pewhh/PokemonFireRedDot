@@ -194,7 +194,7 @@
 #define FLAG_HARD                 0x0B0
 #define FLAG_HARDCORE             0x0B1
 #define FLAG_EXPERT               0x0B2
-#define FLAG_0x0B3                0x0B3
+#define FLAG_REVIVED_MT_MOON_FOSSIL                0x0B3
 #define FLAG_0x0B4                0x0B4
 #define FLAG_0x0B5                0x0B5
 #define FLAG_0x0B6                0x0B6
