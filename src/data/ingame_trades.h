@@ -15,14 +15,29 @@ static const struct InGameTrade sInGameTrades[] = {
         .sheen = 10,
         .requestedSpecies = SPECIES_ABRA
     }, 
-    [INGAME_TRADE_JYNX] = 
+    [INGAME_TRADE_SLOWPOKEPSYDUCK] = 
     {
-        .nickname = _("ZYNX"),
-        .species = SPECIES_JYNX,
-        .ivs = {18, 17, 18, 22, 25, 21},
+#if defined(FIRERED)
+        .nickname = _("POWLKE"),
+        .species = SPECIES_SLOWPOKE,
+        .ivs = {21, 25, 22, 18, 18, 17},
         .abilityNum = 0,
         .otId = 36728,
-        .conditions = {5, 30, 5, 5, 5},
+        .conditions = {5, 5, 30, 5, 5},
+        .personality = 0x498a2e14,
+        .heldItem = ITEM_FAB_MAIL,
+        .mailNum = 0,
+        .otName = _("DONTAE"),
+        .otGender = MALE,
+        .sheen = 10,
+        .requestedSpecies = SPECIES_POLIWHIRL
+#elif defined(LEAFGREEN)
+        .nickname = _("DUCKY"),
+        .species = SPECIES_PSYDUCK,
+        .ivs = {18, 21, 17, 25, 18, 22},
+        .abilityNum = 0,
+        .otId = 36728,
+        .conditions = {5, 5, 30, 5, 5},
         .personality = 0x498a2e1d,
         .heldItem = ITEM_FAB_MAIL,
         .mailNum = 0,
@@ -30,6 +45,7 @@ static const struct InGameTrade sInGameTrades[] = {
         .otGender = MALE,
         .sheen = 10,
         .requestedSpecies = SPECIES_POLIWHIRL
+#endif
     }, 
     [INGAME_TRADE_NIDORAN] = 
     {
