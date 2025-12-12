@@ -1064,8 +1064,8 @@
                 "species": "SPECIES_CATERPIE"
               },
               {
-                "min_level": 7,
-                "max_level": 8,
+                "min_level": 5,
+                "max_level": 6,
                 "species": "SPECIES_WEEDLE"
               },
               {
@@ -1133,8 +1133,8 @@
                 "species": "SPECIES_CATERPIE"
               },
               {
-                "min_level": 7,
-                "max_level": 8,
+                "min_level": 5,
+                "max_level": 6,
                 "species": "SPECIES_WEEDLE"
               },
               {
