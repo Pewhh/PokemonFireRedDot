@@ -354,7 +354,8 @@ struct SaveBlock2
     /*0xAF0*/ struct BerryCrush berryCrush;
     /*0xB00*/ struct PokemonJumpRecords pokeJump;
     /*0xB10*/ struct BerryPickingResults berryPick;
-    /*0xB20*/ u8 filler_B20[0x400];
+    /*0xB20*/ u8 activeVersion;       // 0 = FireRed, 1 = LeafGreen
+    /*0xB21*/ u8 filler_B21[0x3FF];
     /*0xF20*/ u32 encryptionKey;
 }; // size: 0xF24
 

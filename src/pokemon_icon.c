@@ -1,4 +1,5 @@
 #include "global.h"
+#include "load_save.h"
 #include "gflib.h"
 #include "mail_data.h"
 #include "pokemon_icon.h"
@@ -1108,8 +1109,9 @@ u16 MailSpeciesToIconSpecies(u16 species)
 const u8 *GetMonIconTiles(u16 species, bool32 extra)
 {
     const u8 *iconSprite = gMonIconTable[species];
+    // gMonIcon_Deoxys holds 3 icons: Normal, Attack (FireRed), Defense (LeafGreen)
     if (species == SPECIES_DEOXYS && extra == TRUE)
-        iconSprite += 0x400;
+        iconSprite += IsLeafGreenVersion() ? 0x800 : 0x400;
     return iconSprite;
 }
 

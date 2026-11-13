@@ -1,4 +1,5 @@
 #include "global.h"
+#include "load_save.h"
 #include "gflib.h"
 #include "decompress.h"
 #include "task.h"
@@ -620,79 +621,46 @@ static const u8 *const sControlsGuide_Pages2And3_Strings[CONTROLS_GUIDE_STRINGS_
     gControlsGuide_Text_LRButtons
 };
 
-static const u8 *const sMaleNameChoices[] =
-{
-#if defined(FIRERED)
-    gNameChoice_Red,
-    gNameChoice_Fire,
-    gNameChoice_Ash,
-    gNameChoice_Kene,
-    gNameChoice_Geki,
-#elif defined(LEAFGREEN)
-    gNameChoice_Green,
-    gNameChoice_Leaf,
-    gNameChoice_Gary,
-    gNameChoice_Kaz,
-    gNameChoice_Toru,
-#endif
-    gNameChoice_Jak,
-    gNameChoice_Janne,
-    gNameChoice_Jonn,
-    gNameChoice_Kamon,
-    gNameChoice_Karl,
-    gNameChoice_Taylor,
-    gNameChoice_Oscar,
-    gNameChoice_Hiro,
-    gNameChoice_Max,
-    gNameChoice_Jon,
-    gNameChoice_Ralph,
-    gNameChoice_Kay,
-    gNameChoice_Tosh,
-    gNameChoice_Roak
+// FireRed name choices
+static const u8 *const sMaleNameChoices_FR[] = {
+    gNameChoice_Red, gNameChoice_Fire, gNameChoice_Ash, gNameChoice_Kene, gNameChoice_Geki,
+    gNameChoice_Jak, gNameChoice_Janne, gNameChoice_Jonn, gNameChoice_Kamon, gNameChoice_Karl,
+    gNameChoice_Taylor, gNameChoice_Oscar, gNameChoice_Hiro, gNameChoice_Max, gNameChoice_Jon,
+    gNameChoice_Ralph, gNameChoice_Kay, gNameChoice_Tosh, gNameChoice_Roak
+};
+static const u8 *const sFemaleNameChoices_FR[] = {
+    gNameChoice_Red, gNameChoice_Fire,
+    gNameChoice_Omi, gNameChoice_Jodi, gNameChoice_Amanda, gNameChoice_Hillary, gNameChoice_Makey,
+    gNameChoice_Michi, gNameChoice_Paula, gNameChoice_June, gNameChoice_Cassie, gNameChoice_Rey,
+    gNameChoice_Seda, gNameChoice_Kiko, gNameChoice_Mina, gNameChoice_Norie, gNameChoice_Sai,
+    gNameChoice_Momo, gNameChoice_Suzi
+};
+static const u8 *const sRivalNameChoices_FR[] = {
+    gNameChoice_Green, gNameChoice_Gary, gNameChoice_Kaz, gNameChoice_Toru
 };
 
-static const u8 *const sFemaleNameChoices[] =
-{
-#if defined(FIRERED)
-    gNameChoice_Red,
-    gNameChoice_Fire,
-#elif defined(LEAFGREEN)
-    gNameChoice_Green,
-    gNameChoice_Leaf,
-#endif
-    gNameChoice_Omi,
-    gNameChoice_Jodi,
-    gNameChoice_Amanda,
-    gNameChoice_Hillary,
-    gNameChoice_Makey,
-    gNameChoice_Michi,
-    gNameChoice_Paula,
-    gNameChoice_June,
-    gNameChoice_Cassie,
-    gNameChoice_Rey,
-    gNameChoice_Seda,
-    gNameChoice_Kiko,
-    gNameChoice_Mina,
-    gNameChoice_Norie,
-    gNameChoice_Sai,
-    gNameChoice_Momo,
-    gNameChoice_Suzi
+// LeafGreen name choices
+static const u8 *const sMaleNameChoices_LG[] = {
+    gNameChoice_Green, gNameChoice_Leaf, gNameChoice_Gary, gNameChoice_Kaz, gNameChoice_Toru,
+    gNameChoice_Jak, gNameChoice_Janne, gNameChoice_Jonn, gNameChoice_Kamon, gNameChoice_Karl,
+    gNameChoice_Taylor, gNameChoice_Oscar, gNameChoice_Hiro, gNameChoice_Max, gNameChoice_Jon,
+    gNameChoice_Ralph, gNameChoice_Kay, gNameChoice_Tosh, gNameChoice_Roak
+};
+static const u8 *const sFemaleNameChoices_LG[] = {
+    gNameChoice_Green, gNameChoice_Leaf,
+    gNameChoice_Omi, gNameChoice_Jodi, gNameChoice_Amanda, gNameChoice_Hillary, gNameChoice_Makey,
+    gNameChoice_Michi, gNameChoice_Paula, gNameChoice_June, gNameChoice_Cassie, gNameChoice_Rey,
+    gNameChoice_Seda, gNameChoice_Kiko, gNameChoice_Mina, gNameChoice_Norie, gNameChoice_Sai,
+    gNameChoice_Momo, gNameChoice_Suzi
+};
+static const u8 *const sRivalNameChoices_LG[] = {
+    gNameChoice_Red, gNameChoice_Ash, gNameChoice_Kene, gNameChoice_Geki
 };
 
-static const u8 *const sRivalNameChoices[] =
-{
-#if defined(FIRERED)
-    gNameChoice_Green,
-    gNameChoice_Gary,
-    gNameChoice_Kaz,
-    gNameChoice_Toru
-#elif defined(LEAFGREEN)
-    gNameChoice_Red,
-    gNameChoice_Ash,
-    gNameChoice_Kene,
-    gNameChoice_Geki
-#endif
-};
+// Runtime helpers — return correct array for active version
+#define sMaleNameChoices   (IsLeafGreenVersion() ? sMaleNameChoices_LG   : sMaleNameChoices_FR)
+#define sFemaleNameChoices (IsLeafGreenVersion() ? sFemaleNameChoices_LG : sFemaleNameChoices_FR)
+#define sRivalNameChoices  (IsLeafGreenVersion() ? sRivalNameChoices_LG  : sRivalNameChoices_FR)
 
 enum
 {
@@ -2164,7 +2132,7 @@ static void PrintNameChoiceOptions(u8 taskId, u8 hasPlayerBeenNamed)
         textPtrs = gSaveBlock2Ptr->playerGender == MALE ? sMaleNameChoices : sFemaleNameChoices;
     else
         textPtrs = sRivalNameChoices;
-    for (i = 0; i < ARRAY_COUNT(sRivalNameChoices); i++)
+    for (i = 0; i < ARRAY_COUNT(sRivalNameChoices_FR); i++)  // always 4 names per version
         AddTextPrinterParameterized(tMenuWindowId, FONT_NORMAL, textPtrs[i], 8, 16 * (i + 1) + 1, 0, NULL);
     Menu_InitCursor(tMenuWindowId, FONT_NORMAL, 0, 1, 16, 5, 0);
     CopyWindowToVram(tMenuWindowId, COPYWIN_FULL);
@@ -2178,9 +2146,9 @@ static void GetDefaultName(u8 hasPlayerBeenNamed, u8 rivalNameChoice)
     if (hasPlayerBeenNamed == FALSE)
     {
         if (gSaveBlock2Ptr->playerGender == MALE)
-            src = sMaleNameChoices[Random() % ARRAY_COUNT(sMaleNameChoices)];
+            src = sMaleNameChoices[Random() % ARRAY_COUNT(sMaleNameChoices_FR)];
         else
-            src = sFemaleNameChoices[Random() % ARRAY_COUNT(sFemaleNameChoices)];
+            src = sFemaleNameChoices[Random() % ARRAY_COUNT(sFemaleNameChoices_FR)];
         dest = gSaveBlock2Ptr->playerName;
     }
     else

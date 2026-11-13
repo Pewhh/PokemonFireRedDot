@@ -10,6 +10,7 @@
 #include "random.h"
 #include "save.h"
 #include "new_game.h"
+#include "load_save.h"
 #include "title_screen.h"
 #include "decompress.h"
 #include "util.h"
@@ -1926,6 +1927,10 @@ static void IntroCB_ExitToTitleScreen(struct IntroSequenceData * this)
             Free(this);
             DisableInterrupts(INTR_FLAG_HBLANK);
             SetHBlankCallback(NULL);
+            // No save file: show a random version's title screen, like FRLG+.
+            // The player picks the real one when starting a NEW GAME.
+            if (gSaveFileStatus == SAVE_STATUS_EMPTY || gSaveFileStatus == SAVE_STATUS_NO_FLASH || gSaveFileStatus == SAVE_STATUS_INVALID)
+                SetActiveVersion(Random() % 2);
             SetMainCallback2(CB2_InitTitleScreen);
         }
         break;

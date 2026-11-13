@@ -1,5 +1,4 @@
-#if defined(FIRERED)
+// Both versions' Pokedex texts are in the ROM.
+// The LeafGreen strings have the same names with an _LG suffix.
 #include "pokedex_text_fr.h"
-#elif defined(LEAFGREEN)
 #include "pokedex_text_lg.h"
-#endif

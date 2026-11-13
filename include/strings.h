@@ -1549,4 +1549,11 @@ extern const u8 gText_PokeSum_EggOrigin_NicePlace[];
 extern const u8 gText_PokeSum_EggOrigin_Spa[];
 extern const u8 gText_PokeSum_EggOrigin_Trade[];
 
+// Key System menu (version switch)
+extern const u8 gText_KeySystemSettings[];
+extern const u8 gText_Version[];
+extern const u8 gText_VersionFireRed[];
+extern const u8 gText_VersionLeafGreen[];
+extern const u8 gText_KeySystemExit[];
+
 #endif //GUARD_STRINGS_H

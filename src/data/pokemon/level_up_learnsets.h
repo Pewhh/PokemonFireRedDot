@@ -831,13 +831,26 @@ static const u16 sDiglettLevelUpLearnset[] = {
 
 static const u16 sDugtrioLevelUpLearnset[] = {
     LEVEL_UP_MOVE(1, MOVE_TRI_ATTACK),
-#if defined(FIRERED)
     LEVEL_UP_MOVE(1, MOVE_SCRATCH),
     LEVEL_UP_MOVE(1, MOVE_SAND_ATTACK),
-#elif defined(LEAFGREEN)
+    LEVEL_UP_MOVE(1, MOVE_GROWL),
+    LEVEL_UP_MOVE(5, MOVE_GROWL),
+    LEVEL_UP_MOVE(9, MOVE_MAGNITUDE),
+    LEVEL_UP_MOVE(17, MOVE_DIG),
+    LEVEL_UP_MOVE(21, MOVE_FURY_SWIPES),
+    LEVEL_UP_MOVE(25, MOVE_MUD_SLAP),
+    LEVEL_UP_MOVE(26, MOVE_SAND_TOMB),
+    LEVEL_UP_MOVE(38, MOVE_SLASH),
+    LEVEL_UP_MOVE(51, MOVE_EARTHQUAKE),
+    LEVEL_UP_MOVE(55, MOVE_FISSURE),
+    LEVEL_UP_END
+};
+
+// LeafGreen has SAND-ATTACK and SCRATCH in the opposite order. See GetLevelUpLearnset in pokemon.c.
+static const u16 sDugtrioLevelUpLearnset_LG[] = {
+    LEVEL_UP_MOVE(1, MOVE_TRI_ATTACK),
     LEVEL_UP_MOVE(1, MOVE_SAND_ATTACK),
     LEVEL_UP_MOVE(1, MOVE_SCRATCH),
-#endif
     LEVEL_UP_MOVE(1, MOVE_GROWL),
     LEVEL_UP_MOVE(5, MOVE_GROWL),
     LEVEL_UP_MOVE(9, MOVE_MAGNITUDE),
@@ -6025,7 +6038,7 @@ static const u16 sJirachiLevelUpLearnset[] = {
     LEVEL_UP_END
 };
 
-#if defined(FIRERED)
+// Attack Forme (FireRed)
 static const u16 sDeoxysLevelUpLearnset[] = {
     LEVEL_UP_MOVE(1, MOVE_LEER),
     LEVEL_UP_MOVE(1, MOVE_WRAP),
@@ -6041,8 +6054,9 @@ static const u16 sDeoxysLevelUpLearnset[] = {
     LEVEL_UP_MOVE(50, MOVE_HYPER_BEAM),
     LEVEL_UP_END
 };
-#elif defined(LEAFGREEN)
-static const u16 sDeoxysLevelUpLearnset[] = {
+
+// Defense Forme (LeafGreen). See GetLevelUpLearnset in pokemon.c.
+static const u16 sDeoxysLevelUpLearnset_LG[] = {
     LEVEL_UP_MOVE(1, MOVE_LEER),
     LEVEL_UP_MOVE(1, MOVE_WRAP),
     LEVEL_UP_MOVE(5, MOVE_NIGHT_SHADE),
@@ -6059,7 +6073,6 @@ static const u16 sDeoxysLevelUpLearnset[] = {
     LEVEL_UP_MOVE(50, MOVE_MIRROR_COAT),
     LEVEL_UP_END
 };
-#endif
 
 static const u16 sChimechoLevelUpLearnset[] = {
     LEVEL_UP_MOVE(1, MOVE_WRAP),

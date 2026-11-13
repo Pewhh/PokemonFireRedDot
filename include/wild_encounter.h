@@ -10,6 +10,13 @@
 
 #define NUM_ALTERING_CAVE_TABLES 9
 
+// Which game version a wild encounter header belongs to.
+// Set by wild_encounters.json.txt from the label suffix (_FireRed / _LeafGreen).
+// Labels with neither suffix are used in both versions.
+#define WILD_VERSION_FIRERED   0
+#define WILD_VERSION_LEAFGREEN 1
+#define WILD_VERSION_BOTH      2
+
 struct WildPokemon
 {
     u8 minLevel;
@@ -27,6 +34,7 @@ struct WildPokemonHeader
 {
     u8 mapGroup;
     u8 mapNum;
+    u8 version; // WILD_VERSION_*
     const struct WildPokemonInfo *landMonsInfo;
     const struct WildPokemonInfo *waterMonsInfo;
     const struct WildPokemonInfo *rockSmashMonsInfo;
@@ -34,6 +42,8 @@ struct WildPokemonHeader
 };
 
 extern const struct WildPokemonHeader gWildMonHeaders[];
+
+bool8 IsWildMonHeaderForActiveVersion(const struct WildPokemonHeader *header);
 
 void DisableWildEncounters(bool8 disabled);
 bool8 StandardWildEncounter(u32 currMetatileAttrs, u16 previousMetaTileBehavior);

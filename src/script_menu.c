@@ -314,20 +314,23 @@ static const struct MenuAction sMultichoiceList_BikeShop[] = {
     { gText_NoThanks }
 };
 
+// FireRed prizes
 static const struct MenuAction sMultichoiceList_GameCornerPokemonPrizes[] = {
-#if defined(FIRERED)
     { gText_Abra_180Coins },
     { gText_Clefairy_500Coins },
     { gText_Dratini_2800Coins },
     { gText_Scyther_5500Coins },
     { gText_Porygon_9999Coins },
-#elif defined(LEAFGREEN)
+    { gText_NoThanks_2 }
+};
+
+// LeafGreen prizes
+static const struct MenuAction sMultichoiceList_GameCornerPokemonPrizes_LG[] = {
     { gText_Abra_120Coins },
     { gText_Clefairy_750Coins },
     { gText_Pinsir_2500Coins },
     { gText_Dratini_4600Coins },
     { gText_Porygon_6500Coins },
-#endif
     { gText_NoThanks_2 }
 };
 
@@ -562,6 +565,7 @@ static const struct MultichoiceListStruct sMultichoiceLists[] = {
     [MULTICHOICE_62]                                         = MULTICHOICE(sMultichoiceList_62),
     [MULTICHOICE_JOIN_OR_LEAD]                               = MULTICHOICE(sMultichoiceList_JoinOrLead),
     [MULTICHOICE_TRAINER_TOWER_MODE]                         = MULTICHOICE(sMultichoiceList_TrainerTowerMode),
+    [MULTICHOICE_GAME_CORNER_POKEMON_PRIZES_LG]              = MULTICHOICE(sMultichoiceList_GameCornerPokemonPrizes_LG),
 };
 
 // From Cool to Berries goes unused

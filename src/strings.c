@@ -1341,4 +1341,10 @@ const u8 gText_DelAllCancelOk[] = _("DEL. ALL{CLEAR_TO 0x57}CANCEL{CLEAR_TO 0xA4
 const u8 gText_Hard[]     = _("HARD");
 const u8 gText_Hardcore[] = _("HARDCORE");
 const u8 gText_Expert[]   = _("EXPERT");
+// Key System menu (version switch)
+const u8 gText_KeySystemSettings[] = _("KEY SYSTEM SETTINGS");
+const u8 gText_Version[] = _("VERSION");
+const u8 gText_VersionFireRed[] = _("FIRERED");
+const u8 gText_VersionLeafGreen[] = _("LEAFGREEN");
+const u8 gText_KeySystemExit[] = _("EXIT");
 

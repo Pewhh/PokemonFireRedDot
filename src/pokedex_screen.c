@@ -1,4 +1,5 @@
 #include "global.h"
+#include "load_save.h"
 #include "gflib.h"
 #include "graphics.h"
 #include "m4a.h"
@@ -2862,7 +2863,9 @@ void DexScreen_PrintMonFlavorText(u8 windowId, u16 species, u8 x, u8 y)
 
     if (DexScreen_GetSetPokedexFlag(species, FLAG_GET_CAUGHT, FALSE))
     {
-        printerTemplate.currentChar = gPokedexEntries[species].description;
+        const u8 *description = IsLeafGreenVersion() ? gPokedexEntries[species].descriptionLG : gPokedexEntries[species].description;
+
+        printerTemplate.currentChar = description;
         printerTemplate.windowId = windowId;
         printerTemplate.fontId = FONT_NORMAL;
         printerTemplate.letterSpacing = 1;
@@ -2872,7 +2875,7 @@ void DexScreen_PrintMonFlavorText(u8 windowId, u16 species, u8 x, u8 y)
         printerTemplate.bgColor = 0;
         printerTemplate.shadowColor = 2;
 
-        length = GetStringWidth(FONT_NORMAL, gPokedexEntries[species].description, 0);
+        length = GetStringWidth(FONT_NORMAL, description, 0);
         xCenter = x + (240 - length) / 2;
 
         if (xCenter > 0)

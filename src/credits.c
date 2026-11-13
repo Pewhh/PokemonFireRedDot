@@ -12,15 +12,13 @@
 #include "menu.h"
 #include "field_weather.h"
 #include "quest_log.h"
+#include "load_save.h"
 #include "constants/maps.h"
 #include "constants/field_weather.h"
 #include "constants/sound.h"
 
-#if defined(FIRERED)
-#define TITLE_TEXT gString_PokemonFireRed_Staff
-#elif defined(LEAFGREEN)
-#define TITLE_TEXT gString_PokemonLeafGreen_Staff
-#endif
+// Picked at runtime from the version being played
+#define TITLE_TEXT (IsLeafGreenVersion() ? gString_PokemonLeafGreen_Staff : gString_PokemonFireRed_Staff)
 
 enum CreditsSceneIdx
 {

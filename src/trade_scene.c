@@ -476,6 +476,16 @@ static const union AffineAnimCmd *const sAffineAnims_CrossingMonPics[] = {
 
 #include "data/ingame_trades.h"
 
+// Returns the in-game trade for the version being played.
+static const struct InGameTrade *GetInGameTrade(u8 id)
+{
+    if (IsLeafGreenVersion()
+     && id < ARRAY_COUNT(sInGameTrades_LeafGreen)
+     && sInGameTrades_LeafGreen[id].species != SPECIES_NONE)
+        return &sInGameTrades_LeafGreen[id];
+    return &sInGameTrades[id];
+}
+
 static const struct WindowTemplate sTradeMessageWindowTemplates[] = {
     {
         .bg = 0,
@@ -1242,7 +1252,7 @@ static void TradeBufferOTnameAndNicknames(void)
     }
     else
     {
-        inGameTrade = &sInGameTrades[gSpecialVar_0x8004];
+        inGameTrade = GetInGameTrade(gSpecialVar_0x8004);
         StringCopy(gStringVar1, inGameTrade->otName);
         StringCopy_Nickname(gStringVar3, inGameTrade->nickname);
         GetMonData(&gPlayerParty[gSpecialVar_0x8005], MON_DATA_NICKNAME, nickname);
@@ -2435,7 +2445,7 @@ u16 GetInGameTradeSpeciesInfo(void)
     // Populates gStringVar1 with the name of the requested species and
     // gStringVar2 with the name of the offered species.
     // Returns the requested species.
-    const struct InGameTrade * inGameTrade = &sInGameTrades[gSpecialVar_0x8004];
+    const struct InGameTrade * inGameTrade = GetInGameTrade(gSpecialVar_0x8004);
     StringCopy(gStringVar1, gSpeciesNames[inGameTrade->requestedSpecies]);
     StringCopy(gStringVar2, gSpeciesNames[inGameTrade->species]);
     return inGameTrade->requestedSpecies;
@@ -2446,7 +2456,7 @@ static void BufferInGameTradeMonName(void)
     // Populates gStringVar1 with the nickname of the sent Pokemon and
     // gStringVar2 with the name of the offered species.
     u8 nickname[30];
-    const struct InGameTrade * inGameTrade = &sInGameTrades[gSpecialVar_0x8004];
+    const struct InGameTrade * inGameTrade = GetInGameTrade(gSpecialVar_0x8004);
     GetMonData(&gPlayerParty[gSpecialVar_0x8005], MON_DATA_NICKNAME, nickname);
     StringCopy_Nickname(gStringVar1, nickname);
     StringCopy(gStringVar2, gSpeciesNames[inGameTrade->species]);
@@ -2454,7 +2464,7 @@ static void BufferInGameTradeMonName(void)
 
 static void CreateInGameTradePokemonInternal(u8 playerSlot, u8 inGameTradeIdx)
 {
-    const struct InGameTrade * inGameTrade = &sInGameTrades[inGameTradeIdx];
+    const struct InGameTrade * inGameTrade = GetInGameTrade(inGameTradeIdx);
     u8 level = GetMonData(&gPlayerParty[playerSlot], MON_DATA_LEVEL);
     struct Mail mail;
     u8 metLocation = METLOC_IN_GAME_TRADE;

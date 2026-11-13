@@ -1,6 +1,7 @@
 #define IS_POKEMON_C
 
 #include "global.h"
+#include "load_save.h"
 #include "gflib.h"
 #include "random.h"
 #include "text.h"
@@ -1398,6 +1399,20 @@ const s8 sNatureStatTable[NUM_NATURES][NUM_NATURE_STATS] =
 #include "data/pokemon/evolution.h"
 #include "data/pokemon/level_up_learnset_pointers.h"
 
+// Level-up learnset for the version being played.
+// gLevelUpLearnsets holds FireRed's; the few that differ in LeafGreen are swapped here.
+static const u16 *GetLevelUpLearnset(u16 species)
+{
+    if (IsLeafGreenVersion())
+    {
+        if (species == SPECIES_DEOXYS)
+            return sDeoxysLevelUpLearnset_LG;
+        if (species == SPECIES_DUGTRIO)
+            return sDugtrioLevelUpLearnset_LG;
+    }
+    return gLevelUpLearnsets[species];
+}
+
 static const s8 sPokeblockFlavorCompatibilityTable[NUM_NATURES * FLAVOR_COUNT] =
 {
     // Cool, Beauty, Cute, Smart, Tough
@@ -1640,9 +1655,8 @@ static const u16 sHMMoves[] =
     MOVE_ROCK_SMASH, MOVE_WATERFALL, MOVE_DIVE, HM_MOVES_END
 };
 
-#if defined(FIRERED)
-// Attack forme
-static const u16 sDeoxysBaseStats[] = 
+// Attack forme (FireRed)
+static const u16 sDeoxysBaseStats_FR[] =
 {
     [STAT_HP]    = 50,
     [STAT_ATK]   = 180,
@@ -1651,9 +1665,8 @@ static const u16 sDeoxysBaseStats[] =
     [STAT_SPATK] = 180,
     [STAT_SPDEF] = 20,
 };
-#elif defined(LEAFGREEN)
-// Defense forme
-static const u16 sDeoxysBaseStats[] =
+// Defense forme (LeafGreen)
+static const u16 sDeoxysBaseStats_LG[] =
 {
     [STAT_HP]    = 50,
     [STAT_ATK]   = 70,
@@ -1662,7 +1675,8 @@ static const u16 sDeoxysBaseStats[] =
     [STAT_SPATK] = 70,
     [STAT_SPDEF] = 160,
 };
-#endif
+// Runtime selection based on active version
+#define sDeoxysBaseStats (IsLeafGreenVersion() ? sDeoxysBaseStats_LG : sDeoxysBaseStats_FR)
 
 // The classes used by other players in the Union Room.
 // These should correspond with the overworld graphics in sUnionRoomObjGfxIds
@@ -1819,7 +1833,9 @@ void CreateBoxMon(struct BoxPokemon *boxMon, u16 species, u8 level, u8 fixedIV, 
     value = GetCurrentRegionMapSectionId();
     SetBoxMonData(boxMon, MON_DATA_MET_LOCATION, &value);
     SetBoxMonData(boxMon, MON_DATA_MET_LEVEL, &level);
-    SetBoxMonData(boxMon, MON_DATA_MET_GAME, &gGameVersion);
+    // Origin game follows the version being played, like FRLG+
+    value = IsLeafGreenVersion() ? VERSION_LEAF_GREEN : VERSION_FIRE_RED;
+    SetBoxMonData(boxMon, MON_DATA_MET_GAME, &value);
     value = ITEM_POKE_BALL;
     SetBoxMonData(boxMon, MON_DATA_POKEBALL, &value);
     SetBoxMonData(boxMon, MON_DATA_OT_GENDER, &gSaveBlock2Ptr->playerGender);
@@ -2277,17 +2293,17 @@ static void GiveBoxMonInitialMoveset(struct BoxPokemon *boxMon)
     s32 level = GetLevelFromBoxMonExp(boxMon);
     s32 i;
 
-    for (i = 0; gLevelUpLearnsets[species][i] != LEVEL_UP_END; i++)
+    for (i = 0; GetLevelUpLearnset(species)[i] != LEVEL_UP_END; i++)
     {
         u16 moveLevel;
         u16 move;
 
-        moveLevel = (gLevelUpLearnsets[species][i] & LEVEL_UP_MOVE_LV);
+        moveLevel = (GetLevelUpLearnset(species)[i] & LEVEL_UP_MOVE_LV);
 
         if (moveLevel > (level << 9))
             break;
 
-        move = (gLevelUpLearnsets[species][i] & LEVEL_UP_MOVE_ID);
+        move = (GetLevelUpLearnset(species)[i] & LEVEL_UP_MOVE_ID);
 
         if (GiveMoveToBoxMon(boxMon, move) == MON_HAS_MAX_MOVES)
             DeleteFirstMoveAndGiveMoveToBoxMon(boxMon, move);
@@ -2308,17 +2324,17 @@ u16 MonTryLearningNewMove(struct Pokemon *mon, bool8 firstMove)
     {
         sLearningMoveTableID = 0;
 
-        while ((gLevelUpLearnsets[species][sLearningMoveTableID] & LEVEL_UP_MOVE_LV) != (level << 9))
+        while ((GetLevelUpLearnset(species)[sLearningMoveTableID] & LEVEL_UP_MOVE_LV) != (level << 9))
         {
             sLearningMoveTableID++;
-            if (gLevelUpLearnsets[species][sLearningMoveTableID] == LEVEL_UP_END)
+            if (GetLevelUpLearnset(species)[sLearningMoveTableID] == LEVEL_UP_END)
                 return MOVE_NONE;
         }
     }
 
-    if ((gLevelUpLearnsets[species][sLearningMoveTableID] & LEVEL_UP_MOVE_LV) == (level << 9))
+    if ((GetLevelUpLearnset(species)[sLearningMoveTableID] & LEVEL_UP_MOVE_LV) == (level << 9))
     {
-        gMoveToLearn = (gLevelUpLearnsets[species][sLearningMoveTableID] & LEVEL_UP_MOVE_ID);
+        gMoveToLearn = (GetLevelUpLearnset(species)[sLearningMoveTableID] & LEVEL_UP_MOVE_ID);
         sLearningMoveTableID++;
         retVal = GiveMoveToMon(mon, gMoveToLearn);
     }
@@ -5781,23 +5797,23 @@ u8 GetMoveRelearnerMoves(struct Pokemon *mon, u16 *moves)
     {
         u16 moveLevel;
 
-        if (gLevelUpLearnsets[species][i] == LEVEL_UP_END)
+        if (GetLevelUpLearnset(species)[i] == LEVEL_UP_END)
             break;
 
-        moveLevel = gLevelUpLearnsets[species][i] & LEVEL_UP_MOVE_LV;
+        moveLevel = GetLevelUpLearnset(species)[i] & LEVEL_UP_MOVE_LV;
 
         if (moveLevel <= (level << 9))
         {
-            for (j = 0; j < MAX_MON_MOVES && learnedMoves[j] != (gLevelUpLearnsets[species][i] & LEVEL_UP_MOVE_ID); j++)
+            for (j = 0; j < MAX_MON_MOVES && learnedMoves[j] != (GetLevelUpLearnset(species)[i] & LEVEL_UP_MOVE_ID); j++)
                 ;
 
             if (j == MAX_MON_MOVES)
             {
-                for (k = 0; k < numMoves && moves[k] != (gLevelUpLearnsets[species][i] & LEVEL_UP_MOVE_ID); k++)
+                for (k = 0; k < numMoves && moves[k] != (GetLevelUpLearnset(species)[i] & LEVEL_UP_MOVE_ID); k++)
                     ;
 
                 if (k == numMoves)
-                    moves[numMoves++] = gLevelUpLearnsets[species][i] & LEVEL_UP_MOVE_ID;
+                    moves[numMoves++] = GetLevelUpLearnset(species)[i] & LEVEL_UP_MOVE_ID;
             }
         }
     }
@@ -5810,8 +5826,8 @@ u8 GetLevelUpMovesBySpecies(u16 species, u16 *moves)
     u8 numMoves = 0;
     int i;
 
-    for (i = 0; i < MAX_LEVEL_UP_MOVES && gLevelUpLearnsets[species][i] != LEVEL_UP_END; i++)
-         moves[numMoves++] = gLevelUpLearnsets[species][i] & LEVEL_UP_MOVE_ID;
+    for (i = 0; i < MAX_LEVEL_UP_MOVES && GetLevelUpLearnset(species)[i] != LEVEL_UP_END; i++)
+         moves[numMoves++] = GetLevelUpLearnset(species)[i] & LEVEL_UP_MOVE_ID;
 
      return numMoves;
 }
@@ -5835,23 +5851,23 @@ u8 GetNumberOfRelearnableMoves(struct Pokemon *mon)
     {
         u16 moveLevel;
 
-        if (gLevelUpLearnsets[species][i] == LEVEL_UP_END)
+        if (GetLevelUpLearnset(species)[i] == LEVEL_UP_END)
             break;
 
-        moveLevel = gLevelUpLearnsets[species][i] & LEVEL_UP_MOVE_LV;
+        moveLevel = GetLevelUpLearnset(species)[i] & LEVEL_UP_MOVE_LV;
 
         if (moveLevel <= (level << 9))
         {
-            for (j = 0; j < MAX_MON_MOVES && learnedMoves[j] != (gLevelUpLearnsets[species][i] & LEVEL_UP_MOVE_ID); j++)
+            for (j = 0; j < MAX_MON_MOVES && learnedMoves[j] != (GetLevelUpLearnset(species)[i] & LEVEL_UP_MOVE_ID); j++)
                 ;
 
             if (j == MAX_MON_MOVES)
             {
-                for (k = 0; k < numMoves && moves[k] != (gLevelUpLearnsets[species][i] & LEVEL_UP_MOVE_ID); k++)
+                for (k = 0; k < numMoves && moves[k] != (GetLevelUpLearnset(species)[i] & LEVEL_UP_MOVE_ID); k++)
                     ;
 
                 if (k == numMoves)
-                    moves[numMoves++] = gLevelUpLearnsets[species][i] & LEVEL_UP_MOVE_ID;
+                    moves[numMoves++] = GetLevelUpLearnset(species)[i] & LEVEL_UP_MOVE_ID;
             }
         }
     }

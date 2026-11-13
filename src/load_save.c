@@ -10,6 +10,7 @@
 #include "berry_powder.h"
 #include "overworld.h"
 #include "quest_log.h"
+#include "event_data.h"
 
 #define SAVEBLOCK_MOVE_RANGE    128
 
@@ -151,6 +152,38 @@ void SetContinueGameWarpStatusToDynamicWarp(void)
 void ClearContinueGameWarpStatus2(void)
 {
     gSaveBlock2Ptr->specialSaveWarpFlags &= ~CONTINUE_GAME_WARP;
+}
+
+// Version switching support
+// Returns TRUE if the player has selected LeafGreen mode.
+// Safe to call any time after LoadGameSave (which runs before the title screen).
+bool8 IsLeafGreenVersion(void)
+{
+    if (gSaveBlock2Ptr == NULL)
+        return FALSE;
+    return gSaveBlock2Ptr->activeVersion == 1;
+}
+
+void SetActiveVersion(u8 version)
+{
+    gSaveBlock2Ptr->activeVersion = version;
+}
+
+// Specials called from scripts to switch the active version
+void Special_SetVersionFireRed(void)
+{
+    gSaveBlock2Ptr->activeVersion = 0;
+}
+
+void Special_SetVersionLeafGreen(void)
+{
+    gSaveBlock2Ptr->activeVersion = 1;
+}
+
+// Returns 0 for FireRed, 1 for LeafGreen — usable via specialvar in scripts
+void Special_GetActiveVersion(void)
+{
+    gSpecialVar_Result = gSaveBlock2Ptr->activeVersion;
 }
 
 void SavePlayerParty(void)

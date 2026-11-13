@@ -27,11 +27,8 @@ enum TitleScreenScene
     TITLESCREENSCENE_CRY
 };
 
-#if   defined(FIRERED)
-#define TITLE_SPECIES SPECIES_CHARIZARD
-#elif defined(LEAFGREEN)
-#define TITLE_SPECIES SPECIES_VENUSAUR
-#endif
+// Title species is determined at runtime based on active version
+#define TITLE_SPECIES (IsLeafGreenVersion() ? SPECIES_VENUSAUR : SPECIES_CHARIZARD)
 
 static EWRAM_DATA u8 sTitleScreenTimerTaskId = 0;
 
@@ -57,13 +54,10 @@ static void LoadMainTitleScreenPalsAndResetBgs(void);
 static void CB2_FadeOutTransitionToSaveClearScreen(void);
 static void CB2_FadeOutTransitionToBerryFix(void);
 static void LoadSpriteGfxAndPals(void);
-#if defined(FIRERED)
 static void SpriteCallback_TitleScreenFlame(struct Sprite *sprite);
 static void Task_FlameSpawner(u8 taskId);
-#elif defined(LEAFGREEN)
 static void SpriteCallback_TitleScreenLeaf(struct Sprite *sprite);
 static void Task_LeafSpawner(u8 taskId);
-#endif
 static void TitleScreen_srand(u8 taskId, u8 field, u16 seed);
 static u16 TitleScreen_rand(u8 taskId, u8 field);
 static u32 CreateBlankSprite(void);
@@ -75,23 +69,19 @@ static void SpriteCallback_Slash(struct Sprite *sprite);
 
 static const u8 sBorderBgTiles[] = INCBIN_U8("graphics/title_screen/border_bg.4bpp.lz");
 
-#if defined(FIRERED)
-static const u8 sBorderBgMap[] = INCBIN_U8("graphics/title_screen/firered/border_bg.bin.lz");
-#elif defined(LEAFGREEN)
-static const u8 sBorderBgMap[] = INCBIN_U8("graphics/title_screen/leafgreen/border_bg.bin.lz");
-#endif
+static const u8 sBorderBgMap_FR[] = INCBIN_U8("graphics/title_screen/firered/border_bg.bin.lz");
+static const u8 sBorderBgMap_LG[] = INCBIN_U8("graphics/title_screen/leafgreen/border_bg.bin.lz");
 
 static const u32 sSlash_Gfx[] = INCBIN_U32("graphics/title_screen/slash.4bpp.lz");
 
-#if defined(FIRERED)
+// FireRed particle assets
 static const u16 sFlames_Pal[] = INCBIN_U16("graphics/title_screen/firered/flames.gbapal");
 static const u32 sFlames_Gfx[] = INCBIN_U32("graphics/title_screen/firered/flames.4bpp.lz");
 static const u32 sBlankFlames_Gfx[] = INCBIN_U32("graphics/title_screen/firered/blank_flames.4bpp.lz");
-#elif defined(LEAFGREEN)
+// LeafGreen particle assets
 static const u16 sLeaves_Pal[] = INCBIN_U16("graphics/title_screen/leafgreen/leaves.gbapal");
 static const u32 sLeaves_Gfx[] = INCBIN_U32("graphics/title_screen/leafgreen/leaves.4bpp.lz");
 static const u32 sStreak_Gfx[] = INCBIN_U32("graphics/title_screen/leafgreen/streak.4bpp.lz");
-#endif
 
 static const struct OamData sOamData_FlameOrLeaf = {
     .objMode = ST_OAM_OBJ_NORMAL,
@@ -102,7 +92,7 @@ static const struct OamData sOamData_FlameOrLeaf = {
     .paletteNum = 0
 };
 
-#if defined(FIRERED)
+// FireRed flame animations
 static const union AnimCmd sSpriteAnim_Flame[] = {
     ANIMCMD_FRAME(0, 3),
     ANIMCMD_FRAME(4, 6),
@@ -125,12 +115,12 @@ static const union AnimCmd sSpriteAnim_Flame_Unused[] = {
     ANIMCMD_END
 };
 
-static const union AnimCmd *const sSpriteAnim_FlameOrLeaf[] = {
+static const union AnimCmd *const sSpriteAnim_Flame_Table[] = {
     sSpriteAnim_Flame,
     sSpriteAnim_Flame_Unused,
 };
 
-#elif defined(LEAFGREEN)
+// LeafGreen leaf animations
 static const union AnimCmd sSpriteAnim_Leaf[] = {
     ANIMCMD_FRAME(0, 8),
     ANIMCMD_FRAME(4, 8),
@@ -146,10 +136,9 @@ static const union AnimCmd sSpriteAnim_Leaf[] = {
     ANIMCMD_JUMP(0)
 };
 
-static const union AnimCmd *const sSpriteAnim_FlameOrLeaf[] = {
+static const union AnimCmd *const sSpriteAnim_Leaf_Table[] = {
     sSpriteAnim_Leaf
 };
-#endif
 
 enum {
     TILE_TAG_FLAME_OR_LEAF,
@@ -164,28 +153,38 @@ enum {
     PAL_TAG_SLASH,
 };
 
-static const struct SpriteTemplate sSpriteTemplate_FlameOrLeaf = {
+// FireRed sprite templates
+static const struct SpriteTemplate sSpriteTemplate_Flame = {
     .tileTag = TILE_TAG_FLAME_OR_LEAF,
     .paletteTag = PAL_TAG_DEFAULT,
     .oam = &sOamData_FlameOrLeaf,
-    .anims = sSpriteAnim_FlameOrLeaf,
+    .anims = sSpriteAnim_Flame_Table,
     .images = NULL,
     .affineAnims = gDummySpriteAffineAnimTable,
     .callback = SpriteCallbackDummy
 };
 
-#if defined(FIRERED)
 static const struct SpriteTemplate sSpriteTemplate_BlankFlame = {
     .tileTag = TILE_TAG_BLANK_OR_STREAK,
     .paletteTag = PAL_TAG_DEFAULT,
     .oam = &sOamData_FlameOrLeaf,
-    .anims = sSpriteAnim_FlameOrLeaf,
+    .anims = sSpriteAnim_Flame_Table,
     .images = NULL,
     .affineAnims = gDummySpriteAffineAnimTable,
     .callback = SpriteCallbackDummy
 };
 
-#elif defined(LEAFGREEN)
+// LeafGreen sprite templates
+static const struct SpriteTemplate sSpriteTemplate_Leaf = {
+    .tileTag = TILE_TAG_FLAME_OR_LEAF,
+    .paletteTag = PAL_TAG_DEFAULT,
+    .oam = &sOamData_FlameOrLeaf,
+    .anims = sSpriteAnim_Leaf_Table,
+    .images = NULL,
+    .affineAnims = gDummySpriteAffineAnimTable,
+    .callback = SpriteCallbackDummy
+};
+
 static const struct OamData sOamData_Streak = {
     .shape = SPRITE_SHAPE(32x16),
     .size = SPRITE_SIZE(32x16),
@@ -201,7 +200,6 @@ static const struct SpriteTemplate sSpriteTemplate_Streak = {
     .affineAnims = gDummySpriteAffineAnimTable,
     .callback = SpriteCallbackDummy
 };
-#endif
 
 static const struct OamData sOamData_BlankSprite = {
     .objMode = ST_OAM_OBJ_NORMAL,
@@ -286,17 +284,17 @@ static void (*const sSceneFuncs[])(s16 *data) = {
     [TITLESCREENSCENE_CRY]         = SetTitleScreenScene_Cry
 };
 
-#if defined(FIRERED)
-static const struct CompressedSpriteSheet sSpriteSheets[] = {
+// FireRed sprite sheets and palettes
+static const struct CompressedSpriteSheet sSpriteSheets_FR[] = {
     {sFlames_Gfx,                    0x500, TILE_TAG_FLAME_OR_LEAF},
     {sBlankFlames_Gfx,               0x500, TILE_TAG_BLANK_OR_STREAK},
     {gTitleScreen_BlankSprite_Tiles, 0x400, TILE_TAG_BLANK},
     {sSlash_Gfx,                     0x800, TILE_TAG_SLASH}
 };
 
-static const struct SpritePalette sSpritePals[] = {
-    {sFlames_Pal,            PAL_TAG_DEFAULT},
-    {gTitleScreen_Slash_Pal, PAL_TAG_SLASH},
+static const struct SpritePalette sSpritePals_FR[] = {
+    {sFlames_Pal,               PAL_TAG_DEFAULT},
+    {gTitleScreen_Slash_Pal_FR, PAL_TAG_SLASH},
     {}
 };
 
@@ -304,24 +302,23 @@ static const u8 sFlameXPositions[] = {
     4, 16, 26, 32, 48, 200, 216, 224, 232, 60, 76, 92, 108, 128, 144, 0
 };
 
-#elif defined(LEAFGREEN)
-static const struct CompressedSpriteSheet sSpriteSheets[] = {
+// LeafGreen sprite sheets and palettes
+static const struct CompressedSpriteSheet sSpriteSheets_LG[] = {
     {sLeaves_Gfx,                    0x580, TILE_TAG_FLAME_OR_LEAF},
     {sStreak_Gfx,                    0x100, TILE_TAG_BLANK_OR_STREAK},
     {gTitleScreen_BlankSprite_Tiles, 0x400, TILE_TAG_BLANK},
     {sSlash_Gfx,                     0x800, TILE_TAG_SLASH}
 };
 
-static const struct SpritePalette sSpritePals[] = {
-    {sLeaves_Pal,            PAL_TAG_DEFAULT},
-    {gTitleScreen_Slash_Pal, PAL_TAG_SLASH},
+static const struct SpritePalette sSpritePals_LG[] = {
+    {sLeaves_Pal,               PAL_TAG_DEFAULT},
+    {gTitleScreen_Slash_Pal_LG, PAL_TAG_SLASH},
     {}
 };
 
 static const u16 sStreakYPositions[] = {
     40, 80, 110, 60, 90, 70, 100, 50
 };
-#endif
 
 static const u32 sUnused_Tilemap1[] = INCBIN_U32("graphics/title_screen/unused1.bin.lz");
 static const u32 sUnused_Tilemap2[] = INCBIN_U32("graphics/title_screen/unused2.bin.lz");
@@ -364,20 +361,31 @@ void CB2_InitTitleScreen(void)
         sTitleScreenTimerTaskId = TASK_NONE;
         break;
     case 1:
-        LoadPalette(gGraphics_TitleScreen_GameTitleLogoPals, BG_PLTT_ID(0), 13 * PLTT_SIZE_4BPP);
-        DecompressAndCopyTileDataToVram(0, gGraphics_TitleScreen_GameTitleLogoTiles, 0, 0, 0);
-        DecompressAndCopyTileDataToVram(0, gGraphics_TitleScreen_GameTitleLogoMap, 0, 0, 1);
-        LoadPalette(gGraphics_TitleScreen_BoxArtMonPals, BG_PLTT_ID(13), PLTT_SIZE_4BPP);
-        DecompressAndCopyTileDataToVram(1, gGraphics_TitleScreen_BoxArtMonTiles, 0, 0, 0);
-        DecompressAndCopyTileDataToVram(1, gGraphics_TitleScreen_BoxArtMonMap, 0, 0, 1);
-        LoadPalette(gGraphics_TitleScreen_BackgroundPals, BG_PLTT_ID(15), PLTT_SIZE_4BPP);
+    {
+        bool8 isLG = IsLeafGreenVersion();
+        const u16 *titleLogoPals  = isLG ? gGraphics_TitleScreen_GameTitleLogoPals_LG  : gGraphics_TitleScreen_GameTitleLogoPals_FR;
+        const u8  *titleLogoTiles = isLG ? gGraphics_TitleScreen_GameTitleLogoTiles_LG : gGraphics_TitleScreen_GameTitleLogoTiles_FR;
+        const u8  *titleLogoMap   = isLG ? gGraphics_TitleScreen_GameTitleLogoMap_LG   : gGraphics_TitleScreen_GameTitleLogoMap_FR;
+        const u16 *boxMonPals     = isLG ? gGraphics_TitleScreen_BoxArtMonPals_LG      : gGraphics_TitleScreen_BoxArtMonPals_FR;
+        const u8  *boxMonTiles    = isLG ? gGraphics_TitleScreen_BoxArtMonTiles_LG     : gGraphics_TitleScreen_BoxArtMonTiles_FR;
+        const u8  *boxMonMap      = isLG ? gGraphics_TitleScreen_BoxArtMonMap_LG       : gGraphics_TitleScreen_BoxArtMonMap_FR;
+        const u16 *bgPals         = isLG ? gGraphics_TitleScreen_BackgroundPals_LG     : gGraphics_TitleScreen_BackgroundPals_FR;
+        const u8  *borderBgMap    = isLG ? sBorderBgMap_LG                             : sBorderBgMap_FR;
+        LoadPalette(titleLogoPals, BG_PLTT_ID(0), 13 * PLTT_SIZE_4BPP);
+        DecompressAndCopyTileDataToVram(0, titleLogoTiles, 0, 0, 0);
+        DecompressAndCopyTileDataToVram(0, titleLogoMap, 0, 0, 1);
+        LoadPalette(boxMonPals, BG_PLTT_ID(13), PLTT_SIZE_4BPP);
+        DecompressAndCopyTileDataToVram(1, boxMonTiles, 0, 0, 0);
+        DecompressAndCopyTileDataToVram(1, boxMonMap, 0, 0, 1);
+        LoadPalette(bgPals, BG_PLTT_ID(15), PLTT_SIZE_4BPP);
         DecompressAndCopyTileDataToVram(2, gGraphics_TitleScreen_CopyrightPressStartTiles, 0, 0, 0);
         DecompressAndCopyTileDataToVram(2, gGraphics_TitleScreen_CopyrightPressStartMap, 0, 0, 1);
-        LoadPalette(gGraphics_TitleScreen_BackgroundPals, BG_PLTT_ID(14), PLTT_SIZE_4BPP);
+        LoadPalette(bgPals, BG_PLTT_ID(14), PLTT_SIZE_4BPP);
         DecompressAndCopyTileDataToVram(3, sBorderBgTiles, 0, 0, 0);
-        DecompressAndCopyTileDataToVram(3, sBorderBgMap, 0, 0, 1);
+        DecompressAndCopyTileDataToVram(3, borderBgMap, 0, 0, 1);
         LoadSpriteGfxAndPals();
         break;
+    }
     case 2:
         if (!FreeTempTileDataBuffersIfPossible())
         {
@@ -593,7 +601,7 @@ static void SetTitleScreenScene_FadeIn(s16 *data)
             BlendPalettes(palettes, 16, RGB(30, 30, 31));
             BeginNormalPaletteFade(palettes, 1, 16, 0, RGB(30, 30, 31));
             ShowBg(0);
-            CpuCopy16(gGraphics_TitleScreen_BoxArtMonPals, &gPlttBufferUnfaded[BG_PLTT_ID(13)], PLTT_SIZE_4BPP);
+            CpuCopy16(IsLeafGreenVersion() ? gGraphics_TitleScreen_BoxArtMonPals_LG : gGraphics_TitleScreen_BoxArtMonPals_FR, &gPlttBufferUnfaded[BG_PLTT_ID(13)], PLTT_SIZE_4BPP);
             BlendPalettesGradually(1 << 13, 1, 15, 0, RGB(30, 30, 31), 0, 0);
             tState++;
         }
@@ -617,11 +625,10 @@ static void SetTitleScreenScene_Run(s16 *data)
     case 0:
         SetHelpContext(HELPCONTEXT_TITLE_SCREEN);
         CreateTask(Task_TitleScreen_BlinkPressStart, 0);
-#if defined(FIRERED)
-        CreateTask(Task_FlameSpawner, 5);
-#elif defined(LEAFGREEN)
-        CreateTask(Task_LeafSpawner, 5);
-#endif
+        if (IsLeafGreenVersion())
+            CreateTask(Task_LeafSpawner, 5);
+        else
+            CreateTask(Task_FlameSpawner, 5);
         SetGpuRegsForTitleScreenRun();
         tSlashSpriteId = CreateSlashSprite();
         HelpSystem_Enable();
@@ -728,6 +735,11 @@ static void SetTitleScreenScene_Cry(s16 *data)
     case 2:
         if (!gPaletteFade.active)
         {
+            // The version in RAM can differ from the save file: it is picked at random
+            // when there is no save, and the Key System menu changes it without saving.
+            // Reloading the save here would undo that, so keep it.
+            u8 activeVersion = gSaveBlock2Ptr->activeVersion;
+
             SeedRngAndSetTrainerId();
             SetSaveBlocksPointers();
             ResetMenuAndMonGlobals();
@@ -735,6 +747,7 @@ static void SetTitleScreenScene_Cry(s16 *data)
             LoadGameSave(SAVE_NORMAL);
             if (gSaveFileStatus == SAVE_STATUS_EMPTY || gSaveFileStatus == SAVE_STATUS_INVALID)
                 Sav2_ClearSetDefault();
+            SetActiveVersion(activeVersion);
             SetPokemonCryStereo(gSaveBlock2Ptr->optionsSound);
             InitHeap(gHeap, HEAP_SIZE);
             SetMainCallback2(CB2_InitMainMenu);
@@ -828,22 +841,25 @@ static void Task_TitleScreen_BlinkPressStart(u8 taskId)
         {
             data[0] = 0;
             data[1] ^= 1;
+            {
+            const u16 *bgPals = IsLeafGreenVersion() ? gGraphics_TitleScreen_BackgroundPals_LG : gGraphics_TitleScreen_BackgroundPals_FR;
             if (data[1])
             {
                 for (i = 0; i < 5; i++)
                 {
-                    gPlttBufferUnfaded[BG_PLTT_ID(15) + 1 + i] = gGraphics_TitleScreen_BackgroundPals[6];
-                    gPlttBufferFaded[BG_PLTT_ID(15) + 1 + i] = gGraphics_TitleScreen_BackgroundPals[6];
+                    gPlttBufferUnfaded[BG_PLTT_ID(15) + 1 + i] = bgPals[6];
+                    gPlttBufferFaded[BG_PLTT_ID(15) + 1 + i] = bgPals[6];
                 }
             }
             else
             {
                 for (i = 0; i < 5; i++)
                 {
-                    gPlttBufferUnfaded[BG_PLTT_ID(15) + 1 + i] = gGraphics_TitleScreen_BackgroundPals[1 + i];
-                    gPlttBufferFaded[BG_PLTT_ID(15) + 1 + i] = gGraphics_TitleScreen_BackgroundPals[1 + i];
+                    gPlttBufferUnfaded[BG_PLTT_ID(15) + 1 + i] = bgPals[1 + i];
+                    gPlttBufferFaded[BG_PLTT_ID(15) + 1 + i] = bgPals[1 + i];
                 }
             }
+        }
             if (data[14])
             {
                 BlendPalettes(0x00008000, gPaletteFade.y, gPaletteFade.blendColor);
@@ -899,6 +915,10 @@ static void ScheduleStopScanlineEffect(void)
 static void LoadMainTitleScreenPalsAndResetBgs(void)
 {
     u8 taskId;
+    bool8 isLG = IsLeafGreenVersion();
+    const u16 *titleLogoPals = isLG ? gGraphics_TitleScreen_GameTitleLogoPals_LG : gGraphics_TitleScreen_GameTitleLogoPals_FR;
+    const u16 *boxMonPals    = isLG ? gGraphics_TitleScreen_BoxArtMonPals_LG     : gGraphics_TitleScreen_BoxArtMonPals_FR;
+    const u16 *bgPals        = isLG ? gGraphics_TitleScreen_BackgroundPals_LG    : gGraphics_TitleScreen_BackgroundPals_FR;
 
     taskId = FindTaskIdByFunc(Task_TitleScreen_SlideWin0);
     if (taskId != TASK_NONE)
@@ -906,10 +926,10 @@ static void LoadMainTitleScreenPalsAndResetBgs(void)
 
     DestroyBlendPalettesGraduallyTask();
     ResetPaletteFadeControl();
-    LoadPalette(gGraphics_TitleScreen_GameTitleLogoPals, BG_PLTT_ID(0), 13 * PLTT_SIZE_4BPP);
-    LoadPalette(gGraphics_TitleScreen_BoxArtMonPals, BG_PLTT_ID(13), PLTT_SIZE_4BPP);
-    LoadPalette(gGraphics_TitleScreen_BackgroundPals, BG_PLTT_ID(15), PLTT_SIZE_4BPP);
-    LoadPalette(gGraphics_TitleScreen_BackgroundPals, BG_PLTT_ID(14), PLTT_SIZE_4BPP);
+    LoadPalette(titleLogoPals, BG_PLTT_ID(0), 13 * PLTT_SIZE_4BPP);
+    LoadPalette(boxMonPals,    BG_PLTT_ID(13), PLTT_SIZE_4BPP);
+    LoadPalette(bgPals,        BG_PLTT_ID(15), PLTT_SIZE_4BPP);
+    LoadPalette(bgPals,        BG_PLTT_ID(14), PLTT_SIZE_4BPP);
     ResetBgPositions();
     ClearGpuRegBits(REG_OFFSET_DISPCNT, DISPCNT_WIN0_ON | DISPCNT_WIN1_ON | DISPCNT_OBJWIN_ON);
     ShowBg(1);
@@ -936,13 +956,14 @@ static void CB2_FadeOutTransitionToBerryFix(void)
 static void LoadSpriteGfxAndPals(void)
 {
     s32 i;
+    bool8 isLG = IsLeafGreenVersion();
+    const struct CompressedSpriteSheet *sheets = isLG ? sSpriteSheets_LG : sSpriteSheets_FR;
+    const struct SpritePalette         *pals   = isLG ? sSpritePals_LG   : sSpritePals_FR;
 
-    for (i = 0; i < NELEMS(sSpriteSheets); i++)
-        LoadCompressedSpriteSheet(&sSpriteSheets[i]);
-    LoadSpritePalettes(sSpritePals);
+    for (i = 0; i < 4; i++)
+        LoadCompressedSpriteSheet(&sheets[i]);
+    LoadSpritePalettes(pals);
 }
-
-#if defined(FIRERED)
 
 #define sPosX      data[0]
 #define sSpeedX    data[1]
@@ -982,7 +1003,7 @@ static bool32 CreateFlameSprite(s32 x, s32 y, s32 xspeed, s32 yspeed, bool32 cre
 {
     u8 spriteId;
     if (createFlame)
-        spriteId = CreateSprite(&sSpriteTemplate_FlameOrLeaf, x, y, 0);
+        spriteId = CreateSprite(&sSpriteTemplate_Flame, x, y, 0);
     else
         spriteId = CreateSprite(&sSpriteTemplate_BlankFlame, x, y, 0);
 
@@ -1067,8 +1088,6 @@ static void Task_FlameSpawner(u8 taskId)
 #undef tOff_Seed
 #undef tOffsetX
 
-#elif defined(LEAFGREEN)
-
 #define sPosX        data[0]
 #define sSpeedX      data[1]
 #define sPosY        data[2]
@@ -1107,7 +1126,7 @@ static void SpriteCallback_TitleScreenLeaf(struct Sprite *sprite)
 
 static void CreateLeafSprite(s32 y, s32 xspeed, s32 yspeed)
 {
-    u8 spriteId = CreateSprite(&sSpriteTemplate_FlameOrLeaf, DISPLAY_WIDTH, y, 0);
+    u8 spriteId = CreateSprite(&sSpriteTemplate_Leaf, DISPLAY_WIDTH, y, 0);
     if (spriteId != MAX_SPRITES)
     {
         gSprites[spriteId].sPosX = DISPLAY_WIDTH * 16;
@@ -1198,8 +1217,6 @@ static void Task_LeafSpawner(u8 taskId)
 #undef tData2
 #undef tData3And4
 
-#endif //FRLG
-
 static void TitleScreen_srand(u8 taskId, u8 field, u16 seed)
 {
     SetWordTaskArg(taskId, field, seed);
@@ -1228,7 +1245,7 @@ static void SetPalOnOrCreateBlankSprite(bool32 hasCreatedBlankSprite)
     if (hasCreatedBlankSprite)
     {
         palIdx = IndexOfSpritePaletteTag(PAL_TAG_SLASH);
-        LoadPalette(gTitleScreen_Slash_Pal, OBJ_PLTT_ID(palIdx), PLTT_SIZE_4BPP);
+        LoadPalette(IsLeafGreenVersion() ? gTitleScreen_Slash_Pal_LG : gTitleScreen_Slash_Pal_FR, OBJ_PLTT_ID(palIdx), PLTT_SIZE_4BPP);
     }
     else
         CreateBlankSprite();

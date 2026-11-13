@@ -13,6 +13,7 @@
 #include "script.h"
 #include "link.h"
 #include "quest_log.h"
+#include "load_save.h"
 #include "constants/maps.h"
 #include "constants/abilities.h"
 #include "constants/items.h"
@@ -173,6 +174,17 @@ static u8 ChooseWildMonLevel(const struct WildPokemon * info)
     return lo + res;
 }
 
+// Both versions' tables are in the ROM. A header only counts if it
+// belongs to the version the player is currently playing.
+bool8 IsWildMonHeaderForActiveVersion(const struct WildPokemonHeader *header)
+{
+    if (header->version == WILD_VERSION_BOTH)
+        return TRUE;
+    if (IsLeafGreenVersion())
+        return header->version == WILD_VERSION_LEAFGREEN;
+    return header->version == WILD_VERSION_FIRERED;
+}
+
 static u16 GetCurrentMapWildMonHeaderId(void)
 {
     u16 i;
@@ -184,7 +196,8 @@ static u16 GetCurrentMapWildMonHeaderId(void)
             break;
 
         if (gWildMonHeaders[i].mapGroup == gSaveBlock1Ptr->location.mapGroup &&
-            gWildMonHeaders[i].mapNum == gSaveBlock1Ptr->location.mapNum)
+            gWildMonHeaders[i].mapNum == gSaveBlock1Ptr->location.mapNum &&
+            IsWildMonHeaderForActiveVersion(wildHeader))
         {
             if (gSaveBlock1Ptr->location.mapGroup == MAP_GROUP(MAP_SIX_ISLAND_ALTERING_CAVE) &&
                 gSaveBlock1Ptr->location.mapNum == MAP_NUM(MAP_SIX_ISLAND_ALTERING_CAVE))
@@ -193,6 +206,8 @@ static u16 GetCurrentMapWildMonHeaderId(void)
                 if (alteringCaveId >= NUM_ALTERING_CAVE_TABLES)
                     alteringCaveId = 0;
 
+                // The 9 Altering Cave tables of each version are consecutive in
+                // wild_encounters.json, so the offset stays inside the same version.
                 i += alteringCaveId;
             }
 

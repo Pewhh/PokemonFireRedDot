@@ -1,3 +1,7 @@
+// Both versions' in-game trades are in the ROM.
+// sInGameTrades holds the FireRed trades (and the ones shared by both versions).
+// sInGameTrades_LeafGreen only lists the trades that are different in LeafGreen;
+// GetInGameTrade() in trade_scene.c picks the right one for the active version.
 static const struct InGameTrade sInGameTrades[] = {
     [INGAME_TRADE_MR_MIME] = 
     {
@@ -17,7 +21,6 @@ static const struct InGameTrade sInGameTrades[] = {
     }, 
     [INGAME_TRADE_SLOWPOKEPSYDUCK] = 
     {
-#if defined(FIRERED)
         .nickname = _("POWLKE"),
         .species = SPECIES_SLOWPOKE,
         .ivs = {21, 25, 22, 18, 18, 17},
@@ -31,25 +34,9 @@ static const struct InGameTrade sInGameTrades[] = {
         .otGender = MALE,
         .sheen = 10,
         .requestedSpecies = SPECIES_POLIWHIRL
-#elif defined(LEAFGREEN)
-        .nickname = _("DUCKY"),
-        .species = SPECIES_PSYDUCK,
-        .ivs = {18, 21, 17, 25, 18, 22},
-        .abilityNum = 0,
-        .otId = 36728,
-        .conditions = {5, 5, 30, 5, 5},
-        .personality = 0x498a2e1d,
-        .heldItem = ITEM_FAB_MAIL,
-        .mailNum = 0,
-        .otName = _("DONTAE"),
-        .otGender = MALE,
-        .sheen = 10,
-        .requestedSpecies = SPECIES_POLIWHIRL
-#endif
     }, 
     [INGAME_TRADE_NIDORAN] = 
     {
-#if defined(FIRERED)
         .nickname = _("MS. NIDO"),
         .species = SPECIES_NIDORAN_F,
         .ivs = {22, 18, 25, 19, 15, 22},
@@ -63,21 +50,6 @@ static const struct InGameTrade sInGameTrades[] = {
         .otGender = FEMALE,
         .sheen = 10,
         .requestedSpecies = SPECIES_NIDORAN_M
-#elif defined(LEAFGREEN)
-        .nickname = _("MR. NIDO"),
-        .species = SPECIES_NIDORAN_M,
-        .ivs = {19, 25, 18, 22, 22, 15},
-        .abilityNum = 0,
-        .otId = 63184,
-        .conditions = {30, 5, 5, 5, 5},
-        .personality = 0x4c970b9e,
-        .heldItem = ITEM_TINY_MUSHROOM,
-        .mailNum = 255,
-        .otName = _("SAIGE"),
-        .otGender = FEMALE,
-        .sheen = 10,
-        .requestedSpecies = SPECIES_NIDORAN_F
-#endif
     }, 
     [INGAME_TRADE_FARFETCHD] = 
     {
@@ -97,7 +69,6 @@ static const struct InGameTrade sInGameTrades[] = {
     }, 
     [INGAME_TRADE_NIDORINOA] = 
     {
-#if defined(FIRERED)
         .nickname = _("NINA"),
         .species = SPECIES_NIDORINA,
         .ivs = {22, 25, 18, 19, 22, 15},
@@ -111,21 +82,6 @@ static const struct InGameTrade sInGameTrades[] = {
         .otGender = MALE,
         .sheen = 10,
         .requestedSpecies = SPECIES_NIDORINO
-#elif defined(LEAFGREEN)
-        .nickname = _("NINO"),
-        .species = SPECIES_NIDORINO,
-        .ivs = {19, 18, 25, 22, 15, 22},
-        .abilityNum = 0,
-        .otId = 13637,
-        .conditions = {5, 5, 5, 5, 30},
-        .personality = 0x00eeca19,
-        .heldItem = ITEM_NONE,
-        .mailNum = 255,
-        .otName = _("TURNER"),
-        .otGender = MALE,
-        .sheen = 10,
-        .requestedSpecies = SPECIES_NIDORINA
-#endif
     }, 
     [INGAME_TRADE_LICKITUNG] = 
     {
@@ -141,11 +97,7 @@ static const struct InGameTrade sInGameTrades[] = {
         .otName = _("HADEN"),
         .otGender = MALE,
         .sheen = 10,
-#if defined(FIRERED)
         .requestedSpecies = SPECIES_GOLDUCK
-#elif defined(LEAFGREEN)
-        .requestedSpecies = SPECIES_SLOWBRO
-#endif
     }, 
     [INGAME_TRADE_ELECTRODE] = 
     {
@@ -195,6 +147,74 @@ static const struct InGameTrade sInGameTrades[] = {
         .sheen = 10,
         .requestedSpecies = SPECIES_PONYTA
     }
+};
+
+// Entries left out here have .species == SPECIES_NONE, meaning "same as FireRed".
+static const struct InGameTrade sInGameTrades_LeafGreen[] = {
+    [INGAME_TRADE_SLOWPOKEPSYDUCK] = 
+    {
+        .nickname = _("DUCKY"),
+        .species = SPECIES_PSYDUCK,
+        .ivs = {18, 21, 17, 25, 18, 22},
+        .abilityNum = 0,
+        .otId = 36728,
+        .conditions = {5, 5, 30, 5, 5},
+        .personality = 0x498a2e1d,
+        .heldItem = ITEM_FAB_MAIL,
+        .mailNum = 0,
+        .otName = _("DONTAE"),
+        .otGender = MALE,
+        .sheen = 10,
+        .requestedSpecies = SPECIES_POLIWHIRL
+    },
+    [INGAME_TRADE_NIDORAN] = 
+    {
+        .nickname = _("MR. NIDO"),
+        .species = SPECIES_NIDORAN_M,
+        .ivs = {19, 25, 18, 22, 22, 15},
+        .abilityNum = 0,
+        .otId = 63184,
+        .conditions = {30, 5, 5, 5, 5},
+        .personality = 0x4c970b9e,
+        .heldItem = ITEM_TINY_MUSHROOM,
+        .mailNum = 255,
+        .otName = _("SAIGE"),
+        .otGender = FEMALE,
+        .sheen = 10,
+        .requestedSpecies = SPECIES_NIDORAN_F
+    },
+    [INGAME_TRADE_NIDORINOA] = 
+    {
+        .nickname = _("NINO"),
+        .species = SPECIES_NIDORINO,
+        .ivs = {19, 18, 25, 22, 15, 22},
+        .abilityNum = 0,
+        .otId = 13637,
+        .conditions = {5, 5, 5, 5, 30},
+        .personality = 0x00eeca19,
+        .heldItem = ITEM_NONE,
+        .mailNum = 255,
+        .otName = _("TURNER"),
+        .otGender = MALE,
+        .sheen = 10,
+        .requestedSpecies = SPECIES_NIDORINA
+    },
+    [INGAME_TRADE_LICKITUNG] = 
+    {
+        .nickname = _("MARC"),
+        .species = SPECIES_LICKITUNG,
+        .ivs = {24, 19, 21, 15, 23, 21},
+        .abilityNum = 0,
+        .otId = 1239,
+        .conditions = {5, 5, 5, 5, 30},
+        .personality = 0x451308ab,
+        .heldItem = ITEM_NONE,
+        .mailNum = 255,
+        .otName = _("HADEN"),
+        .otGender = MALE,
+        .sheen = 10,
+        .requestedSpecies = SPECIES_SLOWBRO
+    },
 };
 
 static const u16 sInGameTradeMailMessages[][10] = {

@@ -11,6 +11,7 @@
 #include "random.h"
 #include "trig.h"
 #include "strings.h"
+#include "load_save.h"
 #include "constants/songs.h"
 
 #define NUM_REELS 3
@@ -395,39 +396,54 @@ static const u16 sPayoutTable[] = {
     [PAYOUT_7]         = 300
 };
 
-#if defined(FIRERED)
-static const u16 sReelIcons_Pal[][16] = INCBIN_U16("graphics/slot_machine/firered/reel_icons.gbapal");
-static const u32 sReelIcons_Tiles[]   = INCBIN_U32("graphics/slot_machine/firered/reel_icons.4bpp.lz");
-static const u16 sClefairy_Pal[]      = INCBIN_U16("graphics/slot_machine/firered/clefairy.gbapal");
-static const u32 sClefairy_Tiles[]    = INCBIN_U32("graphics/slot_machine/firered/clefairy.4bpp.lz");
-#elif defined(LEAFGREEN)
-static const u16 sReelIcons_Pal[][16] = INCBIN_U16("graphics/slot_machine/leafgreen/reel_icons.gbapal");
-static const u32 sReelIcons_Tiles[]   = INCBIN_U32("graphics/slot_machine/leafgreen/reel_icons.4bpp.lz");
-static const u16 sClefairy_Pal[]      = INCBIN_U16("graphics/slot_machine/leafgreen/clefairy.gbapal");
-static const u32 sClefairy_Tiles[]    = INCBIN_U32("graphics/slot_machine/leafgreen/clefairy.4bpp.lz");
-#endif
+// FireRed graphics
+static const u16 sReelIcons_Pal_FR[][16] = INCBIN_U16("graphics/slot_machine/firered/reel_icons.gbapal");
+static const u32 sReelIcons_Tiles_FR[]   = INCBIN_U32("graphics/slot_machine/firered/reel_icons.4bpp.lz");
+static const u16 sClefairy_Pal_FR[]      = INCBIN_U16("graphics/slot_machine/firered/clefairy.gbapal");
+static const u32 sClefairy_Tiles_FR[]    = INCBIN_U32("graphics/slot_machine/firered/clefairy.4bpp.lz");
+// LeafGreen graphics
+static const u16 sReelIcons_Pal_LG[][16] = INCBIN_U16("graphics/slot_machine/leafgreen/reel_icons.gbapal");
+static const u32 sReelIcons_Tiles_LG[]   = INCBIN_U32("graphics/slot_machine/leafgreen/reel_icons.4bpp.lz");
+static const u16 sClefairy_Pal_LG[]      = INCBIN_U16("graphics/slot_machine/leafgreen/clefairy.gbapal");
+static const u32 sClefairy_Tiles_LG[]    = INCBIN_U32("graphics/slot_machine/leafgreen/clefairy.4bpp.lz");
 static const u16 sDigits_Pal[]        = INCBIN_U16("graphics/slot_machine/digits.gbapal");
 static const u32 sDigits_Tiles[]      = INCBIN_U32("graphics/slot_machine/digits.4bpp.lz");
 
-static const struct CompressedSpriteSheet sSpriteSheets[] = {
-    {.data = sReelIcons_Tiles, .size = 0xe00, .tag = GFXTAG_REEL_ICONS},
-    {.data = sClefairy_Tiles,  .size = 0xc00, .tag = GFXTAG_CLEFAIRY},
+static const struct CompressedSpriteSheet sSpriteSheets_FR[] = {
+    {.data = sReelIcons_Tiles_FR, .size = 0xe00, .tag = GFXTAG_REEL_ICONS},
+    {.data = sClefairy_Tiles_FR,  .size = 0xc00, .tag = GFXTAG_CLEFAIRY},
     {.data = sDigits_Tiles,    .size = 0x280, .tag = GFXTAG_DIGITS},
 };
 
-static const struct SpritePalette sSpritePalettes[] = {
-    {.data = sReelIcons_Pal[0], .tag = PALTAG_REEL_ICONS_0},
-    {.data = sReelIcons_Pal[1], .tag = PALTAG_REEL_ICONS_1},
-    {.data = sReelIcons_Pal[2], .tag = PALTAG_REEL_ICONS_2},
-    {.data = sReelIcons_Pal[3], .tag = PALTAG_REEL_ICONS_3},
-    {.data = sReelIcons_Pal[4], .tag = PALTAG_REEL_ICONS_4},
-    {.data = sClefairy_Pal,     .tag = PALTAG_CLEFAIRY},
+static const struct SpritePalette sSpritePalettes_FR[] = {
+    {.data = sReelIcons_Pal_FR[0], .tag = PALTAG_REEL_ICONS_0},
+    {.data = sReelIcons_Pal_FR[1], .tag = PALTAG_REEL_ICONS_1},
+    {.data = sReelIcons_Pal_FR[2], .tag = PALTAG_REEL_ICONS_2},
+    {.data = sReelIcons_Pal_FR[3], .tag = PALTAG_REEL_ICONS_3},
+    {.data = sReelIcons_Pal_FR[4], .tag = PALTAG_REEL_ICONS_4},
+    {.data = sClefairy_Pal_FR,     .tag = PALTAG_CLEFAIRY},
     {.data = sDigits_Pal,       .tag = PALTAG_DIGITS},
     {}
 };
 
-static const u16 sReelIconPaletteTags[] = {
-#if defined(FIRERED)
+static const struct CompressedSpriteSheet sSpriteSheets_LG[] = {
+    {.data = sReelIcons_Tiles_LG, .size = 0xe00, .tag = GFXTAG_REEL_ICONS},
+    {.data = sClefairy_Tiles_LG,  .size = 0xc00, .tag = GFXTAG_CLEFAIRY},
+    {.data = sDigits_Tiles,    .size = 0x280, .tag = GFXTAG_DIGITS},
+};
+
+static const struct SpritePalette sSpritePalettes_LG[] = {
+    {.data = sReelIcons_Pal_LG[0], .tag = PALTAG_REEL_ICONS_0},
+    {.data = sReelIcons_Pal_LG[1], .tag = PALTAG_REEL_ICONS_1},
+    {.data = sReelIcons_Pal_LG[2], .tag = PALTAG_REEL_ICONS_2},
+    {.data = sReelIcons_Pal_LG[3], .tag = PALTAG_REEL_ICONS_3},
+    {.data = sReelIcons_Pal_LG[4], .tag = PALTAG_REEL_ICONS_4},
+    {.data = sClefairy_Pal_LG,     .tag = PALTAG_CLEFAIRY},
+    {.data = sDigits_Pal,       .tag = PALTAG_DIGITS},
+    {}
+};
+
+static const u16 sReelIconPaletteTags_FR[] = {
     [ICON_7]         = PALTAG_REEL_ICONS_2,
     [ICON_ROCKET]    = PALTAG_REEL_ICONS_2,
     [ICON_PIKACHU]   = PALTAG_REEL_ICONS_0,
@@ -435,7 +451,9 @@ static const u16 sReelIconPaletteTags[] = {
     [ICON_CHERRIES]  = PALTAG_REEL_ICONS_2,
     [ICON_MAGNEMITE] = PALTAG_REEL_ICONS_4,
     [ICON_SHELLDER]  = PALTAG_REEL_ICONS_3,
-#elif defined(LEAFGREEN)
+};
+
+static const u16 sReelIconPaletteTags_LG[] = {
     [ICON_7]         = PALTAG_REEL_ICONS_2,
     [ICON_ROCKET]    = PALTAG_REEL_ICONS_2,
     [ICON_PIKACHU]   = PALTAG_REEL_ICONS_0,
@@ -443,8 +461,10 @@ static const u16 sReelIconPaletteTags[] = {
     [ICON_CHERRIES]  = PALTAG_REEL_ICONS_2,
     [ICON_MAGNEMITE] = PALTAG_REEL_ICONS_1,
     [ICON_SHELLDER]  = PALTAG_REEL_ICONS_1,
-#endif
 };
+
+// Both versions' slot machine graphics are in the ROM; pick by active version.
+#define SLOT_GFX(name) (IsLeafGreenVersion() ? name##_LG : name##_FR)
 
 static const u16 sReelIconAffineParams[] = {
     0x0120, 0x011f, 0x011e, 0x011d, 0x011c, 0x011b, 0x011a, 0x0119, 0x0118, 0x0117, 0x0116, 0x0115, 0x0114, 0x0113, 0x0112, 0x0111,
@@ -735,27 +755,26 @@ bool8 (*const sSlotMachineSetupTasks[])(u8 *, struct SlotMachineSetupTaskData *)
     [SLOTTASK_HIDEHELP] = SlotsTask_HideHelp
 };
 
-#if defined(FIRERED)
-static const u16 sBg_Pal[][16]             = INCBIN_U16("graphics/slot_machine/firered/bg.gbapal");
-static const u32 sBg_Tiles[]               = INCBIN_U32("graphics/slot_machine/firered/bg.4bpp.lz");
-static const u32 sBg_Tilemap[]             = INCBIN_U32("graphics/slot_machine/firered/bg.bin.lz");
-static const u16 sBgPal_MatchLines[]       = INCBIN_U16("graphics/slot_machine/firered/match_lines.gbapal");
-static const u16 sBgPal_PayoutLight[][16]  = INCBIN_U16("graphics/slot_machine/firered/payout_lights.gbapal");
-static const u32 sButtonPressed_Tiles[]    = INCBIN_U32("graphics/slot_machine/firered/button_pressed.4bpp.lz");
-static const u16 sCombosWindow_Pal[]       = INCBIN_U16("graphics/slot_machine/firered/combos_window.gbapal");
-static const u32 sCombosWindow_Tiles[]     = INCBIN_U32("graphics/slot_machine/firered/combos_window.4bpp.lz");
-static const u32 sCombosWindow_Tilemap[]   = INCBIN_U32("graphics/slot_machine/firered/combos_window.bin.lz");
-#elif defined(LEAFGREEN)
-static const u16 sBg_Pal[][16]             = INCBIN_U16("graphics/slot_machine/leafgreen/bg.gbapal");
-static const u32 sBg_Tiles[]               = INCBIN_U32("graphics/slot_machine/leafgreen/bg.4bpp.lz");
-static const u32 sBg_Tilemap[]             = INCBIN_U32("graphics/slot_machine/leafgreen/bg.bin.lz");
-static const u16 sBgPal_MatchLines[]       = INCBIN_U16("graphics/slot_machine/leafgreen/match_lines.gbapal");
-static const u16 sBgPal_PayoutLight[][16]  = INCBIN_U16("graphics/slot_machine/leafgreen/payout_lights.gbapal");
-static const u32 sButtonPressed_Tiles[]    = INCBIN_U32("graphics/slot_machine/leafgreen/button_pressed.4bpp.lz");
-static const u16 sCombosWindow_Pal[]       = INCBIN_U16("graphics/slot_machine/leafgreen/combos_window.gbapal");
-static const u32 sCombosWindow_Tiles[]     = INCBIN_U32("graphics/slot_machine/leafgreen/combos_window.4bpp.lz");
-static const u32 sCombosWindow_Tilemap[]   = INCBIN_U32("graphics/slot_machine/leafgreen/combos_window.bin.lz");
-#endif
+// FireRed graphics
+static const u16 sBg_Pal_FR[][16]             = INCBIN_U16("graphics/slot_machine/firered/bg.gbapal");
+static const u32 sBg_Tiles_FR[]               = INCBIN_U32("graphics/slot_machine/firered/bg.4bpp.lz");
+static const u32 sBg_Tilemap_FR[]             = INCBIN_U32("graphics/slot_machine/firered/bg.bin.lz");
+static const u16 sBgPal_MatchLines_FR[]       = INCBIN_U16("graphics/slot_machine/firered/match_lines.gbapal");
+static const u16 sBgPal_PayoutLight_FR[][16]  = INCBIN_U16("graphics/slot_machine/firered/payout_lights.gbapal");
+static const u32 sButtonPressed_Tiles_FR[]    = INCBIN_U32("graphics/slot_machine/firered/button_pressed.4bpp.lz");
+static const u16 sCombosWindow_Pal_FR[]       = INCBIN_U16("graphics/slot_machine/firered/combos_window.gbapal");
+static const u32 sCombosWindow_Tiles_FR[]     = INCBIN_U32("graphics/slot_machine/firered/combos_window.4bpp.lz");
+static const u32 sCombosWindow_Tilemap_FR[]   = INCBIN_U32("graphics/slot_machine/firered/combos_window.bin.lz");
+// LeafGreen graphics
+static const u16 sBg_Pal_LG[][16]             = INCBIN_U16("graphics/slot_machine/leafgreen/bg.gbapal");
+static const u32 sBg_Tiles_LG[]               = INCBIN_U32("graphics/slot_machine/leafgreen/bg.4bpp.lz");
+static const u32 sBg_Tilemap_LG[]             = INCBIN_U32("graphics/slot_machine/leafgreen/bg.bin.lz");
+static const u16 sBgPal_MatchLines_LG[]       = INCBIN_U16("graphics/slot_machine/leafgreen/match_lines.gbapal");
+static const u16 sBgPal_PayoutLight_LG[][16]  = INCBIN_U16("graphics/slot_machine/leafgreen/payout_lights.gbapal");
+static const u32 sButtonPressed_Tiles_LG[]    = INCBIN_U32("graphics/slot_machine/leafgreen/button_pressed.4bpp.lz");
+static const u16 sCombosWindow_Pal_LG[]       = INCBIN_U16("graphics/slot_machine/leafgreen/combos_window.gbapal");
+static const u32 sCombosWindow_Tiles_LG[]     = INCBIN_U32("graphics/slot_machine/leafgreen/combos_window.4bpp.lz");
+static const u32 sCombosWindow_Tilemap_LG[]   = INCBIN_U32("graphics/slot_machine/leafgreen/combos_window.bin.lz");
 
 static const struct BgTemplate sBgTemplates[] = {
     {
@@ -1782,9 +1801,9 @@ static bool32 LoadSpriteGraphicsAndAllocateManager(void)
 {
     s32 i;
 
-    for (i = 0; i < ARRAY_COUNT(sSpriteSheets); i++)
-        LoadCompressedSpriteSheet(&sSpriteSheets[i]);
-    LoadSpritePalettes(sSpritePalettes);
+    for (i = 0; i < ARRAY_COUNT(sSpriteSheets_FR); i++)
+        LoadCompressedSpriteSheet(&SLOT_GFX(sSpriteSheets)[i]);
+    LoadSpritePalettes(SLOT_GFX(sSpritePalettes));
     sSlotMachineGfxManager = Alloc(sizeof(*sSlotMachineGfxManager));
     if (sSlotMachineGfxManager == NULL)
         return FALSE;
@@ -1827,7 +1846,7 @@ static void CreateReelIconSprites(void)
             animId =  sReelIconAnimByReelAndPos[i][j];
             sprite = &gSprites[spriteId];
             StartSpriteAnim(sprite, animId);
-            sprite->oam.paletteNum = IndexOfSpritePaletteTag(sReelIconPaletteTags[animId]);
+            sprite->oam.paletteNum = IndexOfSpritePaletteTag(SLOT_GFX(sReelIconPaletteTags)[animId]);
             sprite->data[0] = i;
             sprite->data[1] = j;
             sprite->data[2] = j;
@@ -1861,7 +1880,7 @@ static void UpdateReelIconSprites(const s16 * reelPosPtr, const s16 * yposPtr)
                 struct Sprite *sprite = sSlotMachineGfxManager->reelIconSprites[i][j];
                 StartSpriteAnim(sprite, animId);
             }
-            sSlotMachineGfxManager->reelIconSprites[i][j]->oam.paletteNum = IndexOfSpritePaletteTag(sReelIconPaletteTags[sReelIconAnimByReelAndPos[i][reelPos]]);
+            sSlotMachineGfxManager->reelIconSprites[i][j]->oam.paletteNum = IndexOfSpritePaletteTag(SLOT_GFX(sReelIconPaletteTags)[sReelIconAnimByReelAndPos[i][reelPos]]);
             reelPos++;
             if (reelPos >= REEL_LENGTH)
                 reelPos = 0;
@@ -2034,22 +2053,22 @@ static bool8 SlotsTask_GraphicsInit(u8 * state, struct SlotMachineSetupTaskData 
         CopyBgTilemapBufferToVram(3);
 
         ResetTempTileDataBuffers();
-        DecompressAndCopyTileDataToVram(2, sBg_Tiles, 0, 0x00, 0);
-        DecompressAndCopyTileDataToVram(2, sButtonPressed_Tiles, 0, 0xC0, 0);
+        DecompressAndCopyTileDataToVram(2, SLOT_GFX(sBg_Tiles), 0, 0x00, 0);
+        DecompressAndCopyTileDataToVram(2, SLOT_GFX(sButtonPressed_Tiles), 0, 0xC0, 0);
         SetBgTilemapBuffer(2, ptr->bg2TilemapBuffer);
-        CopyToBgTilemapBuffer(2, sBg_Tilemap, 0, 0x00);
+        CopyToBgTilemapBuffer(2, SLOT_GFX(sBg_Tilemap), 0, 0x00);
         CopyBgTilemapBufferToVram(2);
-        LoadPalette(sBg_Pal, BG_PLTT_ID(0), sizeof(sBg_Pal));
-        LoadPalette(sBgPal_MatchLines, BG_PLTT_ID(PALSLOT_LINE_BET), sizeof(sBgPal_MatchLines));
-        LoadPalette(sCombosWindow_Pal, BG_PLTT_ID(7), sizeof(sCombosWindow_Pal));
+        LoadPalette(SLOT_GFX(sBg_Pal), BG_PLTT_ID(0), sizeof(sBg_Pal_FR));
+        LoadPalette(SLOT_GFX(sBgPal_MatchLines), BG_PLTT_ID(PALSLOT_LINE_BET), sizeof(sBgPal_MatchLines_FR));
+        LoadPalette(SLOT_GFX(sCombosWindow_Pal), BG_PLTT_ID(7), sizeof(sCombosWindow_Pal_FR));
         SetBackdropColor(RGB(30, 30, 31), pal);
         LoadUserWindowGfx2(0, 0x00A, BG_PLTT_ID(13));
         LoadStdWindowGfxOnBg(0, 0x001, BG_PLTT_ID(15));
 
         SetBgTilemapBuffer(0, ptr->bg0TilemapBuffer);
         FillBgTilemapBufferRect_Palette0(0, 0, 0, 2, 32, 30);
-        DecompressAndCopyTileDataToVram(1, sCombosWindow_Tiles, 0, 0, 0);
-        DecompressAndCopyTileDataToVram(1, sCombosWindow_Tilemap, 0, 0, 1);
+        DecompressAndCopyTileDataToVram(1, SLOT_GFX(sCombosWindow_Tiles), 0, 0, 0);
+        DecompressAndCopyTileDataToVram(1, SLOT_GFX(sCombosWindow_Tilemap), 0, 0, 1);
         CopyBgTilemapBufferToVram(1);
 
         LoadPalette(GetTextWindowPalette(2), BG_PLTT_ID(14), PLTT_SIZE_4BPP);
@@ -2386,7 +2405,7 @@ static void Task_FlashWinningLine(u8 taskId)
     switch (data[0])
     {
     case 0:
-        LoadPalette(sBgPal_MatchLines, BG_PLTT_ID(PALSLOT_LINE_MATCH), sizeof(sBgPal_MatchLines));
+        LoadPalette(SLOT_GFX(sBgPal_MatchLines), BG_PLTT_ID(PALSLOT_LINE_MATCH), sizeof(sBgPal_MatchLines_FR));
         for (i = 0; i < NUM_MATCH_LINES; i++)
         {
             if (GetWinFlagByLine(i))
@@ -2399,7 +2418,7 @@ static void Task_FlashWinningLine(u8 taskId)
         if (data[1] == 0)
         {
             u16 y = gSineTable[data[2]] >> 7;
-            LoadPalette(&sBgPal_PayoutLight[y], BG_PLTT_ID(1), sizeof(sBgPal_PayoutLight[0]));
+            LoadPalette(&SLOT_GFX(sBgPal_PayoutLight)[y], BG_PLTT_ID(1), sizeof(sBgPal_PayoutLight_FR[0]));
             data[2] += 32;
             data[2] &= 0x7F;
             data[1] = 8;
@@ -2438,7 +2457,7 @@ static void Task_FlashWinningLine(u8 taskId)
         }
         
         // Restore payout lights to normal color
-        LoadPalette(&sBg_Pal[1], BG_PLTT_ID(1), sizeof(sBg_Pal[1]));
+        LoadPalette(&SLOT_GFX(sBg_Pal)[1], BG_PLTT_ID(1), sizeof(sBg_Pal_FR[1]));
 
         CopyBgTilemapBufferToVram(2);
         data[0]++;

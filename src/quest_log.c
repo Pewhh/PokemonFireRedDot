@@ -1,4 +1,5 @@
 #include "global.h"
+#include "load_save.h"
 #include "gflib.h"
 #include "task.h"
 #include "menu.h"
@@ -832,9 +833,14 @@ static void QuestLog_AdvancePlayhead(void)
 
 static void QuestLog_StartFinalScene(void)
 {
+    // The version may have been changed in the Key System menu before
+    // pressing CONTINUE. Reloading the save here would undo that, so keep it.
+    u8 activeVersion = gSaveBlock2Ptr->activeVersion;
+
     ResetSpecialVars();
     Save_ResetSaveCounters();
     LoadGameSave(SAVE_NORMAL);
+    SetActiveVersion(activeVersion);
     SetMainCallback2(CB2_EnterFieldFromQuestLog);
     gFieldCallback2 = FieldCB2_FinalScene;
     FreeAllWindowBuffers();

@@ -35,4 +35,8 @@ void SetContinueGameWarpStatus(void);
 bool32 UseContinueGameWarp(void);
 void ClearContinueGameWarpStatus();
 
+// Version switching support
+bool8 IsLeafGreenVersion(void);
+void SetActiveVersion(u8 version);
+
 #endif // GUARD_LOAD_SAVE_H

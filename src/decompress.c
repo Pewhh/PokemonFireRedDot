@@ -2,11 +2,27 @@
 #include "gflib.h"
 #include "decompress.h"
 #include "pokemon.h"
+#include "graphics.h"
+#include "load_save.h"
 
 extern const struct CompressedSpriteSheet gMonFrontPicTable[];
 extern const struct CompressedSpriteSheet gMonBackPicTable[];
 
 static void DuplicateDeoxysTiles(void *pointer, s32 species);
+
+// The pic tables point at FireRed's Deoxys (Attack Forme).
+// When playing LeafGreen, use the Defense Forme pics instead.
+static const void *GetMonPicDataForVersion(const struct CompressedSpriteSheet *src, s32 species)
+{
+    if (species == SPECIES_DEOXYS && IsLeafGreenVersion())
+    {
+        if (src == &gMonFrontPicTable[SPECIES_DEOXYS])
+            return gMonFrontPic_Deoxys_LG;
+        if (src == &gMonBackPicTable[SPECIES_DEOXYS])
+            return gMonBackPic_Deoxys_LG;
+    }
+    return src->data;
+}
 
 void LZDecompressWram(const void *src, void *dest)
 {
@@ -65,7 +81,7 @@ void DecompressPicFromTable(const struct CompressedSpriteSheet *src, void *buffe
     if (species > NUM_SPECIES)
         LZ77UnCompWram(gMonFrontPicTable[0].data, buffer);
     else
-        LZ77UnCompWram(src->data, buffer);
+        LZ77UnCompWram(GetMonPicDataForVersion(src, species), buffer);
     DuplicateDeoxysTiles(buffer, species);
 }
 
@@ -99,7 +115,7 @@ void LoadSpecialPokePic(const struct CompressedSpriteSheet *src, void *dest, s32
     else if (species > NUM_SPECIES) // is species unknown? draw the ? icon
         LZ77UnCompWram(gMonFrontPicTable[0].data, dest);
     else
-        LZ77UnCompWram(src->data, dest);
+        LZ77UnCompWram(GetMonPicDataForVersion(src, species), dest);
 
     DuplicateDeoxysTiles(dest, species);
     DrawSpindaSpots(species, personality, dest, isFrontPic);

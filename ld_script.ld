@@ -133,6 +133,7 @@ SECTIONS {
         src/field_effect.o(.text);
         src/scanline_effect.o(.text);
         src/option_menu.o(.text);
+        src/key_system_menu.o(.text);
         src/pokedex.o(.text);
         src/trainer_card.o(.text);
         src/pokemon_storage_system.o(.text);
@@ -456,6 +457,7 @@ SECTIONS {
         src/wild_encounter.o(.rodata);
         src/field_effect.o(.rodata);
         src/option_menu.o(.rodata);
+        src/key_system_menu.o(.rodata);
         src/trainer_card.o(.rodata);
         src/pokemon_storage_system_menu.o(.rodata);
         src/pokemon_storage_system_tasks.o(.rodata);

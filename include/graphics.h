@@ -2335,8 +2335,10 @@ extern const u32 gMonShinyPalette_Jirachi[];
 extern const u8 gMonIcon_Jirachi[];
 extern const u8 gMonFootprint_Jirachi[];
 extern const u32 gMonFrontPic_Deoxys[];
+extern const u32 gMonFrontPic_Deoxys_LG[];
 extern const u32 gMonPalette_Deoxys[];
 extern const u32 gMonBackPic_Deoxys[];
+extern const u32 gMonBackPic_Deoxys_LG[];
 extern const u32 gMonShinyPalette_Deoxys[];
 extern const u8 gMonIcon_Deoxys[];
 extern const u8 gMonFootprint_Deoxys[];
@@ -3913,17 +3915,29 @@ extern const u32 gFile_graphics_battle_anims_backgrounds_sandstorm_brew_tilemap[
 extern const u32 gFile_graphics_battle_anims_backgrounds_sandstorm_brew_sheet[];
 extern const u32 gBattleAnimSpritePal_FlyingDirt[];
 
-// title_screen
-extern const u16 gGraphics_TitleScreen_GameTitleLogoPals[];
-extern const u8 gGraphics_TitleScreen_GameTitleLogoTiles[];
-extern const u8 gGraphics_TitleScreen_GameTitleLogoMap[];
-extern const u16 gGraphics_TitleScreen_BoxArtMonPals[];
-extern const u8 gGraphics_TitleScreen_BoxArtMonTiles[];
-extern const u8 gGraphics_TitleScreen_BoxArtMonMap[];
-extern u16 gGraphics_TitleScreen_BackgroundPals[]; // If this is const, title_screen.c does not match
+// title_screen — FireRed assets
+extern const u16 gGraphics_TitleScreen_GameTitleLogoPals_FR[];
+extern const u8 gGraphics_TitleScreen_GameTitleLogoTiles_FR[];
+extern const u8 gGraphics_TitleScreen_GameTitleLogoMap_FR[];
+extern const u16 gGraphics_TitleScreen_BoxArtMonPals_FR[];
+extern const u8 gGraphics_TitleScreen_BoxArtMonTiles_FR[];
+extern const u8 gGraphics_TitleScreen_BoxArtMonMap_FR[];
+extern const u16 gGraphics_TitleScreen_BackgroundPals_FR[];
+extern const u16 gTitleScreen_Slash_Pal_FR[];
+
+// title_screen — LeafGreen assets
+extern const u16 gGraphics_TitleScreen_GameTitleLogoPals_LG[];
+extern const u8 gGraphics_TitleScreen_GameTitleLogoTiles_LG[];
+extern const u8 gGraphics_TitleScreen_GameTitleLogoMap_LG[];
+extern const u16 gGraphics_TitleScreen_BoxArtMonPals_LG[];
+extern const u8 gGraphics_TitleScreen_BoxArtMonTiles_LG[];
+extern const u8 gGraphics_TitleScreen_BoxArtMonMap_LG[];
+extern const u16 gGraphics_TitleScreen_BackgroundPals_LG[];
+extern const u16 gTitleScreen_Slash_Pal_LG[];
+
+// title_screen — shared
 extern const u8 gGraphics_TitleScreen_CopyrightPressStartTiles[];
 extern const u8 gGraphics_TitleScreen_CopyrightPressStartMap[];
-extern const u16 gTitleScreen_Slash_Pal[];
 extern const u32 gTitleScreen_BlankSprite_Tiles[];
 
 // battle_gfx_sfx_util

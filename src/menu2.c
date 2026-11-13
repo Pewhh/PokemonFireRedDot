@@ -2,6 +2,7 @@
 #include "gflib.h"
 #include "task.h"
 #include "wild_encounter.h"
+#include "load_save.h"
 
 // Not actually "old" given these were introduced in Gen 3,
 // but they're used as equivalents here alongside the other OLD_UNOWN
@@ -420,15 +421,14 @@ static const u8 sMonSpriteAnchorCoords[][5] = {
     [SPECIES_LATIAS          - 1] = {0x1e, 0x0c, 0x10, 0x23, 0x19},
     [SPECIES_LATIOS          - 1] = {0x05, 0x0e, 0x10, 0x05, 0x1d},
     [SPECIES_JIRACHI         - 1] = {0x1c, 0x15, 0x08, 0x1e, 0x22},
-#if defined(FIRERED)
-    [SPECIES_DEOXYS          - 1] = {0x1b, 0x08, 0x28, 0x1c, 0x16},
-#elif defined(LEAFGREEN)
-    [SPECIES_DEOXYS          - 1] = {0x1a, 0x09, 0x28, 0x1a, 0x17},
-#endif
+    [SPECIES_DEOXYS          - 1] = {0x1b, 0x08, 0x28, 0x1c, 0x16}, // Attack Forme (FireRed)
     [SPECIES_CHIMECHO        - 1] = {0x1d, 0x0c, 0x08, 0x1c, 0x1a},
     [SPECIES_OLD_UNOWN_EMARK - 1] = {0x20, 0x21, 0x08, 0x20, 0x2b},
     [SPECIES_OLD_UNOWN_QMARK - 1] = {0x20, 0x23, 0x08, 0x20, 0x2d}
 };
+
+// Defense Forme (LeafGreen). Used instead of the Deoxys row above when playing LeafGreen.
+static const u8 sDeoxysAnchorCoords_LG[5] = {0x1a, 0x09, 0x28, 0x1a, 0x17};
 
 void AddTextPrinterParameterized3(u8 windowId, u8 fontId, u8 x, u8 y, const u8 * color, s8 speed, const u8 * str)
 {
@@ -656,9 +656,14 @@ u8 Menu2_GetMonSpriteAnchorCoord(u16 species, u32 personality, u8 a2)
     }
     if (species != SPECIES_NONE && a2 < 5)
     {
+        const u8 *coords;
+
         species--;
-        if (sMonSpriteAnchorCoords[species][a2] != 0xFF)
-            return sMonSpriteAnchorCoords[species][a2];
+        coords = sMonSpriteAnchorCoords[species];
+        if (species == SPECIES_DEOXYS - 1 && IsLeafGreenVersion())
+            coords = sDeoxysAnchorCoords_LG;
+        if (coords[a2] != 0xFF)
+            return coords[a2];
     }
     return 32;
 }
