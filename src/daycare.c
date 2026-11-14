@@ -1136,6 +1136,21 @@ void GiveEggFromDaycare(void)
     _GiveEggFromDaycare(&gSaveBlock1Ptr->daycare);
 }
 
+// MAGMA ARMOR in the party (not an Egg) makes Eggs hatch twice as fast.
+static u32 GetEggCyclesToSubtract(void)
+{
+    u32 i;
+
+    for (i = 0; i < gPlayerPartyCount; i++)
+    {
+        if (GetMonData(&gPlayerParty[i], MON_DATA_SANITY_IS_EGG))
+            continue;
+        if (GetMonAbility(&gPlayerParty[i]) == ABILITY_MAGMA_ARMOR)
+            return 2;
+    }
+    return 1;
+}
+
 static bool8 TryProduceOrHatchEgg(struct DayCare *daycare)
 {
     u32 i, validEggs = 0;
@@ -1158,6 +1173,7 @@ static bool8 TryProduceOrHatchEgg(struct DayCare *daycare)
     if (++daycare->stepCounter == 255)
     {
         u32 steps;
+        u32 cyclesToSubtract = GetEggCyclesToSubtract();
 
         for (i = 0; i < gPlayerPartyCount; i++)
         {
@@ -1169,7 +1185,10 @@ static bool8 TryProduceOrHatchEgg(struct DayCare *daycare)
             steps = GetMonData(&gPlayerParty[i], MON_DATA_FRIENDSHIP);
             if (steps != 0)
             {
-                steps -= 1;
+                if (steps >= cyclesToSubtract)
+                    steps -= cyclesToSubtract;
+                else
+                    steps = 0;
                 SetMonData(&gPlayerParty[i], MON_DATA_FRIENDSHIP, &steps);
             }
             else // hatch the egg

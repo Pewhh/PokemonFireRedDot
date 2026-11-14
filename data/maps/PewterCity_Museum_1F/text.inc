@@ -89,22 +89,41 @@ PewterCity_Museum_1F_Text_NoFossilMtMoonHere::
     .string "You don't have Mt. Moon fossil\n"
     .string "with you.$"
 
-PewterCity_Museum_1F_Text_WeCanReviveMtMoonFossil::
-    .string "We can revive your Mt. Moon\n"
-    .string "fossil into a living POKéMON!\p"
-    .string "Would you like us to do that?$"
-
-PewterCity_Museum_1F_Text_HandOverFossil::
-    .string "Thank you for handing over\n"
-    .string "your fossil.$"
-
-PewterCity_Museum_1F_Text_FossilMonBackToLife::
-    .string "Your fossil POKéMON is back to\n"
-    .string "life! It was {STR_VAR_1}, I think!$"
-
 PewterCity_Museum_1F_Text_ReceivedMonFromMuseum::
     .string "{PLAYER} received the {STR_VAR_1}\n"
     .string "from the museum.$"
 
 PewterCity_Museum_1F_Text_AmberIsCinnabar::
     .string "AMBER is from Cinnabar Island.$"
+
+PewterCity_Museum_1F_Text_DoYouHaveAFossilForUs::
+    .string "Welcome to the PEWTER MUSEUM's lab.\p"
+    .string "We study fossils found in\n"
+    .string "MT. MOON.\p"
+    .string "Do you have a fossil for us?$"
+
+PewterCity_Museum_1F_Text_ThatFossilIsOfMonMakeItLiveAgain::
+    .string "Oh!\n"
+    .string "That's a {STR_VAR_2}!\p"
+    .string "It's the fossil of {STR_VAR_1},\n"
+    .string "a POKéMON that is already extinct!\p"
+    .string "Our machine can bring it\n"
+    .string "back to life!$"
+
+PewterCity_Museum_1F_Text_HandedFossilToScientist::
+    .string "{PLAYER} handed over the\n"
+    .string "{STR_VAR_2} to the scientist.$"
+
+PewterCity_Museum_1F_Text_TakesTimeLookAroundTown::
+    .string "It will take a little while.\p"
+    .string "Why don't you take a look\n"
+    .string "around town?$"
+
+PewterCity_Museum_1F_Text_FossilMonBackToLife::
+    .string "Ah, there you are!\p"
+    .string "Your fossil is back to life!\n"
+    .string "It was {STR_VAR_1}, just as I thought!$"
+
+PewterCity_Museum_1F_Text_ComeBackIfYouChangeYourMind::
+    .string "I see.\n"
+    .string "Come back if you change your mind.$"

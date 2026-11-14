@@ -146,6 +146,24 @@ static const struct InGameTrade sInGameTrades[] = {
         .otGender = MALE,
         .sheen = 10,
         .requestedSpecies = SPECIES_PONYTA
+    },
+    // Route 12 fishing house. PLACEHOLDER: change species, nickname and OT when decided.
+    // The same trade is used in both versions (it is not in sInGameTrades_LeafGreen).
+    [INGAME_TRADE_ROUTE12] =
+    {
+        .nickname = _("PIDGEY"),
+        .species = SPECIES_PIDGEY,
+        .ivs = {15, 15, 15, 15, 15, 15},
+        .abilityNum = 0,
+        .otId = 12012,
+        .conditions = {5, 5, 5, 5, 5},
+        .personality = 0x00001212,
+        .heldItem = ITEM_NONE,
+        .mailNum = 255,
+        .otName = _("TRADER"),
+        .otGender = MALE,
+        .sheen = 10,
+        .requestedSpecies = SPECIES_RATTATA
     }
 };
 
@@ -161,7 +179,7 @@ static const struct InGameTrade sInGameTrades_LeafGreen[] = {
         .conditions = {5, 5, 30, 5, 5},
         .personality = 0x498a2e1d,
         .heldItem = ITEM_FAB_MAIL,
-        .mailNum = 0,
+        .mailNum = 1, // PSYDUCK mail, see sInGameTradeMailMessages
         .otName = _("DONTAE"),
         .otGender = MALE,
         .sheen = 10,
@@ -217,12 +235,27 @@ static const struct InGameTrade sInGameTrades_LeafGreen[] = {
     },
 };
 
+// Mail held by the Cerulean trade Pokémon ("THAT'S A HEALTHY ___! BE KIND TO IT").
+// Index = .mailNum of the trade.
 static const u16 sInGameTradeMailMessages[][10] = {
+    // 0: FireRed, SLOWPOKE
     {
         EC_WORD_THAT_S,
         EC_WORD_A,
         EC_WORD_HEALTHY,
-        EC_POKEMON(JYNX),
+        EC_POKEMON(SLOWPOKE),
+        EC_WORD_EXCL,
+        EC_WORD_BE,
+        EC_WORD_KIND,
+        EC_WORD_TO,
+        EC_WORD_IT
+    },
+    // 1: LeafGreen, PSYDUCK
+    {
+        EC_WORD_THAT_S,
+        EC_WORD_A,
+        EC_WORD_HEALTHY,
+        EC_POKEMON(PSYDUCK),
         EC_WORD_EXCL,
         EC_WORD_BE,
         EC_WORD_KIND,

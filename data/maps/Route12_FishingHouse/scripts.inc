@@ -4,26 +4,44 @@ Route12_FishingHouse_MapScripts::
 Route12_FishingHouse_EventScript_FishingGuruBrother::
 	lock
 	faceplayer
-	goto_if_set FLAG_GOT_SUPER_ROD, Route12_FishingHouse_EventScript_CheckMagikarpRecord
-	msgbox Route12_FishingHouse_Text_DoYouLikeToFish, MSGBOX_YESNO
-	goto_if_eq VAR_RESULT, YES, Route12_FishingHouse_EventScript_GiveSuperRod
-	msgbox Route12_FishingHouse_Text_OhThatsDisappointing
+	@ He no longer gives the SUPER ROD (that is in Fuchsia now).
+	@ He only keeps the MAGIKARP size record.
+	goto Route12_FishingHouse_EventScript_CheckMagikarpRecord
+	end
+
+@ In-game trade. Placeholder: Pokémon and sprite not decided yet.
+@ The offered Pokémon and the requested one are set in src/data/ingame_trades.h (INGAME_TRADE_ROUTE12).
+Route12_FishingHouse_EventScript_Trader::
+	lock
+	faceplayer
+	setvar VAR_0x8008, INGAME_TRADE_ROUTE12
+	call EventScript_GetInGameTradeSpeciesInfo
+	goto_if_set FLAG_DID_ROUTE12_TRADE, Route12_FishingHouse_EventScript_TraderAlreadyTraded
+	msgbox Trade_Text_DoYouHaveMonWouldYouTradeForMon, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Route12_FishingHouse_EventScript_TraderDecline
+	call EventScript_ChooseMonForInGameTrade
+	goto_if_ge VAR_0x8004, PARTY_SIZE, Route12_FishingHouse_EventScript_TraderDecline
+	call EventScript_GetInGameTradeSpecies
+	goto_if_ne VAR_RESULT, VAR_0x8009, Route12_FishingHouse_EventScript_TraderNotRequestedMon
+	call EventScript_DoInGameTrade
+	msgbox Trade_Text_Thanks
+	setflag FLAG_DID_ROUTE12_TRADE
 	release
 	end
 
-Route12_FishingHouse_EventScript_GiveSuperRod::
-	checkitemspace ITEM_SUPER_ROD
-	goto_if_eq VAR_RESULT, FALSE, Route12_FishingHouse_EventScript_NoRoomForSuperRod
-	additem ITEM_SUPER_ROD
-	msgbox Route12_FishingHouse_Text_TakeThisAndFish
-	msgreceiveditem Route12_FishingHouse_Text_ReceivedSuperRod, ITEM_SUPER_ROD
-	setflag FLAG_GOT_SUPER_ROD
-	msgbox Route12_FishingHouse_Text_IfYouCatchBigMagikarpShowMe
+Route12_FishingHouse_EventScript_TraderDecline::
+	msgbox Trade_Text_WellIfYouDontWantTo
 	release
 	end
 
-Route12_FishingHouse_EventScript_NoRoomForSuperRod::
-	msgbox Route12_FishingHouse_Text_NoRoomForGift
+Route12_FishingHouse_EventScript_TraderNotRequestedMon::
+	bufferspeciesname STR_VAR_1, VAR_0x8009
+	msgbox Trade_Text_ThisIsntMon
+	release
+	end
+
+Route12_FishingHouse_EventScript_TraderAlreadyTraded::
+	msgbox Trade_Text_HasTradedMonGrownStronger
 	release
 	end
 

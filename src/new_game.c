@@ -106,8 +106,12 @@ void ResetMenuAndMonGlobals(void)
 
 void NewGameInitData(void)
 {
-    bool8 nuzlockePrev = FlagGet(FLAG_HARDCORE) || FlagGet(FLAG_EXPERT);  // A function lower down here clears these, so retain it and reset it at the end  
-    bool8 hardPrev = FlagGet(FLAG_HARD);  // A function lower down here clears these, so retain it and reset it at the end
+    // InitEventData() below clears every flag, so keep the difficulty chosen in
+    // Oak's speech and set it again at the end. One variable per flag, so that
+    // HARDCORE does not turn into EXPERT.
+    bool8 hardPrev = FlagGet(FLAG_HARD);
+    bool8 hardcorePrev = FlagGet(FLAG_HARDCORE);
+    bool8 expertPrev = FlagGet(FLAG_EXPERT);
     u8 rivalName[PLAYER_NAME_LENGTH + 1];
     StringCopy(rivalName, gSaveBlock1Ptr->rivalName);
     gDifferentSaveFile = TRUE;
@@ -150,8 +154,9 @@ void NewGameInitData(void)
     RunScriptImmediately(EventScript_ResetAllMapFlags);
     StringCopy(gSaveBlock1Ptr->rivalName, rivalName);
     ResetTrainerTowerResults();
-    nuzlockePrev ? FlagSet(FLAG_HARDCORE) || FlagSet(FLAG_EXPERT) : FlagClear(FLAG_HARDCORE) || FlagClear(FLAG_EXPERT);
     hardPrev ? FlagSet(FLAG_HARD) : FlagClear(FLAG_HARD);
+    hardcorePrev ? FlagSet(FLAG_HARDCORE) : FlagClear(FLAG_HARDCORE);
+    expertPrev ? FlagSet(FLAG_EXPERT) : FlagClear(FLAG_EXPERT);
 }
 
 static void ResetMiniGamesResults(void)

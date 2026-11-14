@@ -131,109 +131,160 @@ PewterCity_Museum_1F_Movement_ApproachCounterRight::
 	walk_in_place_right
 	step_end
 
+@ Revives the Mt. Moon fossil (HELIX or DOME) at level 25, same flow as the Cinnabar lab
+@ (level 40): show the fossil, hand it over, leave the museum, come back for the Pokemon.
+@ The fossil leaves the bag when handed over, so it can only be revived in one place.
+@ The OLD AMBER is Cinnabar only.
 PewterCity_Museum_1F_EventScript_Scientist2::
-    lock
-    faceplayer
+	lock
+	faceplayer
+	goto_if_eq VAR_PEWTER_MUSEUM_REVIVE_STATE, 2, PewterCity_Museum_1F_EventScript_GiveRevivedMon
+	goto_if_eq VAR_PEWTER_MUSEUM_REVIVE_STATE, 1, PewterCity_Museum_1F_EventScript_FossilStillReviving
+	checkitem ITEM_HELIX_FOSSIL
+	goto_if_eq VAR_RESULT, TRUE, PewterCity_Museum_1F_EventScript_ChooseFossilHelix
+	checkitem ITEM_DOME_FOSSIL
+	goto_if_eq VAR_RESULT, TRUE, PewterCity_Museum_1F_EventScript_ChooseFossilDome
+	@ Mt. Moon fossil already revived (here or in Cinnabar)
+	goto_if_set FLAG_REVIVED_HELIX, PewterCity_Museum_1F_EventScript_AlreadyRevived
+	goto_if_set FLAG_REVIVED_DOME, PewterCity_Museum_1F_EventScript_AlreadyRevived
+	checkitem ITEM_OLD_AMBER
+	goto_if_eq VAR_RESULT, TRUE, PewterCity_Museum_1F_EventScript_AmberHereNo
+	msgbox PewterCity_Museum_1F_Text_NoFossilMtMoonHere
+	release
+	end
 
-    // Já usou o serviço daqui? Bloqueia novas revives.
-    goto_if_set FLAG_REVIVED_MT_MOON_FOSSIL, PewterCity_Museum_1F_EventScript_AlreadyRevived
+PewterCity_Museum_1F_EventScript_ChooseFossilHelix::
+	message PewterCity_Museum_1F_Text_DoYouHaveAFossilForUs
+	waitmessage
+	multichoice 0, 0, MULTICHOICE_HELIX, FALSE
+	switch VAR_RESULT
+	case 0, PewterCity_Museum_1F_EventScript_ShowHelixFossil
+	case 1, PewterCity_Museum_1F_EventScript_Decline
+	case 127, PewterCity_Museum_1F_EventScript_Decline
+	end
 
-    // Se o jogador vier com Old Amber, redireciona pra Cinnabar.
-    goto_if_set FLAG_GOT_OLD_AMBER, PewterCity_Museum_1F_EventScript_AmberHereNo
+PewterCity_Museum_1F_EventScript_ChooseFossilDome::
+	message PewterCity_Museum_1F_Text_DoYouHaveAFossilForUs
+	waitmessage
+	multichoice 0, 0, MULTICHOICE_DOME, FALSE
+	switch VAR_RESULT
+	case 0, PewterCity_Museum_1F_EventScript_ShowDomeFossil
+	case 1, PewterCity_Museum_1F_EventScript_Decline
+	case 127, PewterCity_Museum_1F_EventScript_Decline
+	end
 
-    // Só um dos dois flags abaixo existe no jogo normal (o escolhido no Mt. Moon)
-    goto_if_set FLAG_GOT_HELIX_FOSSIL, PewterCity_Museum_1F_EventScript_OfferHelix
-    goto_if_set FLAG_GOT_DOME_FOSSIL,  PewterCity_Museum_1F_EventScript_OfferDome
+PewterCity_Museum_1F_EventScript_ShowHelixFossil::
+	bufferspeciesname STR_VAR_1, SPECIES_OMANYTE
+	bufferitemname STR_VAR_2, ITEM_HELIX_FOSSIL
+	msgbox PewterCity_Museum_1F_Text_ThatFossilIsOfMonMakeItLiveAgain, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, PewterCity_Museum_1F_EventScript_Decline
+	msgbox PewterCity_Museum_1F_Text_HandedFossilToScientist
+	removeitem ITEM_HELIX_FOSSIL
+	msgbox PewterCity_Museum_1F_Text_TakesTimeLookAroundTown
+	setvar VAR_PEWTER_MUSEUM_REVIVE_STATE, 1
+	setvar VAR_PEWTER_MUSEUM_WHICH_FOSSIL, ITEM_HELIX_FOSSIL
+	release
+	end
 
-    // Não tem fóssil válido
-    msgbox PewterCity_Museum_1F_Text_NoFossilMtMoonHere
-    release
-    end
+PewterCity_Museum_1F_EventScript_ShowDomeFossil::
+	bufferspeciesname STR_VAR_1, SPECIES_KABUTO
+	bufferitemname STR_VAR_2, ITEM_DOME_FOSSIL
+	msgbox PewterCity_Museum_1F_Text_ThatFossilIsOfMonMakeItLiveAgain, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, PewterCity_Museum_1F_EventScript_Decline
+	msgbox PewterCity_Museum_1F_Text_HandedFossilToScientist
+	removeitem ITEM_DOME_FOSSIL
+	msgbox PewterCity_Museum_1F_Text_TakesTimeLookAroundTown
+	setvar VAR_PEWTER_MUSEUM_REVIVE_STATE, 1
+	setvar VAR_PEWTER_MUSEUM_WHICH_FOSSIL, ITEM_DOME_FOSSIL
+	release
+	end
 
-PewterCity_Museum_1F_EventScript_OfferHelix::
-    bufferspeciesname STR_VAR_1, SPECIES_OMANYTE
-    bufferitemname   STR_VAR_2, ITEM_HELIX_FOSSIL
-    msgbox PewterCity_Museum_1F_Text_WeCanReviveMtMoonFossil, MSGBOX_YESNO
-    goto_if_eq VAR_RESULT, NO, PewterCity_Museum_1F_EventScript_Decline
-    msgbox PewterCity_Museum_1F_Text_HandOverFossil
-    removeitem ITEM_HELIX_FOSSIL
-    setvar VAR_TEMP_1, SPECIES_OMANYTE
-    bufferspeciesname STR_VAR_1, SPECIES_OMANYTE
-    msgbox PewterCity_Museum_1F_Text_FossilMonBackToLife
-    givemon SPECIES_OMANYTE, 25     
-    goto_if_eq VAR_RESULT, 2, EventScript_NoMoreRoomForPokemon
-    setflag FLAG_REVIVED_HELIX
-    setflag FLAG_REVIVED_MT_MOON_FOSSIL
-    goto_if_eq VAR_RESULT, 0, PewterCity_Museum_1F_EventScript_NicknameMonParty
-    goto_if_eq VAR_RESULT, 1, PewterCity_Museum_1F_EventScript_NicknameMonPC
-    end
+PewterCity_Museum_1F_EventScript_FossilStillReviving::
+	msgbox PewterCity_Museum_1F_Text_TakesTimeLookAroundTown
+	release
+	end
 
-PewterCity_Museum_1F_EventScript_OfferDome::
-    bufferspeciesname STR_VAR_1, SPECIES_KABUTO
-    bufferitemname   STR_VAR_2, ITEM_DOME_FOSSIL
-    msgbox PewterCity_Museum_1F_Text_WeCanReviveMtMoonFossil, MSGBOX_YESNO
-    goto_if_eq VAR_RESULT, NO, PewterCity_Museum_1F_EventScript_Decline
-    msgbox PewterCity_Museum_1F_Text_HandOverFossil
-    removeitem ITEM_DOME_FOSSIL
-    setvar VAR_TEMP_1, SPECIES_KABUTO
-    bufferspeciesname STR_VAR_1, SPECIES_KABUTO
-    msgbox PewterCity_Museum_1F_Text_FossilMonBackToLife
-    givemon SPECIES_KABUTO, 25
-    goto_if_eq VAR_RESULT, 2, EventScript_NoMoreRoomForPokemon
-    setflag FLAG_REVIVED_DOME
-    setflag FLAG_REVIVED_MT_MOON_FOSSIL
-    goto_if_eq VAR_RESULT, 0, PewterCity_Museum_1F_EventScript_NicknameMonParty
-    goto_if_eq VAR_RESULT, 1, PewterCity_Museum_1F_EventScript_NicknameMonPC
-    end
+PewterCity_Museum_1F_EventScript_GiveRevivedMon::
+	goto_if_eq VAR_PEWTER_MUSEUM_WHICH_FOSSIL, ITEM_HELIX_FOSSIL, PewterCity_Museum_1F_EventScript_GiveOmanyte
+	goto_if_eq VAR_PEWTER_MUSEUM_WHICH_FOSSIL, ITEM_DOME_FOSSIL, PewterCity_Museum_1F_EventScript_GiveKabuto
+	release
+	end
+
+@ No room in party or PC: the Pokemon keeps waiting here (state stays 2), like in Cinnabar
+PewterCity_Museum_1F_EventScript_GiveOmanyte::
+	setvar VAR_TEMP_1, SPECIES_OMANYTE
+	bufferspeciesname STR_VAR_1, SPECIES_OMANYTE
+	msgbox PewterCity_Museum_1F_Text_FossilMonBackToLife
+	givemon SPECIES_OMANYTE, 25
+	goto_if_eq VAR_RESULT, 2, EventScript_NoMoreRoomForPokemon
+	setflag FLAG_REVIVED_HELIX @ Cinnabar uses this flag too
+	setvar VAR_PEWTER_MUSEUM_REVIVE_STATE, 0
+	goto_if_eq VAR_RESULT, 0, PewterCity_Museum_1F_EventScript_NicknameMonParty
+	goto_if_eq VAR_RESULT, 1, PewterCity_Museum_1F_EventScript_NicknameMonPC
+	release
+	end
+
+PewterCity_Museum_1F_EventScript_GiveKabuto::
+	setvar VAR_TEMP_1, SPECIES_KABUTO
+	bufferspeciesname STR_VAR_1, SPECIES_KABUTO
+	msgbox PewterCity_Museum_1F_Text_FossilMonBackToLife
+	givemon SPECIES_KABUTO, 25
+	goto_if_eq VAR_RESULT, 2, EventScript_NoMoreRoomForPokemon
+	setflag FLAG_REVIVED_DOME
+	setvar VAR_PEWTER_MUSEUM_REVIVE_STATE, 0
+	goto_if_eq VAR_RESULT, 0, PewterCity_Museum_1F_EventScript_NicknameMonParty
+	goto_if_eq VAR_RESULT, 1, PewterCity_Museum_1F_EventScript_NicknameMonPC
+	release
+	end
 
 PewterCity_Museum_1F_EventScript_NicknameMonParty::
-    textcolor NPC_TEXT_COLOR_NEUTRAL
-    playfanfare MUS_LEVEL_UP
-    message PewterCity_Museum_1F_Text_ReceivedMonFromMuseum
-    waitmessage
-    waitfanfare
-    msgbox Text_GiveNicknameToThisMon, MSGBOX_YESNO
-    goto_if_eq VAR_RESULT, NO, PewterCity_Museum_1F_EventScript_End
-    call EventScript_GetGiftMonPartySlot
-    call EventScript_ChangePokemonNickname
-    goto PewterCity_Museum_1F_EventScript_End
-    end
+	textcolor NPC_TEXT_COLOR_NEUTRAL
+	playfanfare MUS_LEVEL_UP
+	message PewterCity_Museum_1F_Text_ReceivedMonFromMuseum
+	waitmessage
+	waitfanfare
+	msgbox Text_GiveNicknameToThisMon, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, PewterCity_Museum_1F_EventScript_End
+	call EventScript_GetGiftMonPartySlot
+	call EventScript_ChangePokemonNickname
+	goto PewterCity_Museum_1F_EventScript_End
+	end
 
 PewterCity_Museum_1F_EventScript_NicknameMonPC::
-    textcolor NPC_TEXT_COLOR_NEUTRAL
-    playfanfare MUS_LEVEL_UP
-    message PewterCity_Museum_1F_Text_ReceivedMonFromMuseum
-    waitmessage
-    waitfanfare
-    msgbox Text_GiveNicknameToThisMon, MSGBOX_YESNO
-    goto_if_eq VAR_RESULT, NO, PewterCity_Museum_1F_EventScript_SentPC
-    call EventScript_NameReceivedBoxMon
-    goto PewterCity_Museum_1F_EventScript_SentPC
-    end
+	textcolor NPC_TEXT_COLOR_NEUTRAL
+	playfanfare MUS_LEVEL_UP
+	message PewterCity_Museum_1F_Text_ReceivedMonFromMuseum
+	waitmessage
+	waitfanfare
+	msgbox Text_GiveNicknameToThisMon, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, PewterCity_Museum_1F_EventScript_SentPC
+	call EventScript_NameReceivedBoxMon
+	goto PewterCity_Museum_1F_EventScript_SentPC
+	end
 
 PewterCity_Museum_1F_EventScript_SentPC::
-    call EventScript_TransferredToPC
-    goto PewterCity_Museum_1F_EventScript_End
-    end
+	call EventScript_TransferredToPC
+	goto PewterCity_Museum_1F_EventScript_End
+	end
 
 PewterCity_Museum_1F_EventScript_Decline::
-    msgbox PewterCity_Museum_1F_Text_ComeAgain
-    release
-    end
+	msgbox PewterCity_Museum_1F_Text_ComeBackIfYouChangeYourMind
+	release
+	end
 
 PewterCity_Museum_1F_EventScript_AmberHereNo::
-    msgbox PewterCity_Museum_1F_Text_AmberIsCinnabar
-    release
-    end
+	msgbox PewterCity_Museum_1F_Text_AmberIsCinnabar
+	release
+	end
 
 PewterCity_Museum_1F_EventScript_AlreadyRevived::
-    msgbox PewterCity_Museum_1F_Text_WeHaveTwoFossilsOnExhibit, MSGBOX_NPC
-    release
-    end
+	msgbox PewterCity_Museum_1F_Text_WeHaveTwoFossilsOnExhibit
+	release
+	end
 
 PewterCity_Museum_1F_EventScript_End::
-    release
-    end
+	release
+	end
 
 PewterCity_Museum_1F_EventScript_OldMan::
 	msgbox PewterCity_Museum_1F_Text_ShouldBeGratefulForLongLife, MSGBOX_NPC

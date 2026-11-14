@@ -57,16 +57,14 @@ CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_FossilScientist::
 	goto CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_DontShowFossil
 	end
 
+@ The Mt. Moon fossil can also be revived in the Pewter museum, so check the bag
+@ instead of the flags (VAR_RESULT = TRUE if the fossil is in the bag).
 CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_CheckAddHelixFossilToList::
-	goto_if_unset FLAG_GOT_HELIX_FOSSIL, CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_SetResultFalse
-	goto_if_set FLAG_REVIVED_HELIX, CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_SetResultFalse
-	setvar VAR_RESULT, TRUE
+	checkitem ITEM_HELIX_FOSSIL
 	return
 
 CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_CheckAddDomeFossilToList::
-	goto_if_unset FLAG_GOT_DOME_FOSSIL, CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_SetResultFalse
-	goto_if_set FLAG_REVIVED_DOME, CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_SetResultFalse
-	setvar VAR_RESULT, TRUE
+	checkitem ITEM_DOME_FOSSIL
 	return
 
 CinnabarIsland_PokemonLab_ExperimentRoom_EventScript_CheckAddOldAmberToList::

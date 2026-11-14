@@ -1861,7 +1861,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT] =
 
     [MOVE_SKY_ATTACK] =
     {
-        .effect = EFFECT_FLINCH_HIT | EFFECT_HIGH_CRITICAL,
+        .effect = EFFECT_SKY_ATTACK,
         .power = 120,
         .type = TYPE_FLYING,
         .accuracy = 85,
@@ -2615,7 +2615,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT] =
 
     [MOVE_SANDSTORM] =
     {
-        .effect = EFFECT_SANDSTORM | EFFECT_SPECIAL_DEFENSE_UP_2,
+        .effect = EFFECT_SANDSTORM, // +50% Sp. Def for ROCK types and SAND VEIL: see CalculateBaseDamage
         .power = 0,
         .type = TYPE_ROCK,
         .accuracy = 0,
@@ -3304,7 +3304,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT] =
 
     [MOVE_STOCKPILE] =
     {
-        .effect = EFFECT_STOCKPILE | EFFECT_DEFENSE_UP | EFFECT_SPECIAL_DEFENSE_UP,
+        .effect = EFFECT_STOCKPILE, // also +1 Def / +1 Sp. Def: see BattleScript_EffectStockpile
         .power = 0,
         .type = TYPE_NORMAL,
         .accuracy = 0,
@@ -3356,7 +3356,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT] =
 
     [MOVE_HAIL] =
     {
-        .effect = EFFECT_HAIL | EFFECT_DEFENSE_UP_2, // need changes
+        .effect = EFFECT_HAIL, // +50% Def for ICE types, BLIZZARD never misses: see CalculateBaseDamage / AccuracyCalcHelper
         .power = 0,
         .type = TYPE_ICE,
         .accuracy = 0,

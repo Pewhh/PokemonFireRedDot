@@ -5,7 +5,13 @@ PewterCity_MapScripts::
 PewterCity_OnTransition::
 	setworldmapflag FLAG_WORLD_MAP_PEWTER_CITY
 	setvar VAR_MAP_SCENE_PEWTER_CITY_MUSEUM_1F, 0
+	@ Fossil left at the museum: it is ready once the player has left the museum
+	call_if_eq VAR_PEWTER_MUSEUM_REVIVE_STATE, 1, PewterCity_EventScript_MuseumFossilReady
 	end
+
+PewterCity_EventScript_MuseumFossilReady::
+	setvar VAR_PEWTER_MUSEUM_REVIVE_STATE, 2
+	return
 
 @ Impossible to speak to this NPC from a facing dir != DIR_EAST normally, so they arent checked
 @ Additionally, no movement script exists for facing DIR_SOUTH, which would necessitate walking out of bounds

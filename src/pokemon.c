@@ -2506,6 +2506,14 @@ s32 CalculateBaseDamage(struct BattlePokemon *attacker, struct BattlePokemon *de
         spAttack /= 2;
     if (defender->ability == ABILITY_MAGMA_ARMOR && (type == TYPE_WATER))
         spAttack = spAttack / 8;    
+    // Hail: ICE types get +50% Defense
+    if (WEATHER_HAS_EFFECT2 && (gBattleWeather & B_WEATHER_HAIL)
+     && (defender->type1 == TYPE_ICE || defender->type2 == TYPE_ICE))
+        defense = (150 * defense) / 100;
+    // Sandstorm: ROCK types and SAND VEIL users get +50% Sp. Defense
+    if (WEATHER_HAS_EFFECT2 && (gBattleWeather & B_WEATHER_SANDSTORM)
+     && (defender->type1 == TYPE_ROCK || defender->type2 == TYPE_ROCK || defender->ability == ABILITY_SAND_VEIL))
+        spDefense = (150 * spDefense) / 100;
     if (attacker->ability == ABILITY_HUSTLE)
         attack = (150 * attack) / 100;
     if (attacker->ability == ABILITY_PLUS && ABILITY_ON_FIELD2(ABILITY_MINUS))
@@ -5104,17 +5112,20 @@ u16 GetEvolutionTargetSpecies(struct Pokemon *mon, u8 type, u16 evolutionItem)
         {
             switch (gEvolutionTable[species][i].method)
             {
+            // Friendship evolutions are locked until the Elite Four is beaten for the
+            // first time (FLAG_SYS_GAME_CLEAR). While locked, no target species is
+            // returned, so the evolution scene never starts (no animation, no cancel).
             case EVO_FRIENDSHIP:
-                if (friendship >= 220)
+                if (canFriendshipEvolve && friendship >= 220)
                     targetSpecies = gEvolutionTable[species][i].targetSpecies;
                 break;
             // FR/LG removed the time of day evolutions due to having no RTC.
             case EVO_FRIENDSHIP_ESPEON:
-                if (friendship >= 220 && IsEspeonLocation())
+                if (canFriendshipEvolve && friendship >= 220 && IsEspeonLocation())
                     targetSpecies = gEvolutionTable[species][i].targetSpecies;
                 break;
             case EVO_FRIENDSHIP_UMBREON:
-                if (friendship >= 220 && IsUmbreonLocation())
+                if (canFriendshipEvolve && friendship >= 220 && IsUmbreonLocation())
                     targetSpecies = gEvolutionTable[species][i].targetSpecies;
                 break;
             case EVO_LEVEL:

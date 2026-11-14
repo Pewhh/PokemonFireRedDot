@@ -1,34 +1,3 @@
-Route12_FishingHouse_Text_DoYouLikeToFish::
-    .string "I'm the FISHING GURU's younger\n"
-    .string "brother.\p"
-    .string "I simply looove fishing!\n"
-    .string "I can't bear to go without.\p"
-    .string "Tell me, do you like to fish?$"
-
-Route12_FishingHouse_Text_TakeThisAndFish::
-    .string "Grand! I like your style.\n"
-    .string "I think we can be friends.\p"
-    .string "Take this and fish, young friend!$"
-
-Route12_FishingHouse_Text_ReceivedSuperRod::
-    .string "{PLAYER} received a SUPER ROD from\n"
-    .string "the FISHING GURU's brother.$"
-
-Route12_FishingHouse_Text_IfYouCatchBigMagikarpShowMe::
-    .string "Fishing is a way of life!\n"
-    .string "It is like the finest poetry.\p"
-    .string "From the seas to rivers, go out\n"
-    .string "and land the big one, my friend.\p"
-    .string "Now, I have a request.\p"
-    .string "If you catch a big MAGIKARP \n"
-    .string "with that ROD, I want to see it.\p"
-    .string "As much as I love to fish, I also\n"
-    .string "love seeing gigantic MAGIKARP.$"
-
-Route12_FishingHouse_Text_OhThatsDisappointing::
-    .string "Oh…\n"
-    .string "That's so disappointing…$"
-
 Route12_FishingHouse_Text_TryFishingBringMeMagikarp::
     .string "Hello there, {PLAYER}!\n"
     .string "Have you been fishing?\p"

@@ -5387,12 +5387,25 @@ static void Task_SacredAshDisplayHPRestored(u8 taskId)
 #undef tHadEffect
 #undef tLastSlotUsed
 
+// Evolution items that are not in gItemEffectTable (hold items such as METAL COAT,
+// KING'S ROCK, DRAGON SCALE, UP-GRADE, DEEPSEA TOOTH/SCALE) evolve the Pokemon
+// directly from the evolution table when used from the bag, like the stones do.
+// Any item with fieldUseFunc FieldUseFunc_EvoItem in items.json that is not a
+// "Pokemon item" goes through this path, so new ones only need items.json + evolution.h.
+static bool8 IsEvolutionHoldItem(u16 item)
+{
+    return !IS_POKEMON_ITEM(item);
+}
+
 void ItemUseCB_EvolutionStone(u8 taskId, TaskFunc func)
 {
     bool8 noEffect;
 
     PlaySE(SE_SELECT);
-    noEffect = PokemonItemUseNoEffect(&gPlayerParty[gPartyMenu.slotId], gSpecialVar_ItemId, gPartyMenu.slotId, 0);
+    if (IsEvolutionHoldItem(gSpecialVar_ItemId))
+        noEffect = (GetEvolutionTargetSpecies(&gPlayerParty[gPartyMenu.slotId], EVO_MODE_ITEM_USE, gSpecialVar_ItemId) == SPECIES_NONE);
+    else
+        noEffect = PokemonItemUseNoEffect(&gPlayerParty[gPartyMenu.slotId], gSpecialVar_ItemId, gPartyMenu.slotId, 0);
     if (noEffect)
     {
         gPartyMenuUseExitCallback = FALSE;
@@ -5407,7 +5420,19 @@ void ItemUseCB_EvolutionStone(u8 taskId, TaskFunc func)
 static void CB2_UseEvolutionStone(void)
 {
     gCB2_AfterEvolution = gPartyMenu.exitCallback;
-    ExecuteTableBasedItemEffect_(gPartyMenu.slotId, gSpecialVar_ItemId, 0);
+    if (IsEvolutionHoldItem(gSpecialVar_ItemId))
+    {
+        // Same as the ITEM4_EVO_STONE case in PokemonUseItemEffects
+        struct Pokemon *mon = &gPlayerParty[gPartyMenu.slotId];
+        u16 targetSpecies = GetEvolutionTargetSpecies(mon, EVO_MODE_ITEM_USE, gSpecialVar_ItemId);
+
+        if (targetSpecies != SPECIES_NONE)
+            BeginEvolutionScene(mon, targetSpecies, FALSE, gPartyMenu.slotId);
+    }
+    else
+    {
+        ExecuteTableBasedItemEffect_(gPartyMenu.slotId, gSpecialVar_ItemId, 0);
+    }
     ItemUse_SetQuestLogEvent(QL_EVENT_USED_ITEM, &gPlayerParty[gPartyMenu.slotId], gSpecialVar_ItemId, 0xFFFF);
     RemoveBagItem(gSpecialVar_ItemId, 1);
 }

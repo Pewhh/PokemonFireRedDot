@@ -764,31 +764,35 @@ static const u16 sWeightToDamageTable[] =
     0xFFFF, 0xFFFF
 };
 
-struct PickupItem
-{
-    u16 itemId;
-    u8 chance;
-};
+// PICKUP: what is found depends on the holder's level (rows: 1-10, 11-20 ... 91-100).
+// Columns match sPickupChances: 30%, then 10% x6, then 4% x2, then 1% x2.
+#define PICKUP_ITEMS_PER_ROW 11
+#define PICKUP_LEVEL_ROWS    10
 
-static const struct PickupItem sPickupItems[] =
-{
-    { ITEM_ORAN_BERRY, 15 },
-    { ITEM_CHERI_BERRY, 25 },
-    { ITEM_CHESTO_BERRY, 35 },
-    { ITEM_PECHA_BERRY, 45 },
-    { ITEM_RAWST_BERRY, 55 },
-    { ITEM_ASPEAR_BERRY, 65 },
-    { ITEM_PERSIM_BERRY, 75 },
-    { ITEM_TM10, 80 },
-    { ITEM_PP_UP, 85 },
-    { ITEM_RARE_CANDY, 90 },
-    { ITEM_NUGGET, 95 },
-    { ITEM_SPELON_BERRY, 96 },
-    { ITEM_PAMTRE_BERRY, 97 },
-    { ITEM_WATMEL_BERRY, 98 },
-    { ITEM_DURIN_BERRY, 99 },
-    { ITEM_BELUE_BERRY, 1 },
+static const u8 sPickupChances[PICKUP_ITEMS_PER_ROW] = { 30, 40, 50, 60, 70, 80, 90, 94, 98, 99, 100 }; // cumulative
 
+static const u16 sPickupItems[PICKUP_LEVEL_ROWS][PICKUP_ITEMS_PER_ROW] =
+{
+    // 1-10
+    { ITEM_POTION, ITEM_SUPER_POTION, ITEM_GREAT_BALL, ITEM_SUPER_REPEL, ITEM_ETHER, ITEM_FULL_HEAL, ITEM_ULTRA_BALL, ITEM_HYPER_POTION, ITEM_RARE_CANDY, ITEM_FULL_RESTORE, ITEM_NUGGET },
+    // 11-20
+    { ITEM_SUPER_POTION, ITEM_GREAT_BALL, ITEM_SUPER_REPEL, ITEM_ETHER, ITEM_FULL_HEAL, ITEM_ULTRA_BALL, ITEM_HYPER_POTION, ITEM_RARE_CANDY, ITEM_NUGGET, ITEM_NUGGET, ITEM_KINGS_ROCK },
+    // 21-30
+    { ITEM_GREAT_BALL, ITEM_SUPER_REPEL, ITEM_ETHER, ITEM_FULL_HEAL, ITEM_ULTRA_BALL, ITEM_HYPER_POTION, ITEM_RARE_CANDY, ITEM_NUGGET, ITEM_PP_UP, ITEM_KINGS_ROCK, ITEM_LEFTOVERS },
+    // 31-40
+    { ITEM_SUPER_REPEL, ITEM_ETHER, ITEM_FULL_HEAL, ITEM_ULTRA_BALL, ITEM_HYPER_POTION, ITEM_RARE_CANDY, ITEM_NUGGET, ITEM_PP_UP, ITEM_HP_UP, ITEM_LEFTOVERS, ITEM_BRIGHT_POWDER },
+    // 41-50
+    { ITEM_ETHER, ITEM_FULL_HEAL, ITEM_ULTRA_BALL, ITEM_HYPER_POTION, ITEM_RARE_CANDY, ITEM_NUGGET, ITEM_PP_UP, ITEM_HP_UP, ITEM_PROTEIN, ITEM_BRIGHT_POWDER, ITEM_WHITE_HERB },
+    // 51-60
+    { ITEM_FULL_HEAL, ITEM_ULTRA_BALL, ITEM_HYPER_POTION, ITEM_RARE_CANDY, ITEM_NUGGET, ITEM_PP_UP, ITEM_HP_UP, ITEM_PROTEIN, ITEM_IRON, ITEM_WHITE_HERB, ITEM_TM35_FLAMETHROWER },
+    // 61-70
+    { ITEM_ULTRA_BALL, ITEM_HYPER_POTION, ITEM_RARE_CANDY, ITEM_NUGGET, ITEM_PP_UP, ITEM_HP_UP, ITEM_PROTEIN, ITEM_IRON, ITEM_CARBOS, ITEM_TM35_FLAMETHROWER, ITEM_TM13_ICE_BEAM },
+    // 71-80
+    { ITEM_HYPER_POTION, ITEM_RARE_CANDY, ITEM_NUGGET, ITEM_PP_UP, ITEM_HP_UP, ITEM_PROTEIN, ITEM_IRON, ITEM_CARBOS, ITEM_ZINC, ITEM_TM13_ICE_BEAM, ITEM_TM24_THUNDERBOLT },
+    // 81-90
+    { ITEM_RARE_CANDY, ITEM_NUGGET, ITEM_PP_UP, ITEM_HP_UP, ITEM_PROTEIN, ITEM_IRON, ITEM_CARBOS, ITEM_ZINC, ITEM_MAX_REVIVE, ITEM_TM24_THUNDERBOLT, ITEM_TM26_EARTHQUAKE },
+    // 91-100
+    { ITEM_NUGGET, ITEM_PP_UP, ITEM_HP_UP, ITEM_PROTEIN, ITEM_IRON, ITEM_CARBOS, ITEM_ZINC, ITEM_MAX_REVIVE, ITEM_MAX_ELIXIR, ITEM_TM26_EARTHQUAKE, ITEM_RARE_CANDY },
 };
 
 static const u8 sTerrainToType[] =
@@ -992,6 +996,7 @@ static bool8 AccuracyCalcHelper(u16 move)
     gHitMarker &= ~HITMARKER_IGNORE_UNDERWATER;
 
     if ((WEATHER_HAS_EFFECT && (gBattleWeather & B_WEATHER_RAIN) && gBattleMoves[move].effect == EFFECT_THUNDER)
+     || (WEATHER_HAS_EFFECT && (gBattleWeather & B_WEATHER_HAIL) && move == MOVE_BLIZZARD) // Blizzard never misses in hail
      || (gBattleMoves[move].effect == EFFECT_ALWAYS_HIT || gBattleMoves[move].effect == EFFECT_VITAL_THROW))
     {
         JumpIfMoveFailed(7, move);
@@ -1051,7 +1056,12 @@ static void Cmd_accuracycheck(void)
         else
         {
             u8 acc = gBattleMons[gBattlerAttacker].statStages[STAT_ACC];
-            buff = acc + DEFAULT_STAT_STAGE - gBattleMons[gBattlerTarget].statStages[STAT_EVASION];
+            u8 evasion = gBattleMons[gBattlerTarget].statStages[STAT_EVASION];
+
+            // ILLUMINATE: the user ignores the target's evasion boosts
+            if (gBattleMons[gBattlerAttacker].ability == ABILITY_ILLUMINATE && evasion > DEFAULT_STAT_STAGE)
+                evasion = DEFAULT_STAT_STAGE;
+            buff = acc + DEFAULT_STAT_STAGE - evasion;
         }
 
         if (buff < MIN_STAT_STAGE)
@@ -1071,6 +1081,8 @@ static void Cmd_accuracycheck(void)
             calc = (calc * 130) / 100; // 1.3 compound eyes boost
         if (WEATHER_HAS_EFFECT && gBattleMons[gBattlerTarget].ability == ABILITY_SAND_VEIL && gBattleWeather & B_WEATHER_SANDSTORM)
             calc = (calc * 80) / 100; // 1.2 sand veil loss
+        if (gBattleMons[gBattlerTarget].ability == ABILITY_STENCH)
+            calc = (calc * 80) / 100; // STENCH: always raises evasion, same amount as SAND VEIL
         if (gBattleMons[gBattlerAttacker].ability == ABILITY_HUSTLE && IS_TYPE_PHYSICAL(type))
             calc = (calc * 80) / 100; // 1.2 hustle loss
 
@@ -4013,7 +4025,7 @@ static void Cmd_playstatchangeanimation(void)
                 else if (!gSideTimers[GET_BATTLER_SIDE(gActiveBattler)].mistTimer
                         && gBattleMons[gActiveBattler].ability != ABILITY_CLEAR_BODY
                         && gBattleMons[gActiveBattler].ability != ABILITY_WHITE_SMOKE
-                        && !(gBattleMons[gActiveBattler].ability == ABILITY_KEEN_EYE && currStat == STAT_ACC)
+                        && !((gBattleMons[gActiveBattler].ability == ABILITY_KEEN_EYE || gBattleMons[gActiveBattler].ability == ABILITY_ILLUMINATE) && currStat == STAT_ACC)
                         && !(gBattleMons[gActiveBattler].ability == ABILITY_HYPER_CUTTER && currStat == STAT_ATK))
                 {
                     if (gBattleMons[gActiveBattler].statStages[currStat] > MIN_STAT_STAGE)
@@ -5232,33 +5244,26 @@ static void Cmd_yesnoboxlearnmove(void)
             else
             {
                 u16 moveId = GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_MOVE1 + movePosition);
-                
-                if (IsHMMove2(moveId))
+
+                // HMs can be forgotten too (no IsHMMove2 check here)
+                gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + 1);
+
+                PREPARE_MOVE_BUFFER(gBattleTextBuff2, moveId)
+
+                RemoveMonPPBonus(&gPlayerParty[gBattleStruct->expGetterMonId], movePosition);
+                SetMonMoveSlot(&gPlayerParty[gBattleStruct->expGetterMonId], gMoveToLearn, movePosition);
+
+                if (gBattlerPartyIndexes[0] == gBattleStruct->expGetterMonId && MOVE_IS_PERMANENT(0, movePosition))
                 {
-                    PrepareStringBattle(STRINGID_HMMOVESCANTBEFORGOTTEN, gActiveBattler);
-                    gBattleScripting.learnMoveState = 5;
+                    RemoveBattleMonPPBonus(&gBattleMons[0], movePosition);
+                    SetBattleMonMoveSlot(&gBattleMons[0], gMoveToLearn, movePosition);
                 }
-                else
+                if (gBattleTypeFlags & BATTLE_TYPE_DOUBLE
+                    && gBattlerPartyIndexes[2] == gBattleStruct->expGetterMonId
+                    && MOVE_IS_PERMANENT(2, movePosition))
                 {
-                    gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + 1);
-
-                    PREPARE_MOVE_BUFFER(gBattleTextBuff2, moveId)
-
-                    RemoveMonPPBonus(&gPlayerParty[gBattleStruct->expGetterMonId], movePosition);
-                    SetMonMoveSlot(&gPlayerParty[gBattleStruct->expGetterMonId], gMoveToLearn, movePosition);
-
-                    if (gBattlerPartyIndexes[0] == gBattleStruct->expGetterMonId && MOVE_IS_PERMANENT(0, movePosition))
-                    {
-                        RemoveBattleMonPPBonus(&gBattleMons[0], movePosition);
-                        SetBattleMonMoveSlot(&gBattleMons[0], gMoveToLearn, movePosition);
-                    }
-                    if (gBattleTypeFlags & BATTLE_TYPE_DOUBLE
-                        && gBattlerPartyIndexes[2] == gBattleStruct->expGetterMonId
-                        && MOVE_IS_PERMANENT(2, movePosition))
-                    {
-                        RemoveBattleMonPPBonus(&gBattleMons[2], movePosition);
-                        SetBattleMonMoveSlot(&gBattleMons[2], gMoveToLearn, movePosition);
-                    }
+                    RemoveBattleMonPPBonus(&gBattleMons[2], movePosition);
+                    SetBattleMonMoveSlot(&gBattleMons[2], gMoveToLearn, movePosition);
                 }
             }
         }
@@ -6750,7 +6755,7 @@ static u8 ChangeStatBuffs(s8 statValue, u8 statId, u8 flags, const u8 *BS_ptr)
             }
             return STAT_CHANGE_DIDNT_WORK;
         }
-        else if (gBattleMons[gActiveBattler].ability == ABILITY_KEEN_EYE
+        else if ((gBattleMons[gActiveBattler].ability == ABILITY_KEEN_EYE || gBattleMons[gActiveBattler].ability == ABILITY_ILLUMINATE)
                  && !certain && statId == STAT_ACC)
         {
             if (flags == STAT_CHANGE_ALLOW_PTR)
@@ -9302,11 +9307,14 @@ static void Cmd_pickup(void)
         if (ability == ABILITY_PICKUP && species != SPECIES_NONE && species != SPECIES_EGG && heldItem == ITEM_NONE && !(Random() % 10))
         {
             s32 random = Random() % 100;
+            u32 row = (GetMonData(&gPlayerParty[i], MON_DATA_LEVEL) - 1) / 10;
 
-            for (j = 0; j < 15; ++j)
-                if (sPickupItems[j].chance > random)
+            if (row >= PICKUP_LEVEL_ROWS)
+                row = PICKUP_LEVEL_ROWS - 1;
+            for (j = 0; j < PICKUP_ITEMS_PER_ROW - 1; ++j)
+                if (sPickupChances[j] > random)
                     break;
-            SetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM, &sPickupItems[j]);
+            SetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM, &sPickupItems[row][j]);
         }
     }
     gBattlescriptCurrInstr++;

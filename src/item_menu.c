@@ -167,6 +167,7 @@ static void Task_Bag_TeachyTvStatus(u8 taskId);
 static void Task_Bag_TeachyTvTMs(u8 taskId);
 //bag sort
 static void Task_LoadBagSortOptions(u8 taskId);
+static void Task_CloseNothingToSortMessage(u8 taskId);
 static void ItemMenu_SortByName(u8 taskId);
 static void ItemMenu_SortByType(u8 taskId);
 static void ItemMenu_SortByAmount(u8 taskId);
@@ -1096,53 +1097,25 @@ static void Task_BagMenu_HandleInput(u8 taskId)
                 return;
             }
         }
-        else if (JOY_NEW(START_BUTTON))
+        else if (JOY_NEW(START_BUTTON) && gBagMenuState.location == ITEMMENULOCATION_FIELD)
         {
-            if ((sBagMenuDisplay->nItems[gBagMenuState.pocket]) <= 1)
-            {
-                PlaySE(SE_FAILURE);
-                DisplayItemMessageInBag(taskId, 2, sText_NothingToSort, Task_WaitAButtonAndCloseContextMenu);
-                break;
-            }
-            data[1] = ListMenu_ProcessInput(data[0]);
-            data[2] = BagGetQuantityByPocketPosition(gBagMenuState.pocket + 1, data[1]);
-            if (cursorPos + itemsAbove != sBagMenuDisplay->nItems[gBagMenuState.pocket])
-                gSpecialVar_ItemId = BagGetItemIdByPocketPosition(gBagMenuState.pocket + 1, data[1]);
-            else
-                break;
-
-            PlaySE(SE_SELECT);
+            // Bag sort. Only in the field, like SELECT (move item).
+            // The arrows are destroyed here and created again when returning to the
+            // list (Task_ReturnToBagFromContextMenu), so they are never duplicated.
             BagDestroyPocketScrollArrowPair();
             bag_menu_print_cursor_(data[0], 2);
-            ListMenuGetScrollAndRow(data[0], &cursorPos, &itemsAbove);
-            gTasks[taskId].func = Task_LoadBagSortOptions;
-        }
-        else
-        {
-            input = ListMenu_ProcessInput(data[0]);
-            ListMenuGetScrollAndRow(data[0], &cursorPos, &itemsAbove);
-            switch (input)
+            if (sBagMenuDisplay->nItems[gBagMenuState.pocket] <= 1)
             {
-                case LIST_NOTHING_CHOSEN:
-                    return;
-                case LIST_CANCEL:
-                    // if BERRY CRUSH
-                    //    PlaySE(SE_FAILURE);
-                    //    break;
-                    PlaySE(SE_SELECT);
-                    gSpecialVar_ItemId = ITEM_NONE;
-                    gTasks[taskId].func = ItemMenu_StartFadeToExitCallback;
-                default:
-                    PlaySE(SE_SELECT);
-                    BagDestroyPocketScrollArrowPair();
-                    bag_menu_print_cursor_(data[0], 2);
-                    data[1] = input;
-                    data[2] = BagGetQuantityByPocketPosition(gBagMenuState.pocket + 1, input);
-                    gSpecialVar_ItemId = BagGetItemIdByPocketPosition(gBagMenuState.pocket + 1, input);
-                    gTasks[taskId].func = Task_ItemContextMenuByLocation;
-                    break;
+                PlaySE(SE_FAILURE);
+                DisplayItemMessageInBag(taskId, 2, sText_NothingToSort, Task_CloseNothingToSortMessage);
             }
-        }        
+            else
+            {
+                PlaySE(SE_SELECT);
+                gTasks[taskId].func = Task_LoadBagSortOptions;
+            }
+            return;
+        }
         break;
     }
     input = ListMenu_ProcessInput(data[0]);
@@ -1523,7 +1496,6 @@ static void OpenContextMenu(u8 taskId)
        StringExpandPlaceholders(gStringVar4, gText_Var1IsSelected);
     }
 // === HARD/EXPERT: mensagem — END ===
-    StringExpandPlaceholders(gStringVar4, gText_Var1IsSelected);
     BagPrintTextOnWindow(r4, FONT_NORMAL, gStringVar4, 0, 2, 1, 0, 0, 1);
 }
 
@@ -1766,8 +1738,13 @@ static void Task_UnusedReturnToBag(u8 taskId)
 
 static void Task_ItemMenuAction_Cancel(u8 taskId)
 {
+    u16 cursorPos, itemsAbove;
+
     HideBagWindow(10);
     HideBagWindow(6);
+    // The sort menu prints "Sort items how?" in the description box: put the description back
+    ListMenuGetScrollAndRow(gTasks[taskId].data[0], &cursorPos, &itemsAbove);
+    PrintItemDescriptionOnMessageWindow(cursorPos + itemsAbove);
     PutWindowTilemap(0);
     PutWindowTilemap(1);
     ScheduleBgCopyTilemapToVram(0);
@@ -2555,7 +2532,6 @@ static const u8 sBagMenuSortPokeBalls[] =
 {
     ITEMMENUACTION_BY_NAME,
     ITEMMENUACTION_BY_AMOUNT,
-    ITEMMENUACTION_DUMMY,
     ITEMMENUACTION_CANCEL,
 };
 
@@ -3053,6 +3029,16 @@ static void AddBagSortSubMenu(void)
     windowId = ShowBagWindow(10, sContextMenuNumItems -1);
     AddItemMenuActionTextPrinters(windowId, 2, GetMenuCursorDimensionByFont(2, 0), 4, GetFontAttribute(2, FONTATTR_LETTER_SPACING), GetFontAttribute(2, FONTATTR_MAX_LETTER_HEIGHT) + 2, sContextMenuNumItems, sItemMenuContextActions, sContextMenuItemsPtr);
     Menu_InitCursor              (windowId, 2, 0, 2, GetFontAttribute(2, FONTATTR_MAX_LETTER_HEIGHT) + 2, sContextMenuNumItems, 0);
+}
+
+// "There's nothing to sort!" closes with A or B
+static void Task_CloseNothingToSortMessage(u8 taskId)
+{
+    if (JOY_NEW(A_BUTTON | B_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        Task_ReturnToBagFromContextMenu(taskId);
+    }
 }
 
 static void Task_LoadBagSortOptions(u8 taskId)
