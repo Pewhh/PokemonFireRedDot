@@ -1123,37 +1123,75 @@ static u8 GetMaxLevelForTrainer(u16 trainerId)
     return maxLvl;
 }
 
+// Treinador cujo time define o cap, pela QUANTIDADE de insígnias (não por qual insígnia).
+// Posições 4, 5 e 6 (Erika/Koga/Sabrina em qualquer ordem) usam o mesmo cap por posição.
+// Provisório: enquanto os times "por posição" não existem, o cap de cada posição é lido
+// do time abaixo (maior nível do time em trainer_parties.h).
+static const u16 sLevelCapTrainerByBadgeCount[NUM_BADGES] =
+{
+    [0] = TRAINER_LEADER_BROCK,     // antes da 1ª insígnia
+    [1] = TRAINER_LEADER_MISTY,     // antes da 2ª
+    [2] = TRAINER_LEADER_LT_SURGE,  // antes da 3ª
+    [3] = TRAINER_LEADER_ERIKA,     // antes da 4ª (qualquer um dos três)
+    [4] = TRAINER_LEADER_KOGA,      // antes da 5ª
+    [5] = TRAINER_LEADER_SABRINA,   // antes da 6ª
+    [6] = TRAINER_LEADER_BLAINE,    // antes da 7ª
+    [7] = TRAINER_LEADER_GIOVANNI,  // antes da 8ª
+};
+
+u8 GetBadgeCount(void)
+{
+    u8 i, count = 0;
+
+    for (i = 0; i < NUM_BADGES; i++)
+    {
+        if (FlagGet(FLAG_BADGE01_GET + i))
+            count++;
+    }
+    return count;
+}
+
+// Para scripts: specialvar VAR_RESULT, GetBadgeCountForScript
+u16 GetBadgeCountForScript(void)
+{
+    return GetBadgeCount();
+}
+
+// Maior nível entre as três variantes do Campeão (uma por inicial).
+static u8 GetMaxLevelForChampion(u16 squirtle, u16 bulbasaur, u16 charmander)
+{
+    u8 cap = GetMaxLevelForTrainer(squirtle);
+
+    if (GetMaxLevelForTrainer(bulbasaur) > cap)
+        cap = GetMaxLevelForTrainer(bulbasaur);
+    if (GetMaxLevelForTrainer(charmander) > cap)
+        cap = GetMaxLevelForTrainer(charmander);
+    return cap;
+}
+
+static bool8 HasBeatenChampionRematch(void)
+{
+    return HasTrainerBeenFought(TRAINER_CHAMPION_REMATCH_SQUIRTLE)
+        || HasTrainerBeenFought(TRAINER_CHAMPION_REMATCH_BULBASAUR)
+        || HasTrainerBeenFought(TRAINER_CHAMPION_REMATCH_CHARMANDER);
+}
+
 u8 getLevelCap(void)
 {
-    u16 nextLeader = TRAINER_CHAMPION_FIRST_CHARMANDER; // default seguro
+    u8 badges;
     u8 cap;
 
-    // Sem modos ativos (HARD/HARDCORE/EXPERT) ou já Campeão → sem cap
-    if (!(FlagGet(FLAG_HARD) || FlagGet(FLAG_HARDCORE) || FlagGet(FLAG_EXPERT)) || FlagGet(FLAG_IS_CHAMPION))
-        return 100;
+    // Sem modo com cap (Hard/Hardcore/Expert) ou já venceu a Liga pela segunda vez → sem cap
+    if (!IsLevelCapModeActive() || HasBeatenChampionRematch())
+        return MAX_LEVEL;
 
-    // Decide o "próximo chefe" pelo progresso de insígnias/flags
-    if (!FlagGet(FLAG_BADGE01_GET))
-        nextLeader = TRAINER_LEADER_BROCK;
-    else if (!FlagGet(FLAG_BADGE02_GET))
-        nextLeader = TRAINER_LEADER_MISTY;
-    else if (!FlagGet(FLAG_BADGE03_GET))
-        nextLeader = TRAINER_LEADER_LT_SURGE;
-    else if (!FlagGet(FLAG_BADGE04_GET))
-        nextLeader = TRAINER_LEADER_ERIKA;
-    else if (!FlagGet(FLAG_BADGE05_GET))
-        nextLeader = TRAINER_LEADER_KOGA;
-    else if (!FlagGet(FLAG_BADGE06_GET))
-        nextLeader = TRAINER_LEADER_SABRINA;   // use o ID que você de fato usa aqui
-    else if (!FlagGet(FLAG_BADGE07_GET))
-        nextLeader = TRAINER_LEADER_BLAINE;
-    else if (!FlagGet(FLAG_BADGE08_GET))
-        nextLeader = TRAINER_LEADER_GIOVANNI;
-    else
-        nextLeader = TRAINER_CHAMPION_FIRST_CHARMANDER; // pós-8 insígnias
-
-    // Cap = maior nível do time desse treinador-alvo
-    cap = GetMaxLevelForTrainer(nextLeader);
+    badges = GetBadgeCount();
+    if (badges < NUM_BADGES)
+        cap = GetMaxLevelForTrainer(sLevelCapTrainerByBadgeCount[badges]);
+    else if (!FlagGet(FLAG_SYS_GAME_CLEAR))  // Elite 4 / Campeão, 1ª vez
+        cap = GetMaxLevelForChampion(TRAINER_CHAMPION_FIRST_SQUIRTLE, TRAINER_CHAMPION_FIRST_BULBASAUR, TRAINER_CHAMPION_FIRST_CHARMANDER);
+    else                                     // Elite 4 / Campeão, 2ª vez
+        cap = GetMaxLevelForChampion(TRAINER_CHAMPION_REMATCH_SQUIRTLE, TRAINER_CHAMPION_REMATCH_BULBASAUR, TRAINER_CHAMPION_REMATCH_CHARMANDER);
 
     // fallback defensivo: se algo vier 0, usa um valor razoável
     if (cap == 0)
@@ -1162,14 +1200,14 @@ u8 getLevelCap(void)
     return cap;
 }
 
-static inline bool8 LevelCapIsActive(void)
+bool8 IsLevelCapModeActive(void)
 {
     return (FlagGet(FLAG_HARD) || FlagGet(FLAG_HARDCORE) || FlagGet(FLAG_EXPERT));
 }
 
 bool8 levelCappedNuzlocke(u8 level)
 {
-    if (!LevelCapIsActive())
+    if (!IsLevelCapModeActive())
         return FALSE;
 
     return (level >= getLevelCap());

@@ -21,11 +21,13 @@ SaffronCity_Gym_EventScript_DefeatedSabrina::
 	setflag FLAG_DEFEATED_SABRINA
 	setflag FLAG_BADGE06_GET
 	set_gym_trainers 6
+	msgbox SaffronCity_Gym_Text_MarshBadge
+	call EventScript_ExplainBadgeByPosition
 	goto SaffronCity_Gym_EventScript_GiveTM04
 	end
 
 SaffronCity_Gym_EventScript_GiveTM04::
-	msgbox SaffronCity_Gym_Text_ExplainMarshBadgeTakeThis
+	msgbox SaffronCity_Gym_Text_TakeThisTM04
 	checkitemspace ITEM_TM04
 	goto_if_eq VAR_RESULT, FALSE, SaffronCity_Gym_EventScript_NoRoomForTM04
 	giveitem_msg SaffronCity_Gym_Text_ReceivedTM04FromSabrina, ITEM_TM04

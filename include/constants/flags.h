@@ -1371,6 +1371,15 @@
 #define FLAG_BADGE08_GET                                            (SYS_FLAGS + 0x27)
 #define NUM_BADGES                                                  (1 + FLAG_BADGE08_GET - FLAG_BADGE01_GET)
 
+// Liberações pela QUANTIDADE de insígnias (a ordem entre Erika, Koga e Sabrina é livre)
+#define BADGES_FOR_FLASH        1
+#define BADGES_FOR_CUT          2
+#define BADGES_FOR_FLY          3
+#define BADGES_FOR_STRENGTH     4
+#define BADGES_FOR_ROCK_SMASH   5
+#define BADGES_FOR_SURF         6   // garante o Blaine sempre como 7º
+#define BADGES_FOR_WATERFALL    7
+
 #define FLAG_SYS_POKEMON_GET                                        (SYS_FLAGS + 0x28)
 #define FLAG_SYS_POKEDEX_GET                                        (SYS_FLAGS + 0x29)
 #define FLAG_0x82A                                                  (SYS_FLAGS + 0x2A)

@@ -1937,7 +1937,7 @@ static void MoveBattleBarGraphically(u8 battlerId, u8 whichBar)
                             filledPixels,
                             B_EXPBAR_NUM_TILES);
         level = GetMonData(&gPlayerParty[gBattlerPartyIndexes[battlerId]], MON_DATA_LEVEL);
-        if (level == MAX_LEVEL || levelCappedNuzlocke(level))
+        if (level == MAX_LEVEL)
         {
             for (i = 0; i < B_EXPBAR_NUM_TILES; i++)
                 filledPixels[i] = 0;

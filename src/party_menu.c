@@ -2965,14 +2965,33 @@ static void SetPartyMonSelectionActions(struct Pokemon *mons, u8 slotId, u8 acti
     }
 }
 
+// HMs liberados pela QUANTIDADE de insígnias (não por qual líder foi vencido).
+static const u8 sBadgesForFieldMove[FIELD_MOVE_WATERFALL + 1] =
+{
+    [FIELD_MOVE_FLASH]      = BADGES_FOR_FLASH,
+    [FIELD_MOVE_CUT]        = BADGES_FOR_CUT,
+    [FIELD_MOVE_FLY]        = BADGES_FOR_FLY,
+    [FIELD_MOVE_STRENGTH]   = BADGES_FOR_STRENGTH,
+    [FIELD_MOVE_SURF]       = BADGES_FOR_SURF,
+    [FIELD_MOVE_ROCK_SMASH] = BADGES_FOR_ROCK_SMASH,
+    [FIELD_MOVE_WATERFALL]  = BADGES_FOR_WATERFALL,
+};
+
+static bool8 HasBadgeForFieldMove(u8 fieldMove)
+{
+    return GetBadgeCount() >= sBadgesForFieldMove[fieldMove];
+}
+
 static void SetPartyMonFieldSelectionActions(struct Pokemon *mons, u8 slotId)
 {
     u8 i, j;
+    // Hardcore/Expert: Pokémon morto não usa golpes de campo
+    bool8 isDead = (FlagGet(FLAG_HARDCORE) || FlagGet(FLAG_EXPERT)) && GetMonData(&mons[slotId], MON_DATA_DEAD);
 
     sPartyMenuInternal->numActions = 0;
     AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, CURSOR_OPTION_SUMMARY);
     // Add field moves to action list
-    for (i = 0; i < MAX_MON_MOVES; ++i)
+    for (i = 0; i < MAX_MON_MOVES && !isDead; ++i)
     {
         for (j = 0; sFieldMoves[j] != FIELD_MOVE_END; ++j)
         {
@@ -3927,7 +3946,7 @@ static void CursorCB_FieldMove(u8 taskId)
     else
     {
         // All field moves before WATERFALL are HMs.
-        if (fieldMove <= FIELD_MOVE_WATERFALL && FlagGet(FLAG_BADGE01_GET + fieldMove) != TRUE)
+        if (fieldMove <= FIELD_MOVE_WATERFALL && !HasBadgeForFieldMove(fieldMove))
         {
             DisplayPartyMenuMessage(gText_CantUseUntilNewBadge, TRUE);
             gTasks[taskId].func = Task_ReturnToChooseMonAfterText;

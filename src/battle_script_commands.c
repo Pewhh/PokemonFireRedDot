@@ -3148,6 +3148,106 @@ static void Cmd_jumpiftype(void)
         gBattlescriptCurrInstr += 7;
 }
 
+// ---- Soft level cap (Hard/Hardcore/Expert) e EXP por time (todos os modos) ----
+// Bônus/redução de EXP conforme a distância do Pokémon para o nível médio do time.
+// Índice = (nível do Pokémon - nível do time) + 14, limitado entre -14 e +12. Valores em %.
+static const u16 sRelativePartyScaling[27] =
+{
+    300, 275, 250, 233, 225, // -14 a -10
+    200, 180, 170, 160, 150, //  -9 a  -5
+    140, 130, 120, 110, 100, //  -4 a   0
+     90,  80,  75,  66,  50, //  +1 a  +5
+     40,  33,  25,  20,  15, //  +6 a +10
+     10,   5,                // +11 a +12
+};
+
+// Entra na média do time: não é ovo e não está morto (Hardcore/Expert).
+static bool8 CountsForTeamLevel(struct Pokemon *mon)
+{
+    if (GetMonData(mon, MON_DATA_SPECIES) == SPECIES_NONE || GetMonData(mon, MON_DATA_IS_EGG))
+        return FALSE;
+    if ((FlagGet(FLAG_HARDCORE) || FlagGet(FLAG_EXPERT)) && GetMonData(mon, MON_DATA_DEAD))
+        return FALSE;
+    return TRUE;
+}
+
+// Média do time ignorando quem está muito abaixo (menos de 80% da média simples).
+static u8 GetTeamLevel(void)
+{
+    u32 sum = 0, count = 0, threshold;
+    u8 i, level;
+
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        if (CountsForTeamLevel(&gPlayerParty[i]))
+        {
+            sum += GetMonData(&gPlayerParty[i], MON_DATA_LEVEL);
+            count++;
+        }
+    }
+    if (count == 0)
+        return 0;
+
+    threshold = (sum / count) * 80 / 100;
+    sum = 0;
+    count = 0;
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        if (CountsForTeamLevel(&gPlayerParty[i]))
+        {
+            level = GetMonData(&gPlayerParty[i], MON_DATA_LEVEL);
+            if (level >= threshold)
+            {
+                sum += level;
+                count++;
+            }
+        }
+    }
+    return SAFE_DIV(sum, count); // divide só por quem entrou na soma
+}
+
+static u16 GetPartyScalingPercent(u8 level)
+{
+    s32 diff = (s32)level - GetTeamLevel();
+
+    if (diff > 12)
+        diff = 12;
+    else if (diff < -14)
+        diff = -14;
+    return sRelativePartyScaling[diff + 14];
+}
+
+// Aplica o bônus do time (todos os modos) e o soft cap (Hard/Hardcore/Expert).
+static s32 ApplyLevelCapToExp(struct Pokemon *mon, s32 exp)
+{
+    u32 curExp, capExp;
+    u16 species;
+
+    if (exp <= 0)
+        return exp;
+
+    // Bônus do time: vale em todos os modos
+    exp = exp * GetPartyScalingPercent(GetMonData(mon, MON_DATA_LEVEL)) / 100;
+    if (exp == 0)
+        exp = 1;
+
+    // Corte no level cap: só Hard, Hardcore e Expert
+    if (!IsLevelCapModeActive())
+        return exp;
+
+    // Soft cap: a EXP que passa do nível do cap rende só 10%
+    species = GetMonData(mon, MON_DATA_SPECIES);
+    curExp = GetMonData(mon, MON_DATA_EXP);
+    capExp = gExperienceTables[gSpeciesInfo[species].growthRate][getLevelCap()];
+    if (curExp >= capExp)
+        exp = exp * LEVEL_CAP_EXP_PERCENT / 100;
+    else if (curExp + exp > capExp)
+        exp = (capExp - curExp) + (curExp + exp - capExp) * LEVEL_CAP_EXP_PERCENT / 100;
+    if (exp == 0)
+        exp = 1;
+    return exp;
+}
+
 static void Cmd_getexp(void)
 {
     u16 item;
@@ -3281,6 +3381,9 @@ static void Cmd_getexp(void)
                     {
                         i = STRINGID_EMPTYSTRING4;
                     }
+
+                    // Level cap: bônus do time + corte para não passar do cap
+                    gBattleMoveDamage = ApplyLevelCapToExp(&gPlayerParty[gBattleStruct->expGetterMonId], gBattleMoveDamage);
 
                     // get exp getter battlerId
                     if (gBattleTypeFlags & BATTLE_TYPE_DOUBLE)

@@ -31,6 +31,8 @@
 #include "constants/region_map_sections.h"
 #include "battle_setup.h"
 
+static u32 ClampDaycareExpToLevelCap(u16 species, u32 oldExp, u32 newExp);
+
 // Combination of RSE's Day-Care (re-used on Four Island), FRLG's Day-Care, and egg_hatch.c
 
 extern const struct Evolution gEvolutionTable[][EVOS_PER_MON];
@@ -518,7 +520,9 @@ static u16 TakeSelectedPokemonFromDaycare(struct DaycareMon *daycareMon)
 
     if (GetMonData(&pokemon, MON_DATA_LEVEL) != MAX_LEVEL)
     {
-        experience = GetMonData(&pokemon, MON_DATA_EXP) + daycareMon->steps;
+        experience = ClampDaycareExpToLevelCap(GetMonData(&pokemon, MON_DATA_SPECIES),
+                                               GetMonData(&pokemon, MON_DATA_EXP),
+                                               GetMonData(&pokemon, MON_DATA_EXP) + daycareMon->steps);
         SetMonData(&pokemon, MON_DATA_EXP, &experience);
         ApplyDaycareExperience(&pokemon);
     }
@@ -549,11 +553,27 @@ u16 TakePokemonFromDaycare(void)
     return TakeSelectedPokemonMonFromDaycareShiftSlots(&gSaveBlock1Ptr->daycare, gSpecialVar_0x8004);
 }
 
+// Soft cap (Hard/Hardcore/Expert): a EXP do Day Care acima do cap rende só 10%.
+static u32 ClampDaycareExpToLevelCap(u16 species, u32 oldExp, u32 newExp)
+{
+    u32 capExp, base;
+
+    if (!IsLevelCapModeActive())
+        return newExp;
+    capExp = gExperienceTables[gSpeciesInfo[species].growthRate][getLevelCap()];
+    if (newExp <= capExp)
+        return newExp;
+    base = (oldExp > capExp) ? oldExp : capExp; // daqui para cima vale 10%
+    return base + (newExp - base) * LEVEL_CAP_EXP_PERCENT / 100;
+}
+
 static u8 GetLevelAfterDaycareSteps(struct BoxPokemon *mon, u32 steps)
 {
     struct BoxPokemon tempMon = *mon;
 
-    u32 experience = GetBoxMonData(mon, MON_DATA_EXP) + steps;
+    u32 experience = ClampDaycareExpToLevelCap(GetBoxMonData(mon, MON_DATA_SPECIES),
+                                               GetBoxMonData(mon, MON_DATA_EXP),
+                                               GetBoxMonData(mon, MON_DATA_EXP) + steps);
     SetBoxMonData(&tempMon, MON_DATA_EXP,  &experience);
     return GetLevelFromBoxMonExp(&tempMon);
 }

@@ -456,4 +456,5 @@ gSpecials::
 	def_special Special_SetVersionFireRed
 	def_special Special_SetVersionLeafGreen
 	def_special Special_GetActiveVersion
+	def_special GetBadgeCountForScript
 gSpecialsEnd::

@@ -21,13 +21,11 @@ SaffronCity_Gym_Text_SabrinaPostBattle::
     .string "Everyone has psychic power.\n"
     .string "People just don't realize it.$"
 
-SaffronCity_Gym_Text_ExplainMarshBadgeTakeThis::
-    .string "The MARSHBADGE makes POKéMON up\n"
-    .string "to Lv. 70 obey you.\p"
-    .string "Stronger POKéMON will become wild,\n"
-    .string "ignoring your orders in battle.\p"
-    .string "Just don't raise your POKéMON too\n"
-    .string "much to avoid that problem.\p"
+SaffronCity_Gym_Text_MarshBadge::
+    .string "The MARSHBADGE...\n"
+    .string "I foresaw this outcome.$"
+
+SaffronCity_Gym_Text_TakeThisTM04::
     .string "Wait, please take this TM with you.$"
 
 SaffronCity_Gym_Text_ReceivedTM04FromSabrina::

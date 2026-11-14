@@ -35,6 +35,12 @@ const u8 *GetTrainerALoseText(void);
 const u8 *GetTrainerWonSpeech(void);
 u8  getLevelCap(void);
 bool8 levelCappedNuzlocke(u8 level);
+bool8 IsLevelCapModeActive(void);
+u8 GetBadgeCount(void);
+u16 GetBadgeCountForScript(void);
+
+// Soft cap: % da EXP recebida acima do nível do cap (Hard/Hardcore/Expert)
+#define LEVEL_CAP_EXP_PERCENT 10
 bool8 ExpertPartyLimitActive(void);
 u8  GetOpponentPartyLimit(void);
 bool8 IsGymLeaderTrainer(u16 trainerId);

@@ -1773,7 +1773,7 @@ bool8 ScrCmd_checkpartymove(struct ScriptContext * ctx)
         if (!species)
             break;
             if (!GetMonData(&gPlayerParty[i], MON_DATA_IS_EGG) && MonKnowsMove(&gPlayerParty[i], moveId) == TRUE
-            && !(GetMonData(&gPlayerParty[i], MON_DATA_DEAD) && FlagGet(FLAG_HARDCORE) && FlagGet(FLAG_EXPERT)))
+            && !(GetMonData(&gPlayerParty[i], MON_DATA_DEAD) && (FlagGet(FLAG_HARDCORE) || FlagGet(FLAG_EXPERT))))
             // Nuzlocke check to stop a dead Pokemon from using field moves.
         {
             gSpecialVar_Result = i;

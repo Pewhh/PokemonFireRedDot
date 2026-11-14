@@ -20,11 +20,13 @@ FuchsiaCity_Gym_EventScript_DefeatedKoga::
 	setflag FLAG_DEFEATED_KOGA
 	setflag FLAG_BADGE05_GET
 	set_gym_trainers 5
+	msgbox FuchsiaCity_Gym_Text_KogaSoulBadge
+	call EventScript_ExplainBadgeByPosition
 	goto FuchsiaCity_Gym_EventScript_GiveTM06
 	end
 
 FuchsiaCity_Gym_EventScript_GiveTM06::
-	msgbox FuchsiaCity_Gym_Text_KogaExplainSoulBadge
+	msgbox FuchsiaCity_Gym_Text_KogaTakeThisTM06
 	checkitemspace ITEM_TM06
 	goto_if_eq VAR_RESULT, FALSE, FuchsiaCity_Gym_EventScript_NoRoomForTM06
 	giveitem_msg FuchsiaCity_Gym_Text_ReceivedTM06FromKoga, ITEM_TM06

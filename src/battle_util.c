@@ -1,4 +1,5 @@
 #include "global.h"
+#include "battle_setup.h"
 #include "item.h"
 #include "text.h"
 #include "util.h"
@@ -3155,16 +3156,17 @@ u8 IsMonDisobedient(void)
     {
         if (!IsOtherTrainer(gBattleMons[gBattlerAttacker].otId, gBattleMons[gBattlerAttacker].otName))
             return 0;
-        if (FlagGet(FLAG_BADGE08_GET))
+        // Obediência pela QUANTIDADE de insígnias
+        if (GetBadgeCount() >= 8)
             return 0;
 
         obedienceLevel = 10;
 
-        if (FlagGet(FLAG_BADGE02_GET))
+        if (GetBadgeCount() >= 2)
             obedienceLevel = 30;
-        if (FlagGet(FLAG_BADGE04_GET))
+        if (GetBadgeCount() >= 4)
             obedienceLevel = 50;
-        if (FlagGet(FLAG_BADGE06_GET))
+        if (GetBadgeCount() >= 6)
             obedienceLevel = 70;
     }
 
