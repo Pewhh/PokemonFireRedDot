@@ -36,3 +36,19 @@ PokemonTower_2F_Text_SilphScopeCouldUnmaskGhosts::
     .string "A SILPH SCOPE might be able to\n"
     .string "unmask them.$"
 
+
+PokemonTower_2F_Text_RivalEeveeJolteon::
+    .string "{RIVAL}: You beat me twice,\n"
+    .string "so I got serious.\p"
+    .string "My EEVEE needed more SPEED!$"
+
+PokemonTower_2F_Text_RivalEeveeVaporeon::
+    .string "{RIVAL}: We're even. One win each.\p"
+    .string "So I made my EEVEE tough enough\n"
+    .string "to outlast you!$"
+
+PokemonTower_2F_Text_RivalEeveeFlareon::
+    .string "{RIVAL}: You couldn't even beat me\n"
+    .string "back at the lab!\p"
+    .string "So I made my EEVEE into something\n"
+    .string "cool. Just like me!$"

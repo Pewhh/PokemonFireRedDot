@@ -296,6 +296,7 @@ PalletTown_ProfessorOaksLab_EventScript_RivalBattle::
 	closemessage
 	applymovement LOCALID_OAKS_LAB_PROF_OAK, Common_Movement_FaceDown
 	waitmovement 0
+	goto_if_eq VAR_STARTER_MON, STARTER_MON_OAK_OTHER, PalletTown_ProfessorOaksLab_EventScript_RivalApproachForBattleEevee
 	goto_if_eq VAR_STARTER_MON, 0, PalletTown_ProfessorOaksLab_EventScript_RivalApproachForBattleCharmander
 	goto_if_eq VAR_STARTER_MON, 1, PalletTown_ProfessorOaksLab_EventScript_RivalApproachForBattleBulbasaur
 	goto_if_eq VAR_STARTER_MON, 2, PalletTown_ProfessorOaksLab_EventScript_RivalApproachForBattleSquirtle
@@ -465,6 +466,7 @@ PalletTown_ProfessorOaksLab_Movement_RivalApproachForBattleBulbasaurRight::
 	step_end
 
 PalletTown_ProfessorOaksLab_EventScript_EndRivalBattle::
+	call_if_eq VAR_RESULT, FALSE, PalletTown_ProfessorOaksLab_EventScript_AddRivalEeveeWin @ VAR_RESULT FALSE = jogador venceu
 	special HealPlayerParty
 	msgbox PalletTown_ProfessorOaksLab_Text_RivalGoToughenMyMon
 	closemessage
@@ -576,6 +578,7 @@ PalletTown_ProfessorOaksLab_EventScript_ProfOak::
 	goto_if_ge VAR_MAP_SCENE_VIRIDIAN_CITY_MART, 1, PalletTown_ProfessorOaksLab_EventScript_ReceiveDexScene
 	goto_if_eq VAR_MAP_SCENE_PALLET_TOWN_PROFESSOR_OAKS_LAB, 4, PalletTown_ProfessorOaksLab_EventScript_OakBattleMonForItToGrow
 	goto_if_eq VAR_MAP_SCENE_PALLET_TOWN_PROFESSOR_OAKS_LAB, 3, PalletTown_ProfessorOaksLab_EventScript_OakCanReachNextTownWithMon
+	goto_if_eq VAR_MAP_SCENE_PALLET_TOWN_PROFESSOR_OAKS_LAB, 2, PalletTown_ProfessorOaksLab_EventScript_OakChoosingStarterTalk
 	msgbox PalletTown_ProfessorOaksLab_Text_OakWhichOneWillYouChoose
 	release
 	end
@@ -1139,6 +1142,7 @@ EventScript_GiveNicknameToStarter::
 
 PalletTown_ProfessorOaksLab_EventScript_RivalPicksStarter::
 	closemessage
+	goto_if_eq PLAYER_STARTER_NUM, STARTER_MON_OAK_OTHER, PalletTown_ProfessorOaksLab_EventScript_RivalTakesEevee
 	goto_if_eq PLAYER_STARTER_NUM, 0, PalletTown_ProfessorOaksLab_EventScript_RivalWalksToCharmander
 	goto_if_eq PLAYER_STARTER_NUM, 1, PalletTown_ProfessorOaksLab_EventScript_RivalWalksToBulbasaur
 	goto_if_eq PLAYER_STARTER_NUM, 2, PalletTown_ProfessorOaksLab_EventScript_RivalWalksToSquirtle
@@ -1236,6 +1240,7 @@ PalletTown_ProfessorOaksLab_EventScript_CharmanderBall::
 	end
 
 PalletTown_ProfessorOaksLab_EventScript_LastPokeBall::
+	goto_if_eq VAR_STARTER_MON, STARTER_MON_OAK_OTHER, PalletTown_ProfessorOaksLab_EventScript_ThreeBallsWait
 	msgbox PalletTown_ProfessorOaksLab_Text_OaksLastMon
 	release
 	end
@@ -1299,3 +1304,166 @@ PalletTown_ProfessorOaksLab_EventScript_RightSignAlt::
 	msgbox PalletTown_ProfessorOaksLab_Text_AllMonTypesHaveStrongAndWeakPoints
 	releaseall
 	end
+
+@ ============================================================================
+@ Escolha alternativa com o Prof. Oak (falar com ele 3 vezes durante a escolha)
+@ O jogador recebe PIKACHU, EEVEE ou um Pokémon surpresa; o rival pega um EEVEE.
+@ ============================================================================
+.equ OAK_TALK_COUNT, VAR_TEMP_5
+
+PalletTown_ProfessorOaksLab_EventScript_OakChoosingStarterTalk::
+	addvar OAK_TALK_COUNT, 1
+	goto_if_ge OAK_TALK_COUNT, 3, PalletTown_ProfessorOaksLab_EventScript_OakOfferOtherMons
+	goto_if_eq OAK_TALK_COUNT, 2, PalletTown_ProfessorOaksLab_EventScript_OakSomethingTroublingYou
+	msgbox PalletTown_ProfessorOaksLab_Text_OakWhichOneWillYouChoose
+	release
+	end
+
+PalletTown_ProfessorOaksLab_EventScript_OakSomethingTroublingYou::
+	msgbox PalletTown_ProfessorOaksLab_Text_OakSomethingTroublingYou
+	release
+	end
+
+PalletTown_ProfessorOaksLab_EventScript_OakOfferOtherMons::
+	textcolor NPC_TEXT_COLOR_MALE
+	goto_if_ge OAK_TALK_COUNT, 4, PalletTown_ProfessorOaksLab_EventScript_OakAskWhichOtherMon
+	msgbox PalletTown_ProfessorOaksLab_Text_OakNoneSuitYou
+PalletTown_ProfessorOaksLab_EventScript_OakAskWhichOtherMon::
+	message PalletTown_ProfessorOaksLab_Text_OakWhichWouldYouLike
+	waitmessage
+	multichoice 0, 0, MULTICHOICE_OAK_OTHER_MONS, FALSE
+	switch VAR_RESULT
+	case 0, PalletTown_ProfessorOaksLab_EventScript_OakOfferPikachu
+	case 1, PalletTown_ProfessorOaksLab_EventScript_OakOfferEevee
+	case 2, PalletTown_ProfessorOaksLab_EventScript_OakOfferSurprise
+	release
+	end
+
+PalletTown_ProfessorOaksLab_EventScript_OakOfferPikachu::
+	setvar VAR_STARTER_OTHER_SPECIES, SPECIES_PIKACHU
+	showmonpic SPECIES_PIKACHU, 10, 3
+	msgbox PalletTown_ProfessorOaksLab_Text_OakChoosingPikachu, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, YES, PalletTown_ProfessorOaksLab_EventScript_OakGiveOtherMon
+	goto PalletTown_ProfessorOaksLab_EventScript_OakOtherMonDeclined
+	end
+
+PalletTown_ProfessorOaksLab_EventScript_OakOfferEevee::
+	setvar VAR_STARTER_OTHER_SPECIES, SPECIES_EEVEE
+	showmonpic SPECIES_EEVEE, 10, 3
+	msgbox PalletTown_ProfessorOaksLab_Text_OakChoosingEevee, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, YES, PalletTown_ProfessorOaksLab_EventScript_OakGiveOtherMon
+	goto PalletTown_ProfessorOaksLab_EventScript_OakOtherMonDeclined
+	end
+
+PalletTown_ProfessorOaksLab_EventScript_OakOfferSurprise::
+	msgbox PalletTown_ProfessorOaksLab_Text_OakLeaveItToChance, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, PalletTown_ProfessorOaksLab_EventScript_OakSurpriseDeclined
+	specialvar VAR_STARTER_OTHER_SPECIES, GetRandomOakLabMon
+	msgbox PalletTown_ProfessorOaksLab_Text_OakIllChooseForYou
+	showmonpic VAR_STARTER_OTHER_SPECIES, 10, 3
+	goto PalletTown_ProfessorOaksLab_EventScript_OakGiveOtherMon
+	end
+
+PalletTown_ProfessorOaksLab_EventScript_OakOtherMonDeclined::
+	hidemonpic
+PalletTown_ProfessorOaksLab_EventScript_OakSurpriseDeclined::
+	release
+	end
+
+PalletTown_ProfessorOaksLab_EventScript_OakGiveOtherMon::
+	textcolor NPC_TEXT_COLOR_NEUTRAL
+	setflag FLAG_SYS_POKEMON_GET
+	setflag FLAG_PALLET_LADY_NOT_BLOCKING_SIGN
+	givemon VAR_STARTER_OTHER_SPECIES, 5
+	setvar PLAYER_STARTER_NUM, STARTER_MON_OAK_OTHER
+	setvar VAR_STARTER_MON, STARTER_MON_OAK_OTHER
+	bufferspeciesname STR_VAR_1, VAR_STARTER_OTHER_SPECIES
+	message PalletTown_ProfessorOaksLab_Text_ReceivedMonFromOak
+	waitmessage
+	playfanfare MUS_OBTAIN_KEY_ITEM
+	waitfanfare
+	hidemonpic
+	msgbox Text_GiveNicknameToThisMon, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, YES, EventScript_GiveNicknameToStarter
+	goto PalletTown_ProfessorOaksLab_EventScript_RivalPicksStarter
+	end
+
+PalletTown_ProfessorOaksLab_EventScript_RivalTakesEevee::
+	textcolor NPC_TEXT_COLOR_MALE
+	applymovement LOCALID_OAKS_LAB_RIVAL, PalletTown_ProfessorOaksLab_Movement_RivalReact
+	waitmovement 0
+	msgbox PalletTown_ProfessorOaksLab_Text_RivalWantSpecialMonToo
+	msgbox PalletTown_ProfessorOaksLab_Text_OakYouAlwaysWantWhatOthersHave
+	textcolor NPC_TEXT_COLOR_NEUTRAL
+	bufferspeciesname STR_VAR_1, SPECIES_EEVEE
+	message PalletTown_ProfessorOaksLab_Text_RivalReceivedMonFromOak
+	waitmessage
+	playfanfare MUS_OBTAIN_KEY_ITEM
+	waitfanfare
+	textcolor NPC_TEXT_COLOR_MALE
+	goto_if_eq VAR_STARTER_OTHER_SPECIES, SPECIES_EEVEE, PalletTown_ProfessorOaksLab_EventScript_RivalSameEevee
+	msgbox PalletTown_ProfessorOaksLab_Text_RivalGrampsSavedBest
+	goto PalletTown_ProfessorOaksLab_EventScript_RivalTookEevee
+	end
+
+PalletTown_ProfessorOaksLab_EventScript_RivalSameEevee::
+	msgbox PalletTown_ProfessorOaksLab_Text_RivalSameEevee
+PalletTown_ProfessorOaksLab_EventScript_RivalTookEevee::
+	setvar VAR_MAP_SCENE_PALLET_TOWN_PROFESSOR_OAKS_LAB, 3
+	call_if_set FLAG_OPENED_START_MENU, PalletTown_ProfessorOaksLab_EventScript_ReadyEndSignLadyScene
+	release
+	end
+
+PalletTown_ProfessorOaksLab_EventScript_ThreeBallsWait::
+	msgbox PalletTown_ProfessorOaksLab_Text_ThreeMonsWaitForTrainer
+	release
+	end
+
+PalletTown_ProfessorOaksLab_EventScript_AddRivalEeveeWin::
+	addvar VAR_RIVAL_EEVEE_WINS, 1
+	return
+
+@ O rival fica ao lado do Oak (5,4) e desce até o jogador (gatilhos em 5/6/7, 8)
+PalletTown_ProfessorOaksLab_EventScript_RivalApproachForBattleEevee::
+	call_if_eq VAR_TEMP_2, 1, PalletTown_ProfessorOaksLab_EventScript_RivalApproachEeveeLeft
+	call_if_eq VAR_TEMP_2, 2, PalletTown_ProfessorOaksLab_EventScript_RivalApproachEeveeMid
+	call_if_eq VAR_TEMP_2, 3, PalletTown_ProfessorOaksLab_EventScript_RivalApproachEeveeRight
+	trainerbattle_earlyrival TRAINER_RIVAL_OAKS_LAB_EEVEE, RIVAL_BATTLE_TUTORIAL, PalletTown_ProfessorOaksLab_Text_RivalDefeatEevee, Text_RivalVictory
+	goto PalletTown_ProfessorOaksLab_EventScript_EndRivalBattle
+	end
+
+PalletTown_ProfessorOaksLab_EventScript_RivalApproachEeveeLeft::
+	applymovement LOCALID_OAKS_LAB_RIVAL, PalletTown_ProfessorOaksLab_Movement_RivalApproachEeveeLeft
+	waitmovement 0
+	return
+
+PalletTown_ProfessorOaksLab_EventScript_RivalApproachEeveeMid::
+	applymovement LOCALID_OAKS_LAB_RIVAL, PalletTown_ProfessorOaksLab_Movement_RivalApproachEeveeMid
+	waitmovement 0
+	return
+
+PalletTown_ProfessorOaksLab_EventScript_RivalApproachEeveeRight::
+	applymovement LOCALID_OAKS_LAB_RIVAL, PalletTown_ProfessorOaksLab_Movement_RivalApproachEeveeRight
+	waitmovement 0
+	return
+
+PalletTown_ProfessorOaksLab_Movement_RivalApproachEeveeLeft::
+	walk_down
+	walk_down
+	walk_down
+	step_end
+
+PalletTown_ProfessorOaksLab_Movement_RivalApproachEeveeMid::
+	walk_down
+	walk_right
+	walk_down
+	walk_down
+	step_end
+
+PalletTown_ProfessorOaksLab_Movement_RivalApproachEeveeRight::
+	walk_down
+	walk_right
+	walk_right
+	walk_down
+	walk_down
+	step_end

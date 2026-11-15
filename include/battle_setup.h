@@ -41,8 +41,6 @@ u16 GetBadgeCountForScript(void);
 
 // Soft cap: % da EXP recebida acima do nível do cap (Hard/Hardcore/Expert)
 #define LEVEL_CAP_EXP_PERCENT 10
-bool8 ExpertPartyLimitActive(void);
-u8  GetOpponentPartyLimit(void);
 bool8 IsGymLeaderTrainer(u16 trainerId);
 void SetExpertGymBattleConfig(u16 trainerId, u8 selectionCount);
 

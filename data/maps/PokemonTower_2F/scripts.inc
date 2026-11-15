@@ -27,10 +27,12 @@ PokemonTower_2F_EventScript_Rival::
 	applymovement LOCALID_POKEMON_TOWER_RIVAL, Common_Movement_Delay48
 	waitmovement 0
 	msgbox PokemonTower_2F_Text_RivalIntro
+	call_if_eq VAR_STARTER_MON, STARTER_MON_OAK_OTHER, PokemonTower_2F_EventScript_RivalEeveeEvolved
 	setvar VAR_LAST_TALKED, LOCALID_POKEMON_TOWER_RIVAL
 	call_if_eq VAR_STARTER_MON, 2, PokemonTower_2F_EventScript_RivalSquirtle
 	call_if_eq VAR_STARTER_MON, 1, PokemonTower_2F_EventScript_RivalBulbasaur
 	call_if_eq VAR_STARTER_MON, 0, PokemonTower_2F_EventScript_RivalCharmander
+	call_if_eq VAR_STARTER_MON, STARTER_MON_OAK_OTHER, PokemonTower_2F_EventScript_RivalEevee
 	msgbox PokemonTower_2F_Text_RivalPostBattle
 	closemessage
 	playbgm MUS_RIVAL_EXIT, 0
@@ -99,3 +101,32 @@ PokemonTower_2F_Movement_RivalExitDown::
 	walk_down
 	walk_in_place_faster_right
 	step_end
+
+@ Rota do EEVEE: a evolução depende das vitórias do jogador no laboratório e na 1ª batalha da Rota 22
+PokemonTower_2F_EventScript_RivalEevee::
+	goto_if_ge VAR_RIVAL_EEVEE_WINS, RIVAL_EEVEE_WINS_JOLTEON, PokemonTower_2F_EventScript_RivalEeveeJolteon
+	goto_if_eq VAR_RIVAL_EEVEE_WINS, RIVAL_EEVEE_WINS_VAPOREON, PokemonTower_2F_EventScript_RivalEeveeVaporeon
+	trainerbattle_no_intro TRAINER_RIVAL_POKEMON_TOWER_FLAREON, PokemonTower_2F_Text_RivalDefeat
+	return
+
+PokemonTower_2F_EventScript_RivalEeveeJolteon::
+	trainerbattle_no_intro TRAINER_RIVAL_POKEMON_TOWER_JOLTEON, PokemonTower_2F_Text_RivalDefeat
+	return
+
+PokemonTower_2F_EventScript_RivalEeveeVaporeon::
+	trainerbattle_no_intro TRAINER_RIVAL_POKEMON_TOWER_VAPOREON, PokemonTower_2F_Text_RivalDefeat
+	return
+
+PokemonTower_2F_EventScript_RivalEeveeEvolved::
+	goto_if_ge VAR_RIVAL_EEVEE_WINS, RIVAL_EEVEE_WINS_JOLTEON, PokemonTower_2F_EventScript_RivalEeveeEvolvedJolteon
+	goto_if_eq VAR_RIVAL_EEVEE_WINS, RIVAL_EEVEE_WINS_VAPOREON, PokemonTower_2F_EventScript_RivalEeveeEvolvedVaporeon
+	msgbox PokemonTower_2F_Text_RivalEeveeFlareon
+	return
+
+PokemonTower_2F_EventScript_RivalEeveeEvolvedJolteon::
+	msgbox PokemonTower_2F_Text_RivalEeveeJolteon
+	return
+
+PokemonTower_2F_EventScript_RivalEeveeEvolvedVaporeon::
+	msgbox PokemonTower_2F_Text_RivalEeveeVaporeon
+	return

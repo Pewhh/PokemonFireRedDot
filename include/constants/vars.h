@@ -87,8 +87,8 @@
 #define VAR_WONDER_NEWS_STEP_COUNTER       0x4028
 #define VAR_PEWTER_MUSEUM_REVIVE_STATE     0x4029 // 0 = nothing, 1 = reviving, 2 = ready to pick up
 #define VAR_PEWTER_MUSEUM_WHICH_FOSSIL     0x402A // ITEM_HELIX_FOSSIL or ITEM_DOME_FOSSIL
-#define VAR_0x402B                         0x402B
-#define VAR_0x402C                         0x402C
+#define VAR_RIVAL_EEVEE_WINS               0x402B // vitórias sobre o rival no laboratório e na 1ª batalha da Rota 22 (0-2)
+#define VAR_STARTER_OTHER_SPECIES          0x402C // espécie do inicial quando o jogador escolhe com o Oak (PIKACHU/EEVEE/SURPRESA)
 #define VAR_0x402D                         0x402D
 #define VAR_0x402E                         0x402E
 
@@ -342,5 +342,11 @@
 #define NPC_TEXT_COLOR_MON       2 // Black, for Pokémon
 #define NPC_TEXT_COLOR_NEUTRAL   3 // Black, for inanimate objects and messages from the game
 #define NPC_TEXT_COLOR_DEFAULT 255 // If an NPC is selected, use the color specified by GetColorFromTextColorTable, otherwise use Neutral.
+
+// VAR_STARTER_MON: 0-2 = iniciais da mesa; 3 = escolheu com o Oak (rival pega EEVEE)
+#define STARTER_MON_OAK_OTHER 3
+// Evolução do EEVEE do rival pela quantidade de vitórias (VAR_RIVAL_EEVEE_WINS)
+#define RIVAL_EEVEE_WINS_JOLTEON  2
+#define RIVAL_EEVEE_WINS_VAPOREON 1
 
 #endif // GUARD_CONSTANTS_VARS_H

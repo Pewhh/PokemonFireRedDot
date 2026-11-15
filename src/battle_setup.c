@@ -1132,11 +1132,20 @@ static const u16 sLevelCapTrainerByBadgeCount[NUM_BADGES] =
     [0] = TRAINER_LEADER_BROCK,     // antes da 1ª insígnia
     [1] = TRAINER_LEADER_MISTY,     // antes da 2ª
     [2] = TRAINER_LEADER_LT_SURGE,  // antes da 3ª
-    [3] = TRAINER_LEADER_ERIKA,     // antes da 4ª (qualquer um dos três)
-    [4] = TRAINER_LEADER_KOGA,      // antes da 5ª
-    [5] = TRAINER_LEADER_SABRINA,   // antes da 6ª
+    [3] = TRAINER_LEADER_ERIKA,     // antes da 4ª: ver sMidGymTrainersByPosition
+    [4] = TRAINER_LEADER_KOGA,      // antes da 5ª: ver sMidGymTrainersByPosition
+    [5] = TRAINER_LEADER_SABRINA,   // antes da 6ª: ver sMidGymTrainersByPosition
     [6] = TRAINER_LEADER_BLAINE,    // antes da 7ª
     [7] = TRAINER_LEADER_GIOVANNI,  // antes da 8ª
+};
+
+// 4º, 5º e 6º ginásio: Erika, Koga e Sabrina em qualquer ordem. Cada posição tem um time de cada
+// líder, e o cap da posição é o MAIOR nível entre os três times dela (mesmo cap para os três).
+static const u16 sMidGymTrainersByPosition[3][3] =
+{
+    {TRAINER_LEADER_ERIKA,   TRAINER_LEADER_KOGA_4, TRAINER_LEADER_SABRINA_4}, // 4º
+    {TRAINER_LEADER_ERIKA_5, TRAINER_LEADER_KOGA,   TRAINER_LEADER_SABRINA_5}, // 5º
+    {TRAINER_LEADER_ERIKA_6, TRAINER_LEADER_KOGA_6, TRAINER_LEADER_SABRINA},   // 6º
 };
 
 u8 GetBadgeCount(void)
@@ -1169,11 +1178,21 @@ static u8 GetMaxLevelForChampion(u16 squirtle, u16 bulbasaur, u16 charmander)
     return cap;
 }
 
+// As flags de treinador do Campeão são apagadas no Hall da Fama,
+// então a vitória no rematch fica guardada numa flag própria (setada no script da sala do Campeão).
+// Maior nível entre as 6 variantes do Campeão: 3 iniciais da mesa (IDs seguidos a partir de
+// "tableFirst") + 3 evoluções do EEVEE (IDs seguidos a partir de "eeveeFirst").
+static u8 GetMaxLevelForChampionRoutes(u16 tableFirst, u16 eeveeFirst)
+{
+    u8 cap = GetMaxLevelForChampion(tableFirst, tableFirst + 1, tableFirst + 2);
+    u8 eeveeCap = GetMaxLevelForChampion(eeveeFirst, eeveeFirst + 1, eeveeFirst + 2);
+
+    return (eeveeCap > cap) ? eeveeCap : cap;
+}
+
 static bool8 HasBeatenChampionRematch(void)
 {
-    return HasTrainerBeenFought(TRAINER_CHAMPION_REMATCH_SQUIRTLE)
-        || HasTrainerBeenFought(TRAINER_CHAMPION_REMATCH_BULBASAUR)
-        || HasTrainerBeenFought(TRAINER_CHAMPION_REMATCH_CHARMANDER);
+    return FlagGet(FLAG_BEAT_CHAMPION_REMATCH);
 }
 
 u8 getLevelCap(void)
@@ -1186,12 +1205,16 @@ u8 getLevelCap(void)
         return MAX_LEVEL;
 
     badges = GetBadgeCount();
-    if (badges < NUM_BADGES)
+    if (badges >= 3 && badges <= 5) // 4º, 5º ou 6º ginásio
+        cap = GetMaxLevelForChampion(sMidGymTrainersByPosition[badges - 3][0],
+                                     sMidGymTrainersByPosition[badges - 3][1],
+                                     sMidGymTrainersByPosition[badges - 3][2]);
+    else if (badges < NUM_BADGES)
         cap = GetMaxLevelForTrainer(sLevelCapTrainerByBadgeCount[badges]);
     else if (!FlagGet(FLAG_SYS_GAME_CLEAR))  // Elite 4 / Campeão, 1ª vez
-        cap = GetMaxLevelForChampion(TRAINER_CHAMPION_FIRST_SQUIRTLE, TRAINER_CHAMPION_FIRST_BULBASAUR, TRAINER_CHAMPION_FIRST_CHARMANDER);
+        cap = GetMaxLevelForChampionRoutes(TRAINER_CHAMPION_FIRST_SQUIRTLE, TRAINER_CHAMPION_FIRST_JOLTEON);
     else                                     // Elite 4 / Campeão, 2ª vez
-        cap = GetMaxLevelForChampion(TRAINER_CHAMPION_REMATCH_SQUIRTLE, TRAINER_CHAMPION_REMATCH_BULBASAUR, TRAINER_CHAMPION_REMATCH_CHARMANDER);
+        cap = GetMaxLevelForChampionRoutes(TRAINER_CHAMPION_REMATCH_SQUIRTLE, TRAINER_CHAMPION_REMATCH_JOLTEON);
 
     // fallback defensivo: se algo vier 0, usa um valor razoável
     if (cap == 0)
@@ -1221,8 +1244,14 @@ bool8 IsGymLeaderTrainer(u16 trainerId)
     case TRAINER_LEADER_MISTY:
     case TRAINER_LEADER_LT_SURGE:
     case TRAINER_LEADER_ERIKA:
+    case TRAINER_LEADER_ERIKA_5:
+    case TRAINER_LEADER_ERIKA_6:
     case TRAINER_LEADER_KOGA:
+    case TRAINER_LEADER_KOGA_4:
+    case TRAINER_LEADER_KOGA_6:
     case TRAINER_LEADER_SABRINA:
+    case TRAINER_LEADER_SABRINA_4:
+    case TRAINER_LEADER_SABRINA_5:
     case TRAINER_LEADER_BLAINE:
     case TRAINER_LEADER_GIOVANNI:
         return TRUE;
@@ -1234,35 +1263,6 @@ bool8 IsGymLeaderTrainer(u16 trainerId)
 static bool8 IsGymLeaderOpponent(void)
 {
     return IsGymLeaderTrainer(gTrainerBattleOpponent_A);
-}
-
-bool8 ExpertPartyLimitActive(void)
-{
-    if (!FlagGet(FLAG_EXPERT))
-        return FALSE;
-    if (!(gBattleTypeFlags & BATTLE_TYPE_TRAINER))
-        return FALSE;
-
-    return IsGymLeaderOpponent();
-}
-
-u8 GetOpponentPartyLimit(void)
-{
-    if (!ExpertPartyLimitActive())
-        return PARTY_SIZE; // 6 (ou o valor do seu projeto)
-
-    switch (gTrainerBattleOpponent_A)
-    {
-    case TRAINER_LEADER_BROCK:    return 2;
-    case TRAINER_LEADER_MISTY:    return 3;
-    case TRAINER_LEADER_LT_SURGE: return 3;
-    case TRAINER_LEADER_ERIKA:    return 4;
-    case TRAINER_LEADER_KOGA:     return 4;
-    case TRAINER_LEADER_SABRINA:  return 5;
-    case TRAINER_LEADER_BLAINE:   return 5;
-    case TRAINER_LEADER_GIOVANNI: return 5;
-    default:                      return PARTY_SIZE; // segurança
-    }
 }
 
 void SetExpertGymBattleConfig(u16 trainerId, u8 selectionCount)
@@ -1280,7 +1280,7 @@ void SetExpertGymBattleConfig(u16 trainerId, u8 selectionCount)
 
 static void PrepareExpertGymLeaderParty(void)
 {
-    u8 i;
+    u8 i, selected;
 
     if (!FlagGet(FLAG_EXPERT) || sExpertGymSelectionCount == 0)
         return;
@@ -1292,16 +1292,15 @@ static void PrepareExpertGymLeaderParty(void)
     for (i = 0; i < PARTY_SIZE; i++)
         sExpertGymPartyBackup[i] = gPlayerParty[i];
 
-    if (sExpertGymSelectionCount > 5)
-        sExpertGymSelectionCount = 5;
-
-    for (i = 0; i < sExpertGymSelectionCount; i++)
+    // Só os Pokémon realmente escolhidos (o jogador pode escolher menos que o máximo)
+    for (i = 0, selected = 0; i < sExpertGymSelectionCount && i < PARTY_SIZE; i++)
     {
-        if (gSelectedOrderFromParty[i] == 0 || gSelectedOrderFromParty[i] > PARTY_SIZE)
-            sExpertGymSelectedIndices[i] = i;
-        else
-            sExpertGymSelectedIndices[i] = gSelectedOrderFromParty[i] - 1;
+        if (gSelectedOrderFromParty[i] != 0 && gSelectedOrderFromParty[i] <= PARTY_SIZE)
+            sExpertGymSelectedIndices[selected++] = gSelectedOrderFromParty[i] - 1;
     }
+    if (selected == 0)
+        return;
+    sExpertGymSelectionCount = selected;
 
     CpuFill32(0, gPlayerParty, sizeof(gPlayerParty));
     for (i = 0; i < sExpertGymSelectionCount; i++)

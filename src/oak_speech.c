@@ -2164,6 +2164,16 @@ static void GetDefaultName(u8 hasPlayerBeenNamed, u8 rivalNameChoice)
 
 static void Task_OakSpeech_Nuzlocke(u8 taskId)
 {
+    s16 *data = gTasks[taskId].data;
+
+    // Espera o retrato do jogador terminar de aparecer (igual a "Let's begin with your name")
+    if (tTrainerPicFadeState == 0)
+        return;
+    if (tTimer != 0)
+    {
+        tTimer--;
+        return;
+    }
     OakSpeechPrintMessage(gText_Oak_Nuzlocke, sOakSpeechResources->textSpeed);
     gTasks[taskId].func = Task_OakSpeech_ShowNuzlockeMenu;
 }
@@ -2189,8 +2199,9 @@ static void Task_OakSpeech_ShowNuzlockeMenu(u8 taskId)
     AddTextPrinterParameterized3(win, FONT_NORMAL, 8, 33, colors, 0, gText_Hardcore);
     AddTextPrinterParameterized3(win, FONT_NORMAL, 8, 49, colors, 0, gText_Expert);
 
+    // Altura da linha = 16 (14 da fonte + 2), igual ao espaçamento dos textos (1, 17, 33, 49)
     Menu_InitCursor(win, FONT_NORMAL, 0, 1,
-                    GetFontAttribute(FONT_NORMAL, FONTATTR_MAX_LETTER_HEIGHT) + 3,
+                    GetFontAttribute(FONT_NORMAL, FONTATTR_MAX_LETTER_HEIGHT) + 2,
                     4, 0);
     CopyWindowToVram(win, COPYWIN_FULL);
 
@@ -2249,6 +2260,9 @@ static void Task_OakSpeech_ExpertText(u8 taskId)   { OakSpeechPrintMessage(gText
 
 static void Task_OakSpeech_AreYouSure(u8 taskId)
 {
+    // Espera o texto terminar antes de mostrar SIM/NÃO (antes aparecia junto e o A pulava a leitura)
+    if (IsTextPrinterActive(WIN_INTRO_TEXTBOX))
+        return;
     CreateYesNoMenu(&sIntro_WindowTemplates[WIN_INTRO_YESNO], FONT_NORMAL, 0, 2,
                     GetStdWindowBaseTileNum(), 14, 0);
     gTasks[taskId].func = Task_OakSpeech_AreYouSureSelection;

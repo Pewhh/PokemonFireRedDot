@@ -33,6 +33,8 @@ Route22_EventScript_EarlyRival::
 	call_if_eq VAR_STARTER_MON, 2, Route22_EventScript_EarlyRivalSquirtle
 	call_if_eq VAR_STARTER_MON, 1, Route22_EventScript_EarlyRivalBulbasaur
 	call_if_eq VAR_STARTER_MON, 0, Route22_EventScript_EarlyRivalCharmander
+	call_if_eq VAR_STARTER_MON, STARTER_MON_OAK_OTHER, Route22_EventScript_EarlyRivalEevee
+	call_if_eq VAR_RESULT, FALSE, Route22_EventScript_AddRivalEeveeWin @ FALSE = jogador venceu
 	msgbox Route22_Text_EarlyRivalPostBattle
 	closemessage
 	delay 10
@@ -184,6 +186,7 @@ Route22_EventScript_LateRival::
 	call_if_eq VAR_STARTER_MON, 2, Route22_EventScript_LateRivalSquirtle
 	call_if_eq VAR_STARTER_MON, 1, Route22_EventScript_LateRivalBulbasaur
 	call_if_eq VAR_STARTER_MON, 0, Route22_EventScript_LateRivalCharmander
+	call_if_eq VAR_STARTER_MON, STARTER_MON_OAK_OTHER, Route22_EventScript_LateRivalEevee
 	msgbox Route22_Text_LateRivalPostBattle
 	closemessage
 	delay 10
@@ -232,3 +235,26 @@ Route22_Movement_LateRivalExit::
 Route22_EventScript_LeagueGateSign::
 	msgbox Route22_Text_LeagueGateSign, MSGBOX_SIGN
 	end
+
+Route22_EventScript_EarlyRivalEevee::
+	trainerbattle_earlyrival TRAINER_RIVAL_ROUTE22_EARLY_EEVEE, 0, Route22_Text_EarlyRivalDefeat, Text_RivalVictory
+	return
+
+Route22_EventScript_AddRivalEeveeWin::
+	addvar VAR_RIVAL_EEVEE_WINS, 1
+	return
+
+@ Rota do EEVEE: a evolução depende das vitórias do jogador no laboratório e na 1ª batalha da Rota 22
+Route22_EventScript_LateRivalEevee::
+	goto_if_ge VAR_RIVAL_EEVEE_WINS, RIVAL_EEVEE_WINS_JOLTEON, Route22_EventScript_LateRivalEeveeJolteon
+	goto_if_eq VAR_RIVAL_EEVEE_WINS, RIVAL_EEVEE_WINS_VAPOREON, Route22_EventScript_LateRivalEeveeVaporeon
+	trainerbattle_no_intro TRAINER_RIVAL_ROUTE22_LATE_FLAREON, Route22_Text_LateRivalDefeat
+	return
+
+Route22_EventScript_LateRivalEeveeJolteon::
+	trainerbattle_no_intro TRAINER_RIVAL_ROUTE22_LATE_JOLTEON, Route22_Text_LateRivalDefeat
+	return
+
+Route22_EventScript_LateRivalEeveeVaporeon::
+	trainerbattle_no_intro TRAINER_RIVAL_ROUTE22_LATE_VAPOREON, Route22_Text_LateRivalDefeat
+	return

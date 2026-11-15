@@ -2974,7 +2974,7 @@ Move_BARRAGE:
 	end
 
 Move_SKY_ATTACK:
-	choosetwoturnanim SkyAttackSetUp, SkyAttackUnleash
+	goto SkyAttackUnleash @ não carrega mais: só a parte do ataque
 SkyAttackEnd:
 	end
 
@@ -7629,7 +7629,7 @@ SpiderWebThread:
 	return
 
 Move_RAZOR_WIND:
-	choosetwoturnanim RazorWindSetUp, RazorWindUnleash
+	goto RazorWindUnleash @ não carrega mais: só a parte do ataque
 
 RazorWindEnd:
 	waitforvisualfinish

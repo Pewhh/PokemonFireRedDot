@@ -2,17 +2,45 @@ SaffronCity_Gym_MapScripts::
 	.byte 0
 
 SaffronCity_Gym_EventScript_Sabrina::
-        goto_if_set FLAG_DEFEATED_SABRINA, SaffronCity_Gym_EventScript_Sabrina_PostVictoryFlow
-		famechecker FAMECHECKER_SABRINA, FCPICKSTATE_COLORED, UpdatePickStateFromSpecialVar8005
-        setvar VAR_0x8004, TRAINER_LEADER_SABRINA
-        msgbox SaffronCity_Gym_Text_SabrinaIntro, MSGBOX_DEFAULT
-		call EventScript_ChooseExpertGymBattleParty
-        goto_if_eq VAR_RESULT, FALSE, SaffronCity_Gym_EventScript_SabrinaCancelBattle
-        trainerbattle_single TRAINER_LEADER_SABRINA, gText_LetsBattle, SaffronCity_Gym_Text_SabrinaDefeat, SaffronCity_Gym_EventScript_DefeatedSabrina, NO_MUSIC
-        goto_if_unset FLAG_GOT_TM04_FROM_SABRINA, SaffronCity_Gym_EventScript_GiveTM04
-        msgbox SaffronCity_Gym_Text_ExplainTM04
-        release
-        end
+	goto_if_set FLAG_DEFEATED_SABRINA, SaffronCity_Gym_EventScript_Sabrina_PostVictoryFlow
+	famechecker FAMECHECKER_SABRINA, FCPICKSTATE_COLORED, UpdatePickStateFromSpecialVar8005
+	msgbox SaffronCity_Gym_Text_SabrinaIntro, MSGBOX_DEFAULT
+	@ Time do líder pela POSIÇÃO em que ele é enfrentado (insígnias que o jogador já tem)
+	specialvar VAR_RESULT, GetBadgeCountForScript
+	goto_if_ge VAR_RESULT, 5, SaffronCity_Gym_EventScript_SabrinaBattle6
+	goto_if_eq VAR_RESULT, 4, SaffronCity_Gym_EventScript_SabrinaBattle5
+	goto SaffronCity_Gym_EventScript_SabrinaBattle4
+	end
+
+SaffronCity_Gym_EventScript_SabrinaBattle4::
+	setvar VAR_0x8004, TRAINER_LEADER_SABRINA_4
+	call EventScript_ChooseExpertGymBattleParty
+	goto_if_eq VAR_RESULT, FALSE, SaffronCity_Gym_EventScript_SabrinaCancelBattle
+	trainerbattle_single TRAINER_LEADER_SABRINA_4, gText_LetsBattle, SaffronCity_Gym_Text_SabrinaDefeat, SaffronCity_Gym_EventScript_DefeatedSabrina, NO_MUSIC
+	goto SaffronCity_Gym_EventScript_SabrinaAfterBattle
+	end
+
+SaffronCity_Gym_EventScript_SabrinaBattle5::
+	setvar VAR_0x8004, TRAINER_LEADER_SABRINA_5
+	call EventScript_ChooseExpertGymBattleParty
+	goto_if_eq VAR_RESULT, FALSE, SaffronCity_Gym_EventScript_SabrinaCancelBattle
+	trainerbattle_single TRAINER_LEADER_SABRINA_5, gText_LetsBattle, SaffronCity_Gym_Text_SabrinaDefeat, SaffronCity_Gym_EventScript_DefeatedSabrina, NO_MUSIC
+	goto SaffronCity_Gym_EventScript_SabrinaAfterBattle
+	end
+
+SaffronCity_Gym_EventScript_SabrinaBattle6::
+	setvar VAR_0x8004, TRAINER_LEADER_SABRINA
+	call EventScript_ChooseExpertGymBattleParty
+	goto_if_eq VAR_RESULT, FALSE, SaffronCity_Gym_EventScript_SabrinaCancelBattle
+	trainerbattle_single TRAINER_LEADER_SABRINA, gText_LetsBattle, SaffronCity_Gym_Text_SabrinaDefeat, SaffronCity_Gym_EventScript_DefeatedSabrina, NO_MUSIC
+	goto SaffronCity_Gym_EventScript_SabrinaAfterBattle
+	end
+
+SaffronCity_Gym_EventScript_SabrinaAfterBattle::
+	goto_if_unset FLAG_GOT_TM04_FROM_SABRINA, SaffronCity_Gym_EventScript_GiveTM04
+	msgbox SaffronCity_Gym_Text_ExplainTM04
+	release
+	end
 
 SaffronCity_Gym_EventScript_DefeatedSabrina::
 	famechecker FAMECHECKER_SABRINA, 2

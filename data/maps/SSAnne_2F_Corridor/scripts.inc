@@ -37,6 +37,7 @@ SSAnne_2F_Corridor_EventScript_RivalTrigger::
 	call_if_eq VAR_STARTER_MON, 2, SSAnne_2F_Corridor_EventScript_RivalSquirtle
 	call_if_eq VAR_STARTER_MON, 1, SSAnne_2F_Corridor_EventScript_RivalBulbasaur
 	call_if_eq VAR_STARTER_MON, 0, SSAnne_2F_Corridor_EventScript_RivalCharmander
+	call_if_eq VAR_STARTER_MON, STARTER_MON_OAK_OTHER, SSAnne_2F_Corridor_EventScript_RivalEevee
 	msgbox SSAnne_2F_Corridor_Text_RivalPostBattle
 	closemessage
 	delay 10
@@ -167,3 +168,18 @@ SSAnne_2F_Corridor_Movement_RivalExitRight::
 SSAnne_2F_Corridor_EventScript_Sailor::
 	msgbox SSAnne_2F_Corridor_Text_ThisShipIsLuxuryLiner, MSGBOX_NPC
 	end
+
+@ Rota do EEVEE: a evolução depende das vitórias do jogador no laboratório e na 1ª batalha da Rota 22
+SSAnne_2F_Corridor_EventScript_RivalEevee::
+	goto_if_ge VAR_RIVAL_EEVEE_WINS, RIVAL_EEVEE_WINS_JOLTEON, SSAnne_2F_Corridor_EventScript_RivalEeveeJolteon
+	goto_if_eq VAR_RIVAL_EEVEE_WINS, RIVAL_EEVEE_WINS_VAPOREON, SSAnne_2F_Corridor_EventScript_RivalEeveeVaporeon
+	trainerbattle_no_intro TRAINER_RIVAL_SS_ANNE_FLAREON, SSAnne_2F_Corridor_Text_RivalDefeat
+	return
+
+SSAnne_2F_Corridor_EventScript_RivalEeveeJolteon::
+	trainerbattle_no_intro TRAINER_RIVAL_SS_ANNE_JOLTEON, SSAnne_2F_Corridor_Text_RivalDefeat
+	return
+
+SSAnne_2F_Corridor_EventScript_RivalEeveeVaporeon::
+	trainerbattle_no_intro TRAINER_RIVAL_SS_ANNE_VAPOREON, SSAnne_2F_Corridor_Text_RivalDefeat
+	return

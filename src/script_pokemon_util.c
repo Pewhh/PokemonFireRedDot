@@ -184,8 +184,12 @@ void ChooseGymLeaderBattleParty(void)
     }
 
     partyCount = gTrainers[trainerId].partySize;
-    if (partyCount > 5)
-        partyCount = 5;
+    if (partyCount >= PARTY_SIZE) // líder com 6: o time inteiro luta, sem seleção
+    {
+        SetExpertGymBattleConfig(TRAINER_NONE, 0);
+        gSpecialVar_Result = TRUE;
+        return;
+    }
 
     SetPartySelectionMaxMons(partyCount);
     SetExpertGymBattleConfig(trainerId, partyCount);

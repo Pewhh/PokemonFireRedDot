@@ -324,6 +324,13 @@ static const struct MenuAction sMultichoiceList_GameCornerPokemonPrizes[] = {
     { gText_NoThanks_2 }
 };
 
+// Prof. Oak: outros Pokémon (3ª conversa durante a escolha do inicial)
+static const struct MenuAction sMultichoiceList_OakOtherMons[] = {
+    { gText_Pikachu },
+    { gText_Eevee },
+    { gText_Surprise }
+};
+
 // LeafGreen prizes
 static const struct MenuAction sMultichoiceList_GameCornerPokemonPrizes_LG[] = {
     { gText_Abra_120Coins },
@@ -566,6 +573,7 @@ static const struct MultichoiceListStruct sMultichoiceLists[] = {
     [MULTICHOICE_JOIN_OR_LEAD]                               = MULTICHOICE(sMultichoiceList_JoinOrLead),
     [MULTICHOICE_TRAINER_TOWER_MODE]                         = MULTICHOICE(sMultichoiceList_TrainerTowerMode),
     [MULTICHOICE_GAME_CORNER_POKEMON_PRIZES_LG]              = MULTICHOICE(sMultichoiceList_GameCornerPokemonPrizes_LG),
+    [MULTICHOICE_OAK_OTHER_MONS]                             = MULTICHOICE(sMultichoiceList_OakOtherMons),
 };
 
 // From Cool to Berries goes unused

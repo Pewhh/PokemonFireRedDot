@@ -84,3 +84,11 @@ Route10_Text_RockTunnel::
 Route10_Text_PowerPlant::
     .string "POWER PLANT$"
 
+
+Route10_Text_RockTunnelWorker::
+    .string "Sorry, ROCK TUNNEL's closed off.\p"
+    .string "There was a rockslide inside, and\n"
+    .string "we're still clearing the way.\p"
+    .string "Why not train your POKéMON, or\n"
+    .string "try the GYMS in other towns?\p"
+    .string "Come back a little later!$"

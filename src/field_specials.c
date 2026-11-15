@@ -418,7 +418,7 @@ bool8 AreLeadMonEVsMaxedOut(void)
 
 bool8 IsStarterFirstStageInParty(void)
 {
-    u16 species = GetStarterSpeciesById(VarGet(VAR_STARTER_MON));
+    u16 species = GetStarterSpecies();
     u8 partyCount = CalculatePlayerPartyCount();
     u8 i;
     for (i = 0; i < partyCount; i++)
@@ -1531,7 +1531,90 @@ static u16 GetStarterSpeciesById(u16 idx)
 
 u16 GetStarterSpecies(void)
 {
+    // Inicial escolhido com o Oak (PIKACHU, EEVEE ou SURPRESA)
+    if (VarGet(VAR_STARTER_MON) == STARTER_MON_OAK_OTHER)
+        return VarGet(VAR_STARTER_OTHER_SPECIES);
     return GetStarterSpeciesById(VarGet(VAR_STARTER_MON));
+}
+
+// "SURPRISE!" do Prof. Oak: bases de linha evolutiva e Pokémon sem evolução do #1 ao #150.
+// Fora: lendários, os 3 iniciais da mesa, PIKACHU e EEVEE.
+static const u16 sOakLabSurpriseMons[] =
+{
+    SPECIES_CATERPIE,
+    SPECIES_WEEDLE,
+    SPECIES_PIDGEY,
+    SPECIES_RATTATA,
+    SPECIES_SPEAROW,
+    SPECIES_EKANS,
+    SPECIES_SANDSHREW,
+    SPECIES_NIDORAN_F,
+    SPECIES_NIDORAN_M,
+    SPECIES_CLEFAIRY,
+    SPECIES_VULPIX,
+    SPECIES_JIGGLYPUFF,
+    SPECIES_ZUBAT,
+    SPECIES_ODDISH,
+    SPECIES_PARAS,
+    SPECIES_VENONAT,
+    SPECIES_DIGLETT,
+    SPECIES_MEOWTH,
+    SPECIES_PSYDUCK,
+    SPECIES_MANKEY,
+    SPECIES_GROWLITHE,
+    SPECIES_POLIWAG,
+    SPECIES_ABRA,
+    SPECIES_MACHOP,
+    SPECIES_BELLSPROUT,
+    SPECIES_TENTACOOL,
+    SPECIES_GEODUDE,
+    SPECIES_PONYTA,
+    SPECIES_SLOWPOKE,
+    SPECIES_MAGNEMITE,
+    SPECIES_FARFETCHD,
+    SPECIES_DODUO,
+    SPECIES_SEEL,
+    SPECIES_GRIMER,
+    SPECIES_SHELLDER,
+    SPECIES_GASTLY,
+    SPECIES_ONIX,
+    SPECIES_DROWZEE,
+    SPECIES_KRABBY,
+    SPECIES_VOLTORB,
+    SPECIES_EXEGGCUTE,
+    SPECIES_CUBONE,
+    SPECIES_HITMONLEE,
+    SPECIES_HITMONCHAN,
+    SPECIES_LICKITUNG,
+    SPECIES_KOFFING,
+    SPECIES_RHYHORN,
+    SPECIES_CHANSEY,
+    SPECIES_TANGELA,
+    SPECIES_KANGASKHAN,
+    SPECIES_HORSEA,
+    SPECIES_GOLDEEN,
+    SPECIES_STARYU,
+    SPECIES_MR_MIME,
+    SPECIES_SCYTHER,
+    SPECIES_JYNX,
+    SPECIES_ELECTABUZZ,
+    SPECIES_MAGMAR,
+    SPECIES_PINSIR,
+    SPECIES_TAUROS,
+    SPECIES_MAGIKARP,
+    SPECIES_LAPRAS,
+    SPECIES_DITTO,
+    SPECIES_PORYGON,
+    SPECIES_OMANYTE,
+    SPECIES_KABUTO,
+    SPECIES_AERODACTYL,
+    SPECIES_SNORLAX,
+    SPECIES_DRATINI
+};
+
+u16 GetRandomOakLabMon(void)
+{
+    return sOakLabSurpriseMons[Random() % NELEMS(sOakLabSurpriseMons)];
 }
 
 void SetSeenMon(void)

@@ -45,6 +45,7 @@ SilphCo_7F_EventScript_RivalScene::
 	call_if_eq VAR_STARTER_MON, 2, SilphCo_7F_EventScript_RivalSquirtle
 	call_if_eq VAR_STARTER_MON, 1, SilphCo_7F_EventScript_RivalBulbasaur
 	call_if_eq VAR_STARTER_MON, 0, SilphCo_7F_EventScript_RivalCharmander
+	call_if_eq VAR_STARTER_MON, STARTER_MON_OAK_OTHER, SilphCo_7F_EventScript_RivalEevee
 	msgbox SilphCo_7F_Text_RivalPostBattle
 	closemessage
 	playbgm MUS_RIVAL_EXIT, 0
@@ -231,3 +232,18 @@ SilphCo_7F_EventScript_Grunt3::
 	trainerbattle_single TRAINER_TEAM_ROCKET_GRUNT_35, SilphCo_7F_Text_Grunt3Intro, SilphCo_7F_Text_Grunt3Defeat
 	msgbox SilphCo_7F_Text_Grunt3PostBattle, MSGBOX_AUTOCLOSE
 	end
+
+@ Rota do EEVEE: a evolução depende das vitórias do jogador no laboratório e na 1ª batalha da Rota 22
+SilphCo_7F_EventScript_RivalEevee::
+	goto_if_ge VAR_RIVAL_EEVEE_WINS, RIVAL_EEVEE_WINS_JOLTEON, SilphCo_7F_EventScript_RivalEeveeJolteon
+	goto_if_eq VAR_RIVAL_EEVEE_WINS, RIVAL_EEVEE_WINS_VAPOREON, SilphCo_7F_EventScript_RivalEeveeVaporeon
+	trainerbattle_no_intro TRAINER_RIVAL_SILPH_FLAREON, SilphCo_7F_Text_RivalDefeat
+	return
+
+SilphCo_7F_EventScript_RivalEeveeJolteon::
+	trainerbattle_no_intro TRAINER_RIVAL_SILPH_JOLTEON, SilphCo_7F_Text_RivalDefeat
+	return
+
+SilphCo_7F_EventScript_RivalEeveeVaporeon::
+	trainerbattle_no_intro TRAINER_RIVAL_SILPH_VAPOREON, SilphCo_7F_Text_RivalDefeat
+	return

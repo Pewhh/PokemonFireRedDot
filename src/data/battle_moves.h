@@ -1861,7 +1861,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT] =
 
     [MOVE_SKY_ATTACK] =
     {
-        .effect = EFFECT_SKY_ATTACK,
+        .effect = EFFECT_FLINCH_HIT, // sem turno de carga; crítico alto mantido em Cmd_critcalc
         .power = 120,
         .type = TYPE_FLYING,
         .accuracy = 85,
@@ -4526,7 +4526,7 @@ const struct BattleMove gBattleMoves[MOVES_COUNT] =
 
     [MOVE_LEAF_BLADE] =
     {
-        .effect = EFFECT_FOCUS_ENERGY,
+        .effect = EFFECT_HIGH_CRITICAL,
         .power = 80,
         .type = TYPE_GRASS,
         .accuracy = 100,

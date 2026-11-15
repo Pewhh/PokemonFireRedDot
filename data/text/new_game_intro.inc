@@ -243,16 +243,36 @@ gOakSpeech_Text_LetsGo::
     .string "with POKéMON awaits! Let's go!$"
 
 gText_Oak_Nuzlocke::
-    .string "Select difficulty.$"
+    .string "Now, tell me.\n"
+    .string "How tough a journey do you seek?$"
 
 gText_Oak_AreYouSure_Normal::
-    .string "Are you sure?\nClassic POKEMON rules.$"
+    .string "NORMAL, then.\n"
+    .string "The classic POKéMON journey.\p"
+    .string "Is that your choice?$"
 
 gText_Oak_AreYouSure_Hard::
-    .string "Are you sure? No items in battle,\nSet Mode, GYM level caps.$"
+    .string "HARD, then.\p"
+    .string "Past the level of the next big\n"
+    .string "battle, POKéMON grow very slowly.\p"
+    .string "Items from the BAG can't be used\n"
+    .string "in battle, except POKé BALLS.\p"
+    .string "And every battle uses the SET\n"
+    .string "style.\p"
+    .string "Is that your choice?$"
 
 gText_Oak_AreYouSure_Hardcore::
-    .string "Are you sure? Hard mode,\nbut POKEMON can't be revived.$"
+    .string "HARDCORE, then.\n"
+    .string "All the rules of HARD apply.\p"
+    .string "Once you have a POKéDEX, a POKéMON\n"
+    .string "that faints is gone for good.\p"
+    .string "And if you black out, your whole\n"
+    .string "adventure will be erased!\p"
+    .string "Is that your choice?$"
 
 gText_Oak_AreYouSure_Expert::
-    .string "Are you sure? Hardcore +\nparty limits vs bosses.$"    
+    .string "EXPERT, then.\n"
+    .string "All the rules of HARDCORE apply.\p"
+    .string "And GYM LEADERS will only let you\n"
+    .string "bring as many POKéMON as they use.\p"
+    .string "Is that your choice?$"    

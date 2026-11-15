@@ -1,18 +1,23 @@
 PalletTown_PlayersHouse_1F_Text_OhSon::
-    .string "Oh, {PLAYER}{KUN}!$"
+    .string "MOM: Oh, {PLAYER}!\n"
+    .string "Hold on a second!$"
 
 PalletTown_PlayersHouse_1F_Text_DeliveringRunningShoes::
-    .string "I'm glad I caught up to you.\n"
-    .string "Take your running shoes.\p"
-    .string "Here you go.$"
+    .string "MOM: Going out already?\p"
+    .string "Then take these with you.\n"
+    .string "They're brand-new RUNNING SHOES!$"
 
 PalletTown_PlayersHouse_1F_ReceivedRunningShoesFromMom::
     .string "{PLAYER} received the\n"
-    .string "RUNNING SHOES from the MOM.$"
+    .string "RUNNING SHOES from MOM.$"
 
 PalletTown_PlayersHouse_1F_Text_SwitchedShoesWithRunningShoes::
     .string "{PLAYER} switched shoes with the\n"
     .string "RUNNING SHOES.$"
+
+PalletTown_PlayersHouse_1F_Text_MomTakeCare::
+    .string "MOM: There you go!\n"
+    .string "Take care out there, {PLAYER}!$"
 
 PalletTown_PlayersHouse_1F_Text_ExplainRunningShoes::
     .string "Press the B Button to run.\n"

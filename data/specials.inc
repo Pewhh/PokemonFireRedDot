@@ -50,7 +50,6 @@ gSpecials::
 	def_special SavePlayerParty
         def_special LoadPlayerParty
         def_special ChooseHalfPartyForBattle
-        def_special ChooseGymLeaderBattleParty
         def_special Script_ShowLinkTrainerCard
 	def_special NullFieldSpecial  @ Berry Tree specials
 	def_special NullFieldSpecial
@@ -457,4 +456,6 @@ gSpecials::
 	def_special Special_SetVersionLeafGreen
 	def_special Special_GetActiveVersion
 	def_special GetBadgeCountForScript
+	def_special ChooseGymLeaderBattleParty
+	def_special GetRandomOakLabMon
 gSpecialsEnd::

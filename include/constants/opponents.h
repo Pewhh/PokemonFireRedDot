@@ -2,64 +2,47 @@
 #define GUARD_CONSTANTS_OPPONENTS_H
 
 #define TRAINER_NONE                               0
-// Dummy trainers for all the RS trainer classes
-#define TRAINER_AQUA_LEADER                        1
-#define TRAINER_AQUA_GRUNT_M                       2
-#define TRAINER_AQUA_GRUNT_F                       3
-#define TRAINER_RS_AROMA_LADY                      4
-#define TRAINER_RS_RUIN_MANIAC                     5
-#define TRAINER_INTERVIEWER                        6
-#define TRAINER_RS_TUBER_F                         7
-#define TRAINER_RS_TUBER_M                         8
-#define TRAINER_RS_COOLTRAINER_M                   9
-#define TRAINER_RS_COOLTRAINER_F                  10
-#define TRAINER_HEX_MANIAC                        11
-#define TRAINER_RS_LADY                           12
-#define TRAINER_RS_BEAUTY                         13
-#define TRAINER_RICH_BOY                          14
-#define TRAINER_RS_POKEMANIAC                     15
-#define TRAINER_RS_SWIMMER_M                      16
-#define TRAINER_RS_BLACK_BELT                     17
-#define TRAINER_GUITARIST                         18
-#define TRAINER_KINDLER                           19
-#define TRAINER_RS_CAMPER                         20
-#define TRAINER_BUG_MANIAC                        21
-#define TRAINER_RS_PSYCHIC_M                      22
-#define TRAINER_RS_PSYCHIC_F                      23
-#define TRAINER_RS_GENTLEMAN                      24
+// Números 1-88 eram treinadores de Ruby/Sapphire nunca usados no FireRed.
+// Mantidos: líderes, Elite 4, Campeão e personagens principais de Hoenn. O resto foi apagado e reaproveitado:
+// Rota do EEVEE do rival (inicial escolhido com o Oak). Times provisórios: preencher.
+#define TRAINER_RIVAL_OAKS_LAB_EEVEE                1
+#define TRAINER_RIVAL_ROUTE22_EARLY_EEVEE           2
+#define TRAINER_RIVAL_CERULEAN_JOLTEON              3
+#define TRAINER_RIVAL_CERULEAN_VAPOREON             4
+#define TRAINER_RIVAL_CERULEAN_FLAREON              5
+#define TRAINER_RIVAL_SS_ANNE_JOLTEON               6
+#define TRAINER_RIVAL_SS_ANNE_VAPOREON              7
+#define TRAINER_RIVAL_SS_ANNE_FLAREON               8
+#define TRAINER_RIVAL_POKEMON_TOWER_JOLTEON         9
+#define TRAINER_RIVAL_POKEMON_TOWER_VAPOREON        10
+#define TRAINER_RIVAL_POKEMON_TOWER_FLAREON         11
+#define TRAINER_RIVAL_SILPH_JOLTEON                 12
+#define TRAINER_RIVAL_SILPH_VAPOREON                13
+#define TRAINER_RIVAL_SILPH_FLAREON                 14
+#define TRAINER_RIVAL_ROUTE22_LATE_JOLTEON          15
+#define TRAINER_RIVAL_ROUTE22_LATE_VAPOREON         16
+#define TRAINER_RIVAL_ROUTE22_LATE_FLAREON          17
+#define TRAINER_CHAMPION_FIRST_JOLTEON              18
+#define TRAINER_CHAMPION_FIRST_VAPOREON             19
+#define TRAINER_CHAMPION_FIRST_FLAREON              20
+#define TRAINER_CHAMPION_REMATCH_JOLTEON            21
+#define TRAINER_CHAMPION_REMATCH_VAPOREON           22
+#define TRAINER_CHAMPION_REMATCH_FLAREON            23
+// Times dos líderes por POSIÇÃO (4º, 5º e 6º ginásio). O ID original de cada um é a posição
+// do jogo original: ERIKA = 4º, KOGA = 5º, SABRINA = 6º.
+#define TRAINER_LEADER_ERIKA_5                      24
+#define TRAINER_LEADER_ERIKA_6                      30
+#define TRAINER_LEADER_KOGA_4                       31
+#define TRAINER_LEADER_KOGA_6                       32
+#define TRAINER_LEADER_SABRINA_4                    33
+#define TRAINER_LEADER_SABRINA_5                    34
+// Números livres para novos treinadores: 35, 36, 37, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81
 #define TRAINER_ELITE_FOUR_SIDNEY                 25
 #define TRAINER_ELITE_FOUR_PHOEBE                 26
 #define TRAINER_LEADER_ROXANNE                    27
 #define TRAINER_LEADER_BRAWLY                     28
 #define TRAINER_LEADER_TATE_LIZA                  29
-#define TRAINER_SCHOOL_KID_M                      30
-#define TRAINER_SCHOOL_KID_F                      31
-#define TRAINER_SR_AND_JR                         32
-#define TRAINER_POKEFAN_M                         33
-#define TRAINER_POKEFAN_F                         34
-#define TRAINER_EXPERT_M                          35
-#define TRAINER_EXPERT_F                          36
-#define TRAINER_RS_YOUNGSTER                      37
 #define TRAINER_RS_CHAMPION                       38
-#define TRAINER_RS_FISHERMAN                      39
-#define TRAINER_CYCLING_TRIATHLETE_M              40
-#define TRAINER_CYCLING_TRIATHLETE_F              41
-#define TRAINER_RUNNING_TRIATHLETE_M              42
-#define TRAINER_RUNNING_TRIATHLETE_F              43
-#define TRAINER_SWIMMING_TRIATHLETE_M             44
-#define TRAINER_SWIMMING_TRIATHLETE_F             45
-#define TRAINER_DRAGON_TAMER                      46
-#define TRAINER_RS_BIRD_KEEPER                    47
-#define TRAINER_NINJA_BOY                         48
-#define TRAINER_BATTLE_GIRL                       49
-#define TRAINER_PARASOL_LADY                      50
-#define TRAINER_RS_SWIMMER_F                      51
-#define TRAINER_RS_PICNICKER                      52
-#define TRAINER_RS_TWINS                          53
-#define TRAINER_RS_SAILOR                         54
-#define TRAINER_BOARDER_M                         55
-#define TRAINER_BOARDER_F                         56
-#define TRAINER_COLLECTOR                         57
 #define TRAINER_WALLY                             58
 #define TRAINER_BRENDAN                           59
 #define TRAINER_BRENDAN_2                         60
@@ -67,23 +50,6 @@
 #define TRAINER_MAY                               62
 #define TRAINER_MAY_2                             63
 #define TRAINER_MAY_3                             64
-#define TRAINER_RS_PKMN_BREEDER_M                 65
-#define TRAINER_RS_PKMN_BREEDER_F                 66
-#define TRAINER_RS_PKMN_RANGER_M                  67
-#define TRAINER_RS_PKMN_RANGER_F                  68
-#define TRAINER_MAGMA_LEADER                      69
-#define TRAINER_MAGMA_GRUNT_M                     70
-#define TRAINER_MAMGA_GRUNT_F                     71
-#define TRAINER_RS_LASS                           72
-#define TRAINER_RS_BUG_CATCHER                    73
-#define TRAINER_RS_HIKER                          74
-#define TRAINER_RS_YOUNG_COUPLE                   75
-#define TRAINER_OLD_COUPLE                        76
-#define TRAINER_RS_SIS_AND_BRO                    77
-#define TRAINER_AQUA_ADMIN_MATT                   78
-#define TRAINER_AQUA_ADMIN_SHELLY                 79
-#define TRAINER_MAGMA_ADMIN_TABITHA               80
-#define TRAINER_MAGMA_ADMIN_COURTNEY              81
 #define TRAINER_LEADER_WATTSON                    82
 #define TRAINER_LEADER_FLANNERY                   83
 #define TRAINER_LEADER_NORMAN                     84
@@ -746,6 +712,7 @@
 #define TRAINER_CHAMPION_REMATCH_BULBASAUR       740
 #define TRAINER_CHAMPION_REMATCH_CHARMANDER      741
 #define TRAINER_CUE_BALL_PAXTON                  742
+
 
 // NOTE: Because each Trainer uses a flag to determine when they are defeated, there is 
 //       only space for 25 additional trainers before trainer flag space overflows.

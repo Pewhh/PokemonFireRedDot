@@ -125,7 +125,6 @@ AI_CheckBadMove_CheckEffect::
 	if_effect EFFECT_TOXIC, AI_CBM_Poison
 	if_effect EFFECT_LIGHT_SCREEN, AI_CBM_LightScreen
 	if_effect EFFECT_OHKO, AI_CBM_OneHitKO
-	if_effect EFFECT_RAZOR_WIND, AI_CBM_HighRiskForDamage
 	if_effect EFFECT_SUPER_FANG, AI_CBM_HighRiskForDamage
 	if_effect EFFECT_MIST, AI_CBM_Mist
 	if_effect EFFECT_FOCUS_ENERGY, AI_CBM_FocusEnergy
@@ -680,7 +679,6 @@ AI_CheckViability::
 	if_effect EFFECT_LIGHT_SCREEN, AI_CV_LightScreen
 	if_effect EFFECT_REST, AI_CV_Rest
 	if_effect EFFECT_OHKO, AI_CV_OneHitKO
-	if_effect EFFECT_RAZOR_WIND, AI_CV_ChargeUpMove
 	if_effect EFFECT_SUPER_FANG, AI_CV_SuperFang
 	if_effect EFFECT_TRAP, AI_CV_Trap
 	if_effect EFFECT_HIGH_CRITICAL, AI_CV_HighCrit
@@ -704,7 +702,6 @@ AI_CheckViability::
 	if_effect EFFECT_PARALYZE, AI_CV_Paralyze
 	@ if_effect EFFECT_SWAGGER, AI_CV_Swagger  @ Improvement in Emerald
 	if_effect EFFECT_SPEED_DOWN_HIT, AI_CV_SpeedDownFromChance
-	if_effect EFFECT_SKY_ATTACK, AI_CV_ChargeUpMove
 	if_effect EFFECT_VITAL_THROW, AI_CV_VitalThrow
 	if_effect EFFECT_SUBSTITUTE, AI_CV_Substitute
 	if_effect EFFECT_RECHARGE, AI_CV_Recharge

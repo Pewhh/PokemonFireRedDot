@@ -15,3 +15,9 @@ Route10_EventScript_SouthRockTunnelSign::
 Route10_EventScript_PowerPlantSign::
 	msgbox Route10_Text_PowerPlant, MSGBOX_SIGN
 	end
+
+@ Bloqueia a entrada norte do ROCK TUNNEL até o jogador vencer o LT. SURGE
+@ (o NPC some com FLAG_DEFEATED_LT_SURGE). Garante Brock, Misty e Surge como os 3 primeiros.
+Route10_EventScript_RockTunnelWorker::
+	msgbox Route10_Text_RockTunnelWorker, MSGBOX_NPC
+	end

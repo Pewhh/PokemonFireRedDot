@@ -757,6 +757,8 @@ extern const u8 gText_Black[];
 extern const u8 gText_Pink[];
 extern const u8 gText_Sepia[];
 extern const u8 gText_Eevee[];
+extern const u8 gText_Pikachu[];
+extern const u8 gText_Surprise[];
 extern const u8 gText_Flareon[];
 extern const u8 gText_Jolteon[];
 extern const u8 gText_Vaporeon[];

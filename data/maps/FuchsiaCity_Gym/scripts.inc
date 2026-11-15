@@ -2,17 +2,45 @@ FuchsiaCity_Gym_MapScripts::
 	.byte 0
 
 FuchsiaCity_Gym_EventScript_Koga::
-        goto_if_set FLAG_DEFEATED_KOGA, FuchsiaCity_Gym_EventScript_Koga_PostVictoryFlow
-		famechecker FAMECHECKER_KOGA, FCPICKSTATE_COLORED, UpdatePickStateFromSpecialVar8005
-        msgbox FuchsiaCity_Gym_Text_KogaIntro, MSGBOX_DEFAULT
-		setvar VAR_0x8004, TRAINER_LEADER_KOGA
-        call EventScript_ChooseExpertGymBattleParty
-        goto_if_eq VAR_RESULT, FALSE, FuchsiaCity_Gym_EventScript_KogaCancelBattle
-        trainerbattle_single TRAINER_LEADER_KOGA, gText_LetsBattle, FuchsiaCity_Gym_Text_KogaDefeat, FuchsiaCity_Gym_EventScript_DefeatedKoga, NO_MUSIC
-        goto_if_unset FLAG_GOT_TM06_FROM_KOGA, FuchsiaCity_Gym_EventScript_GiveTM06
-        msgbox FuchsiaCity_Gym_Text_KogaPostBattle
-        release
-        end
+	goto_if_set FLAG_DEFEATED_KOGA, FuchsiaCity_Gym_EventScript_Koga_PostVictoryFlow
+	famechecker FAMECHECKER_KOGA, FCPICKSTATE_COLORED, UpdatePickStateFromSpecialVar8005
+	msgbox FuchsiaCity_Gym_Text_KogaIntro, MSGBOX_DEFAULT
+	@ Time do líder pela POSIÇÃO em que ele é enfrentado (insígnias que o jogador já tem)
+	specialvar VAR_RESULT, GetBadgeCountForScript
+	goto_if_ge VAR_RESULT, 5, FuchsiaCity_Gym_EventScript_KogaBattle6
+	goto_if_eq VAR_RESULT, 4, FuchsiaCity_Gym_EventScript_KogaBattle5
+	goto FuchsiaCity_Gym_EventScript_KogaBattle4
+	end
+
+FuchsiaCity_Gym_EventScript_KogaBattle4::
+	setvar VAR_0x8004, TRAINER_LEADER_KOGA_4
+	call EventScript_ChooseExpertGymBattleParty
+	goto_if_eq VAR_RESULT, FALSE, FuchsiaCity_Gym_EventScript_KogaCancelBattle
+	trainerbattle_single TRAINER_LEADER_KOGA_4, gText_LetsBattle, FuchsiaCity_Gym_Text_KogaDefeat, FuchsiaCity_Gym_EventScript_DefeatedKoga, NO_MUSIC
+	goto FuchsiaCity_Gym_EventScript_KogaAfterBattle
+	end
+
+FuchsiaCity_Gym_EventScript_KogaBattle5::
+	setvar VAR_0x8004, TRAINER_LEADER_KOGA
+	call EventScript_ChooseExpertGymBattleParty
+	goto_if_eq VAR_RESULT, FALSE, FuchsiaCity_Gym_EventScript_KogaCancelBattle
+	trainerbattle_single TRAINER_LEADER_KOGA, gText_LetsBattle, FuchsiaCity_Gym_Text_KogaDefeat, FuchsiaCity_Gym_EventScript_DefeatedKoga, NO_MUSIC
+	goto FuchsiaCity_Gym_EventScript_KogaAfterBattle
+	end
+
+FuchsiaCity_Gym_EventScript_KogaBattle6::
+	setvar VAR_0x8004, TRAINER_LEADER_KOGA_6
+	call EventScript_ChooseExpertGymBattleParty
+	goto_if_eq VAR_RESULT, FALSE, FuchsiaCity_Gym_EventScript_KogaCancelBattle
+	trainerbattle_single TRAINER_LEADER_KOGA_6, gText_LetsBattle, FuchsiaCity_Gym_Text_KogaDefeat, FuchsiaCity_Gym_EventScript_DefeatedKoga, NO_MUSIC
+	goto FuchsiaCity_Gym_EventScript_KogaAfterBattle
+	end
+
+FuchsiaCity_Gym_EventScript_KogaAfterBattle::
+	goto_if_unset FLAG_GOT_TM06_FROM_KOGA, FuchsiaCity_Gym_EventScript_GiveTM06
+	msgbox FuchsiaCity_Gym_Text_KogaPostBattle
+	release
+	end
 
 FuchsiaCity_Gym_EventScript_DefeatedKoga::
 	famechecker FAMECHECKER_KOGA, 1

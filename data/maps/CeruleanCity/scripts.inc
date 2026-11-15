@@ -45,6 +45,7 @@ CeruleanCity_EventScript_Rival::
 	call_if_eq VAR_STARTER_MON, 2, CeruleanCity_EventScript_RivalSquirtle
 	call_if_eq VAR_STARTER_MON, 1, CeruleanCity_EventScript_RivalBulbasaur
 	call_if_eq VAR_STARTER_MON, 0, CeruleanCity_EventScript_RivalCharmander
+	call_if_eq VAR_STARTER_MON, STARTER_MON_OAK_OTHER, CeruleanCity_EventScript_RivalEevee
 	famechecker FAMECHECKER_BILL, 0
 	msgbox CeruleanCity_Text_RivalPostBattle
 	closemessage
@@ -356,3 +357,18 @@ CeruleanCity_EventScript_GymSign::
 	msgbox CeruleanCity_Text_GymSign
 	releaseall
 	end
+
+@ Rota do EEVEE: a evolução depende das vitórias do jogador no laboratório e na 1ª batalha da Rota 22
+CeruleanCity_EventScript_RivalEevee::
+	goto_if_ge VAR_RIVAL_EEVEE_WINS, RIVAL_EEVEE_WINS_JOLTEON, CeruleanCity_EventScript_RivalEeveeJolteon
+	goto_if_eq VAR_RIVAL_EEVEE_WINS, RIVAL_EEVEE_WINS_VAPOREON, CeruleanCity_EventScript_RivalEeveeVaporeon
+	trainerbattle_no_intro TRAINER_RIVAL_CERULEAN_FLAREON, CeruleanCity_Text_RivalDefeat
+	return
+
+CeruleanCity_EventScript_RivalEeveeJolteon::
+	trainerbattle_no_intro TRAINER_RIVAL_CERULEAN_JOLTEON, CeruleanCity_Text_RivalDefeat
+	return
+
+CeruleanCity_EventScript_RivalEeveeVaporeon::
+	trainerbattle_no_intro TRAINER_RIVAL_CERULEAN_VAPOREON, CeruleanCity_Text_RivalDefeat
+	return

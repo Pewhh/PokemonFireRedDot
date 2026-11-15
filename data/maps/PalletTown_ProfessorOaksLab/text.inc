@@ -355,3 +355,78 @@ PalletTown_ProfessorOaksLab_Text_RivalIllCompleteThePokedex::
     .string "ONE ISLAND first…\p"
     .string "Anyways, I'm outta here!$"
 
+
+PalletTown_ProfessorOaksLab_Text_OakSomethingTroublingYou::
+    .string "OAK: Hm?\n"
+    .string "Is something troubling you, {PLAYER}?\p"
+    .string "Take your time. Your first POKéMON\n"
+    .string "is no small decision.$"
+
+PalletTown_ProfessorOaksLab_Text_OakNoneSuitYou::
+    .string "OAK: {PLAYER}…\n"
+    .string "None of these three suit you, eh?\p"
+    .string "Hm… I see.\p"
+    .string "Well, I do keep a few other\n"
+    .string "POKéMON here in the lab.$"
+
+PalletTown_ProfessorOaksLab_Text_OakWhichWouldYouLike::
+    .string "OAK: Which would you like?$"
+
+PalletTown_ProfessorOaksLab_Text_OakChoosingPikachu::
+    .string "Ah! PIKACHU is your choice.\n"
+    .string "It's a bit fussy about POKé BALLS…\p"
+    .string "So, {PLAYER}, you're claiming the\n"
+    .string "ELECTRIC POKéMON PIKACHU?$"
+
+PalletTown_ProfessorOaksLab_Text_OakChoosingEevee::
+    .string "Ah! EEVEE is your choice.\n"
+    .string "Its genes are quite unusual.\p"
+    .string "So, {PLAYER}, you're claiming the\n"
+    .string "NORMAL POKéMON EEVEE?$"
+
+PalletTown_ProfessorOaksLab_Text_OakLeaveItToChance::
+    .string "OAK: Ho!\n"
+    .string "You'd leave it up to chance?$"
+
+PalletTown_ProfessorOaksLab_Text_OakIllChooseForYou::
+    .string "OAK: Very well!\n"
+    .string "Then I'll choose one for you.\p"
+    .string "Let me see…\n"
+    .string "Ah, this one!$"
+
+PalletTown_ProfessorOaksLab_Text_RivalWantSpecialMonToo::
+    .string "{RIVAL}: Hey! No fair, Gramps!\p"
+    .string "How come {PLAYER} gets a special\n"
+    .string "POKéMON?\p"
+    .string "If {PLAYER} doesn't want the ones on\n"
+    .string "the table, then neither do I!\p"
+    .string "Gramps! Give me one of your special\n"
+    .string "ones, too!$"
+
+PalletTown_ProfessorOaksLab_Text_OakYouAlwaysWantWhatOthersHave::
+    .string "OAK: {RIVAL}…\n"
+    .string "You always want what someone\l"
+    .string "else has.\p"
+    .string "…Oh, very well. Here.\n"
+    .string "Take good care of it.$"
+
+PalletTown_ProfessorOaksLab_Text_RivalGrampsSavedBest::
+    .string "{RIVAL}: Heh! An EEVEE!\n"
+    .string "It can evolve into all kinds of\l"
+    .string "POKéMON.\p"
+    .string "Gramps saved the best one for his\n"
+    .string "favorite grandson!$"
+
+PalletTown_ProfessorOaksLab_Text_RivalSameEevee::
+    .string "{RIVAL}: Same POKéMON, huh?\n"
+    .string "We'll see whose EEVEE is better!$"
+
+PalletTown_ProfessorOaksLab_Text_ThreeMonsWaitForTrainer::
+    .string "OAK: Those three POKéMON…\p"
+    .string "I suppose they'll have to wait for\n"
+    .string "another TRAINER to come along.$"
+
+PalletTown_ProfessorOaksLab_Text_RivalDefeatEevee::
+    .string "WHAT?\n"
+    .string "Unbelievable!\l"
+    .string "Gramps gave me the weak one!$"

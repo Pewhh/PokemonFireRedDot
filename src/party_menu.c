@@ -4494,6 +4494,7 @@ void ItemUseCB_Medicine(u8 taskId, TaskFunc task)
     }
     else
     {
+        ItemUse_SetQuestLogEvent(QL_EVENT_USED_ITEM, mon, item, 0xFFFF); // registra no Quest Log (como no original)
         gPartyMenuUseExitCallback = TRUE;
         if (!IsItemFlute(item))
         {
@@ -5328,21 +5329,19 @@ void ItemUseCB_SacredAsh(u8 taskId, TaskFunc func)
 static void UseSacredAsh(u8 taskId)
 {
     struct Pokemon *mon = &gPlayerParty[gPartyMenu.slotId];
-    u16 hp = GetMonData(mon, MON_DATA_HP); // já pega o HP do mon
+    u16 hp;
 
-    // Bloqueia em modos HARDCORE/EXPERT se o mon estiver desmaiado (HP == 0)
-    if ((FlagGet(FLAG_HARDCORE) || FlagGet(FLAG_EXPERT)) && hp == 0)
+    // Slot vazio, ou Pokémon morto no Hardcore/Expert: pula para o próximo
+    if (GetMonData(mon, MON_DATA_SPECIES) == SPECIES_NONE
+     || ((FlagGet(FLAG_HARDCORE) || FlagGet(FLAG_EXPERT)) && GetMonData(mon, MON_DATA_DEAD)))
     {
-        DisplayPartyMenuMessage(gText_WontHaveEffect, TRUE);
-        ScheduleBgCopyTilemapToVram(2);
-        gTasks[taskId].func = Task_ClosePartyMenuAfterText; // defina o fluxo de saída
+        gTasks[taskId].func = Task_SacredAshLoop;
         return;
     }
-
-    // Se o slot estiver vazio, segue para o loop do item/efeito
-    if (GetMonData(mon, MON_DATA_SPECIES) == SPECIES_NONE)
+    hp = GetMonData(mon, MON_DATA_HP);
+    if (ExecuteTableBasedItemEffect_(gPartyMenu.slotId, gSpecialVar_ItemId, 0)) // aplica o efeito; TRUE = sem efeito
     {
-        gTasks[taskId].func = Task_SacredAshLoop; // use o seu loop/callback correto aqui
+        gTasks[taskId].func = Task_SacredAshLoop;
         return;
     }
     PlaySE(SE_USE_ITEM);
@@ -5859,6 +5858,14 @@ static bool8 GetBattleEntryEligibility(struct Pokemon *mon)
         if (GetMonData(mon, MON_DATA_HP) == 0)
             return FALSE;
         break;
+    case CHOOSE_MONS_FOR_GYM_LEADER:
+        // Seleção para líder de ginásio (Expert): sem limite de nível,
+        // mas desmaiados e mortos (Hardcore/Expert) não podem entrar.
+        if (GetMonData(mon, MON_DATA_HP) == 0)
+            return FALSE;
+        if ((FlagGet(FLAG_HARDCORE) || FlagGet(FLAG_EXPERT)) && GetMonData(mon, MON_DATA_DEAD))
+            return FALSE;
+        break;
     case CHOOSE_MONS_FOR_BATTLE_TOWER:
         if (gSaveBlock2Ptr->battleTower.battleTowerLevelType == 0 // level 50
          && GetMonData(mon, MON_DATA_LEVEL) > 50)
@@ -5904,9 +5911,10 @@ static u8 CheckBattleEntriesAndGetMessage(void)
             return PARTY_MSG_TWO_MONS_ARE_NEEDED;
         break;
     case CHOOSE_MONS_FOR_GYM_LEADER:
-        if (CountSelectedBattleMons() < requiredMons)
+        // Pode escolher ATÉ a quantidade do time do líder; pelo menos 1.
+        if (CountSelectedBattleMons() == 0)
         {
-            ConvertIntToDecimalStringN(gStringVar1, requiredMons, STR_CONV_MODE_LEFT_ALIGN, 1);
+            ConvertIntToDecimalStringN(gStringVar1, 1, STR_CONV_MODE_LEFT_ALIGN, 1);
             return PARTY_MSG_NOT_ENOUGH_MONS_SELECTED;
         }
         break;

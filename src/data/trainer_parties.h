@@ -21,63 +21,12 @@
         .species = SPECIES_STARMIE, \
     }
 
-static const struct TrainerMonNoItemDefaultMoves sParty_AquaLeader[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_AquaGruntM[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_AquaGruntF[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_RSAromaLady[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_RSRuinManiac[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_Interviewer[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_RSTuberF[] = {DUMMY_TRAINER_STARMIE};
-static const struct TrainerMonNoItemDefaultMoves sParty_RSTuberM[] = {DUMMY_TRAINER_STARMIE};
-static const struct TrainerMonNoItemDefaultMoves sParty_RSCooltrainerM[] = {DUMMY_TRAINER_MON_IV};
-static const struct TrainerMonNoItemDefaultMoves sParty_RSCooltrainerF[] = {DUMMY_TRAINER_MON_IV};
-static const struct TrainerMonNoItemDefaultMoves sParty_HexManiac[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_RSLady[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_RSBeauty[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_RichBoy[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_RSPokemaniac[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_RSSwimmerM[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_RSBlackBelt[] = {DUMMY_TRAINER_MON_IV};
-static const struct TrainerMonNoItemDefaultMoves sParty_Guitarist[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_Kindler[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_RSCamper[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_BugManiac[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_RSPsychicM[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_RSPsychicF[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_RSGentleman[] = {DUMMY_TRAINER_MON};
 static const struct TrainerMonNoItemDefaultMoves sParty_EliteFourSidney[] = {DUMMY_TRAINER_MON};
 static const struct TrainerMonNoItemDefaultMoves sParty_EliteFourPhoebe[] = {DUMMY_TRAINER_MON};
 static const struct TrainerMonNoItemDefaultMoves sParty_LeaderRoxanne[] = {DUMMY_TRAINER_MON};
 static const struct TrainerMonNoItemDefaultMoves sParty_LeaderBrawly[] = {DUMMY_TRAINER_MON};
 static const struct TrainerMonNoItemDefaultMoves sParty_LeaderTateLiza[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_SchoolKidM[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_SchoolKidF[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_SrAndJr[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_PokefanM[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_PokefanF[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_ExpertM[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_ExpertF[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_RSYoungster[] = {DUMMY_TRAINER_MON};
 static const struct TrainerMonNoItemDefaultMoves sParty_RSChampion[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_RSFisherman[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_CyclingTriathleteM[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_CyclingTriathleteF[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_RunningTriathleteM[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_RunningTriathleteF[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_SwimmingTriathleteM[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_SwimmingTriathleteF[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_DragonTamer[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_RSBirdKeeper[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_NinjaBoy[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_BattleGirl[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_ParasolLady[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_RSSwimmerF[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_RSPicnicker[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_RSTwins[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_RSSailor[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_BoarderM[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_BoarderF[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_Collector[] = {DUMMY_TRAINER_MON};
 static const struct TrainerMonNoItemDefaultMoves sParty_Wally[] = {DUMMY_TRAINER_MON};
 static const struct TrainerMonNoItemDefaultMoves sParty_Brendan[] = {DUMMY_TRAINER_MON};
 static const struct TrainerMonNoItemDefaultMoves sParty_Brendan2[] = {DUMMY_TRAINER_MON};
@@ -85,23 +34,6 @@ static const struct TrainerMonNoItemDefaultMoves sParty_Brendan3[] = {DUMMY_TRAI
 static const struct TrainerMonNoItemDefaultMoves sParty_May[] = {DUMMY_TRAINER_MON};
 static const struct TrainerMonNoItemDefaultMoves sParty_May2[] = {DUMMY_TRAINER_MON};
 static const struct TrainerMonNoItemDefaultMoves sParty_May3[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_RSPkmnBreederM[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_RSPkmnBreederF[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_RSPkmnRangerM[] = {DUMMY_TRAINER_MON_IV};
-static const struct TrainerMonNoItemDefaultMoves sParty_RSPkmnRangerF[] = {DUMMY_TRAINER_MON_IV};
-static const struct TrainerMonNoItemDefaultMoves sParty_MagmaLeader[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_MagmaGruntM[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_MagmaGruntF[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_RSLass[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_RSBugCatcher[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_RSHiker[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_RSYoungCouple[] = {DUMMY_TRAINER_MON, DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_OldCouple[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_RSSisAndBro[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_AquaAdminMatt[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_AquaAdminShelly[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_MagmaAdminTabitha[] = {DUMMY_TRAINER_MON};
-static const struct TrainerMonNoItemDefaultMoves sParty_MagmaAdminCourtney[] = {DUMMY_TRAINER_MON};
 static const struct TrainerMonNoItemDefaultMoves sParty_LeaderWattson[] = {DUMMY_TRAINER_MON};
 static const struct TrainerMonNoItemDefaultMoves sParty_LeaderFlannery[] = {DUMMY_TRAINER_MON};
 static const struct TrainerMonNoItemDefaultMoves sParty_LeaderNorman[] = {DUMMY_TRAINER_MON};
@@ -10864,5 +10796,349 @@ static const struct TrainerMonNoItemDefaultMoves sParty_CueBallPaxton[] = {
         .iv = 50,
         .lvl = 39,
         .species = SPECIES_MUK,
+    },
+};
+
+// ---- Rota do EEVEE do rival (VAR_STARTER_MON == STARTER_MON_OAK_OTHER) ----
+// Times PROVISÓRIOS: só o EEVEE (ou a evolução) no nível do inicial do rival original. Preencher depois.
+static const struct TrainerMonNoItemDefaultMoves sParty_RivalOaksLabEevee[] = {
+    {
+        .iv = 0,
+        .lvl = 5,
+        .species = SPECIES_EEVEE,
+    },
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_RivalRoute22EarlyEevee[] = {
+    {
+        .iv = 50,
+        .lvl = 7,
+        .species = SPECIES_EEVEE,
+    },
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_RivalCeruleanJolteon[] = {
+    {
+        .iv = 100,
+        .lvl = 18,
+        .species = SPECIES_EEVEE,
+    },
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_RivalCeruleanVaporeon[] = {
+    {
+        .iv = 100,
+        .lvl = 18,
+        .species = SPECIES_EEVEE,
+    },
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_RivalCeruleanFlareon[] = {
+    {
+        .iv = 100,
+        .lvl = 18,
+        .species = SPECIES_EEVEE,
+    },
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_RivalSsAnneJolteon[] = {
+    {
+        .iv = 100,
+        .lvl = 20,
+        .species = SPECIES_EEVEE,
+    },
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_RivalSsAnneVaporeon[] = {
+    {
+        .iv = 100,
+        .lvl = 20,
+        .species = SPECIES_EEVEE,
+    },
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_RivalSsAnneFlareon[] = {
+    {
+        .iv = 100,
+        .lvl = 20,
+        .species = SPECIES_EEVEE,
+    },
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_RivalPokemonTowerJolteon[] = {
+    {
+        .iv = 100,
+        .lvl = 25,
+        .species = SPECIES_JOLTEON,
+    },
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_RivalPokemonTowerVaporeon[] = {
+    {
+        .iv = 100,
+        .lvl = 25,
+        .species = SPECIES_VAPOREON,
+    },
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_RivalPokemonTowerFlareon[] = {
+    {
+        .iv = 100,
+        .lvl = 25,
+        .species = SPECIES_FLAREON,
+    },
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_RivalSilphJolteon[] = {
+    {
+        .iv = 150,
+        .lvl = 40,
+        .species = SPECIES_JOLTEON,
+    },
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_RivalSilphVaporeon[] = {
+    {
+        .iv = 150,
+        .lvl = 40,
+        .species = SPECIES_VAPOREON,
+    },
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_RivalSilphFlareon[] = {
+    {
+        .iv = 150,
+        .lvl = 40,
+        .species = SPECIES_FLAREON,
+    },
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_RivalRoute22LateJolteon[] = {
+    {
+        .iv = 250,
+        .lvl = 53,
+        .species = SPECIES_JOLTEON,
+    },
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_RivalRoute22LateVaporeon[] = {
+    {
+        .iv = 250,
+        .lvl = 53,
+        .species = SPECIES_VAPOREON,
+    },
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_RivalRoute22LateFlareon[] = {
+    {
+        .iv = 250,
+        .lvl = 53,
+        .species = SPECIES_FLAREON,
+    },
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_ChampionFirstJolteon[] = {
+    {
+        .iv = 255,
+        .lvl = 63,
+        .species = SPECIES_JOLTEON,
+    },
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_ChampionFirstVaporeon[] = {
+    {
+        .iv = 255,
+        .lvl = 63,
+        .species = SPECIES_VAPOREON,
+    },
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_ChampionFirstFlareon[] = {
+    {
+        .iv = 255,
+        .lvl = 63,
+        .species = SPECIES_FLAREON,
+    },
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_ChampionRematchJolteon[] = {
+    {
+        .iv = 255,
+        .lvl = 75,
+        .species = SPECIES_JOLTEON,
+    },
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_ChampionRematchVaporeon[] = {
+    {
+        .iv = 255,
+        .lvl = 75,
+        .species = SPECIES_VAPOREON,
+    },
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_ChampionRematchFlareon[] = {
+    {
+        .iv = 255,
+        .lvl = 75,
+        .species = SPECIES_FLAREON,
+    },
+};
+
+// ---- Líderes por posição (4º, 5º, 6º). Os times sem número são a posição original:
+// sParty_LeaderErika = 4º, sParty_LeaderKoga = 5º, sParty_LeaderSabrina = 6º.
+// ERIKA como 5º ginásio (provisório: time original +14 níveis)
+static const struct TrainerMonNoItemCustomMoves sParty_LeaderErika5[] = {
+    {
+        .iv = 0,
+        .lvl = 43,
+        .species = SPECIES_VICTREEBEL,
+        .moves = {MOVE_STUN_SPORE, MOVE_ACID, MOVE_POISON_POWDER, MOVE_GIGA_DRAIN},
+    },
+    {
+        .iv = 0,
+        .lvl = 38,
+        .species = SPECIES_TANGELA,
+        .moves = {MOVE_POISON_POWDER, MOVE_CONSTRICT, MOVE_INGRAIN, MOVE_GIGA_DRAIN},
+    },
+    {
+        .iv = 0,
+        .lvl = 43,
+        .species = SPECIES_VILEPLUME,
+        .moves = {MOVE_SLEEP_POWDER, MOVE_ACID, MOVE_STUN_SPORE, MOVE_GIGA_DRAIN},
+    },
+};
+
+// ERIKA como 6º ginásio (provisório: time original +14 níveis)
+static const struct TrainerMonNoItemCustomMoves sParty_LeaderErika6[] = {
+    {
+        .iv = 0,
+        .lvl = 43,
+        .species = SPECIES_VICTREEBEL,
+        .moves = {MOVE_STUN_SPORE, MOVE_ACID, MOVE_POISON_POWDER, MOVE_GIGA_DRAIN},
+    },
+    {
+        .iv = 0,
+        .lvl = 38,
+        .species = SPECIES_TANGELA,
+        .moves = {MOVE_POISON_POWDER, MOVE_CONSTRICT, MOVE_INGRAIN, MOVE_GIGA_DRAIN},
+    },
+    {
+        .iv = 0,
+        .lvl = 43,
+        .species = SPECIES_VILEPLUME,
+        .moves = {MOVE_SLEEP_POWDER, MOVE_ACID, MOVE_STUN_SPORE, MOVE_GIGA_DRAIN},
+    },
+};
+
+// KOGA como 4º ginásio (provisório: time original -14 níveis)
+static const struct TrainerMonNoItemCustomMoves sParty_LeaderKoga4[] = {
+    {
+        .iv = 0,
+        .lvl = 23,
+        .species = SPECIES_KOFFING,
+        .moves = {MOVE_SELF_DESTRUCT, MOVE_SLUDGE, MOVE_SMOKESCREEN, MOVE_TOXIC},
+    },
+    {
+        .iv = 0,
+        .lvl = 25,
+        .species = SPECIES_MUK,
+        .moves = {MOVE_MINIMIZE, MOVE_SLUDGE, MOVE_ACID_ARMOR, MOVE_TOXIC},
+    },
+    {
+        .iv = 0,
+        .lvl = 23,
+        .species = SPECIES_KOFFING,
+        .moves = {MOVE_SELF_DESTRUCT, MOVE_SLUDGE, MOVE_SMOKESCREEN, MOVE_TOXIC},
+    },
+    {
+        .iv = 0,
+        .lvl = 29,
+        .species = SPECIES_WEEZING,
+        .moves = {MOVE_TACKLE, MOVE_SLUDGE, MOVE_SMOKESCREEN, MOVE_TOXIC},
+    },
+};
+
+// KOGA como 6º ginásio (provisório: cópia do time original)
+static const struct TrainerMonNoItemCustomMoves sParty_LeaderKoga6[] = {
+    {
+        .iv = 0,
+        .lvl = 37,
+        .species = SPECIES_KOFFING,
+        .moves = {MOVE_SELF_DESTRUCT, MOVE_SLUDGE, MOVE_SMOKESCREEN, MOVE_TOXIC},
+    },
+    {
+        .iv = 0,
+        .lvl = 39,
+        .species = SPECIES_MUK,
+        .moves = {MOVE_MINIMIZE, MOVE_SLUDGE, MOVE_ACID_ARMOR, MOVE_TOXIC},
+    },
+    {
+        .iv = 0,
+        .lvl = 37,
+        .species = SPECIES_KOFFING,
+        .moves = {MOVE_SELF_DESTRUCT, MOVE_SLUDGE, MOVE_SMOKESCREEN, MOVE_TOXIC},
+    },
+    {
+        .iv = 0,
+        .lvl = 43,
+        .species = SPECIES_WEEZING,
+        .moves = {MOVE_TACKLE, MOVE_SLUDGE, MOVE_SMOKESCREEN, MOVE_TOXIC},
+    },
+};
+
+// SABRINA como 4º ginásio (provisório: time original -14 níveis)
+static const struct TrainerMonNoItemCustomMoves sParty_LeaderSabrina4[] = {
+    {
+        .iv = 0,
+        .lvl = 24,
+        .species = SPECIES_KADABRA,
+        .moves = {MOVE_PSYBEAM, MOVE_REFLECT, MOVE_FUTURE_SIGHT, MOVE_CALM_MIND},
+    },
+    {
+        .iv = 0,
+        .lvl = 23,
+        .species = SPECIES_MR_MIME,
+        .moves = {MOVE_BARRIER, MOVE_PSYBEAM, MOVE_BATON_PASS, MOVE_CALM_MIND},
+    },
+    {
+        .iv = 0,
+        .lvl = 24,
+        .species = SPECIES_VENOMOTH,
+        .moves = {MOVE_PSYBEAM, MOVE_GUST, MOVE_LEECH_LIFE, MOVE_SUPERSONIC},
+    },
+    {
+        .iv = 0,
+        .lvl = 29,
+        .species = SPECIES_ALAKAZAM,
+        .moves = {MOVE_PSYCHIC, MOVE_RECOVER, MOVE_FUTURE_SIGHT, MOVE_CALM_MIND},
+    },
+};
+
+// SABRINA como 5º ginásio (provisório: cópia do time original)
+static const struct TrainerMonNoItemCustomMoves sParty_LeaderSabrina5[] = {
+    {
+        .iv = 0,
+        .lvl = 38,
+        .species = SPECIES_KADABRA,
+        .moves = {MOVE_PSYBEAM, MOVE_REFLECT, MOVE_FUTURE_SIGHT, MOVE_CALM_MIND},
+    },
+    {
+        .iv = 0,
+        .lvl = 37,
+        .species = SPECIES_MR_MIME,
+        .moves = {MOVE_BARRIER, MOVE_PSYBEAM, MOVE_BATON_PASS, MOVE_CALM_MIND},
+    },
+    {
+        .iv = 0,
+        .lvl = 38,
+        .species = SPECIES_VENOMOTH,
+        .moves = {MOVE_PSYBEAM, MOVE_GUST, MOVE_LEECH_LIFE, MOVE_SUPERSONIC},
+    },
+    {
+        .iv = 0,
+        .lvl = 43,
+        .species = SPECIES_ALAKAZAM,
+        .moves = {MOVE_PSYCHIC, MOVE_RECOVER, MOVE_FUTURE_SIGHT, MOVE_CALM_MIND},
     },
 };
