@@ -20,7 +20,8 @@
 #include "event_data.h"
 #include "constants/flags.h"
 
-#define INTRO_SPECIES SPECIES_NIDORAN_F
+// HACK: Pokémon que o Prof. Oak apresenta (era SPECIES_NIDORAN_F): NIDORINO no FireRed, NIDORINA no LeafGreen
+#define INTRO_SPECIES (IsLeafGreenVersion() ? SPECIES_NIDORINA : SPECIES_NIDORINO)
 
 enum
 {
@@ -636,7 +637,7 @@ static const u8 *const sFemaleNameChoices_FR[] = {
     gNameChoice_Momo, gNameChoice_Suzi
 };
 static const u8 *const sRivalNameChoices_FR[] = {
-    gNameChoice_Green, gNameChoice_Gary, gNameChoice_Kaz, gNameChoice_Toru
+    gNameChoice_Blue, gNameChoice_Green, gNameChoice_Gary, gNameChoice_Kaz // HACK: BLUE no lugar de TORU
 };
 
 // LeafGreen name choices
@@ -654,7 +655,7 @@ static const u8 *const sFemaleNameChoices_LG[] = {
     gNameChoice_Momo, gNameChoice_Suzi
 };
 static const u8 *const sRivalNameChoices_LG[] = {
-    gNameChoice_Red, gNameChoice_Ash, gNameChoice_Kene, gNameChoice_Geki
+    gNameChoice_Blue, gNameChoice_Gary, gNameChoice_Kene, gNameChoice_Geki // HACK: BLUE e GARY no lugar de RED e ASH
 };
 
 // Runtime helpers — return correct array for active version

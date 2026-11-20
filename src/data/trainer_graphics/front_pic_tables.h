@@ -148,6 +148,13 @@ const struct MonCoords gTrainerFrontPicCoords[] =
     {.size = 8, .y_offset = 1},
     {.size = 8, .y_offset = 1},
     {.size = 8, .y_offset = 1},
+    {.size = 8, .y_offset = 1}, // HACK: BILL
+    {.size = 8, .y_offset = 1}, // HACK: RED_ADV
+    {.size = 8, .y_offset = 1}, // HACK: BLUE_ADV
+    {.size = 8, .y_offset = 1}, // HACK: GREEN_ADV
+    {.size = 8, .y_offset = 1}, // HACK: YELLOW_ADV
+    {.size = 8, .y_offset = 1}, // HACK: JANINE
+    {.size = 8, .y_offset = 1}, // HACK: JESSIE_JAMES
 };
 
 const struct CompressedSpriteSheet gTrainerFrontPicTable[] =
@@ -300,6 +307,13 @@ const struct CompressedSpriteSheet gTrainerFrontPicTable[] =
     TRAINER_SPRITE(RUIN_MANIAC, gTrainerFrontPic_RuinManiac, 0x800),
     TRAINER_SPRITE(LADY, gTrainerFrontPic_Lady, 0x800),
     TRAINER_SPRITE(PAINTER, gTrainerFrontPic_Painter, 0x800),
+    TRAINER_SPRITE(BILL, gTrainerFrontPic_Bill, 0x800), // HACK
+    TRAINER_SPRITE(RED_ADV, gTrainerFrontPic_RedAdv, 0x800), // HACK
+    TRAINER_SPRITE(BLUE_ADV, gTrainerFrontPic_BlueAdv, 0x800), // HACK
+    TRAINER_SPRITE(GREEN_ADV, gTrainerFrontPic_GreenAdv, 0x800), // HACK
+    TRAINER_SPRITE(YELLOW_ADV, gTrainerFrontPic_YellowAdv, 0x800), // HACK
+    TRAINER_SPRITE(JANINE, gTrainerFrontPic_Janine, 0x800), // HACK
+    TRAINER_SPRITE(JESSIE_JAMES, gTrainerFrontPic_JessieJames, 0x800), // HACK
 };
 
 const struct CompressedSpritePalette gTrainerFrontPicPaletteTable[] =
@@ -452,4 +466,11 @@ const struct CompressedSpritePalette gTrainerFrontPicPaletteTable[] =
     TRAINER_PAL(RUIN_MANIAC, gTrainerPalette_RuinManiac),
     TRAINER_PAL(LADY, gTrainerPalette_Lady),
     TRAINER_PAL(PAINTER, gTrainerPalette_Painter),
+    TRAINER_PAL(BILL, gTrainerPalette_Bill), // HACK
+    TRAINER_PAL(RED_ADV, gTrainerPalette_RedAdv), // HACK
+    TRAINER_PAL(BLUE_ADV, gTrainerPalette_BlueAdv), // HACK
+    TRAINER_PAL(GREEN_ADV, gTrainerPalette_GreenAdv), // HACK
+    TRAINER_PAL(YELLOW_ADV, gTrainerPalette_YellowAdv), // HACK
+    TRAINER_PAL(JANINE, gTrainerPalette_Janine), // HACK
+    TRAINER_PAL(JESSIE_JAMES, gTrainerPalette_JessieJames), // HACK
 };

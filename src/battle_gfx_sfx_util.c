@@ -162,7 +162,8 @@ void SpriteCB_TrainerSlideIn(struct Sprite *sprite)
 {
     if (!(gIntroSlideFlags & 1))
     {
-        sprite->x2 += sprite->data[0];
+        // HACK: entrada mais rápida, no mesmo passo do cenário (era x2 += data[0])
+        sprite->x2 = IntroSlideApproachZero(sprite->x2, sprite->data[0]);
         if (sprite->x2 == 0)
             sprite->callback = SpriteCallbackDummy;
     }
@@ -741,6 +742,7 @@ void HandleSpeciesGfxDataChange(u8 battlerAtk, u8 battlerDef, u8 transformType)
         Free(buffer);
         if (targetSpecies == SPECIES_CASTFORM)
         {
+            gSprites[gBattlerSpriteIds[battlerAtk]].anims = gMonFrontAnimsPtrTable[targetSpecies]; // HACK: 4 formas (Emerald)
             LZDecompressWram(lzPaletteData, gBattleStruct->castformPalette[0]);
             LoadPalette(gBattleStruct->castformPalette[0] + gBattleMonForms[battlerDef] * 16, paletteOffset, PLTT_SIZE_4BPP);
         }

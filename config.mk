@@ -43,6 +43,15 @@ ifeq ($(GAME_REVISION),1)
   BUILD_NAME  := $(BUILD_NAME)_rev1
 endif
 
+# HACK: versão de teste com menu de debug (make debug ou make DEBUG=1)
+DEBUG ?= 0
+ifeq (debug,$(MAKECMDGOALS))
+  DEBUG := 1
+endif
+ifeq ($(DEBUG),1)
+  BUILD_NAME := $(BUILD_NAME)_debug
+endif
+
 # Modern GCC
 ifeq ($(MODERN),1)
   BUILD_NAME := $(BUILD_NAME)_modern

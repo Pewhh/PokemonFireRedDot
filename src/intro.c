@@ -12,6 +12,7 @@
 #include "new_game.h"
 #include "load_save.h"
 #include "title_screen.h"
+#include "main_menu.h"
 #include "decompress.h"
 #include "util.h"
 #include "trig.h"
@@ -1927,11 +1928,19 @@ static void IntroCB_ExitToTitleScreen(struct IntroSequenceData * this)
             Free(this);
             DisableInterrupts(INTR_FLAG_HBLANK);
             SetHBlankCallback(NULL);
-            // No save file: show a random version's title screen, like FRLG+.
-            // The player picks the real one when starting a NEW GAME.
-            if (gSaveFileStatus == SAVE_STATUS_EMPTY || gSaveFileStatus == SAVE_STATUS_NO_FLASH || gSaveFileStatus == SAVE_STATUS_INVALID)
-                SetActiveVersion(Random() % 2);
-            SetMainCallback2(CB2_InitTitleScreen);
+            // HACK: sem save, o jogador escolhe a versão aqui, antes da tela-título
+            // (só uma vez por vez que o jogo é ligado). Save com erro ou sem memória:
+            // continua sorteando, e a escolha fica para o NEW GAME.
+            if (gSaveFileStatus == SAVE_STATUS_EMPTY && !WasVersionChosenBeforeTitle())
+            {
+                SetMainCallback2(CB2_InitVersionChoiceBeforeTitle);
+            }
+            else
+            {
+                if (gSaveFileStatus == SAVE_STATUS_NO_FLASH || gSaveFileStatus == SAVE_STATUS_INVALID)
+                    SetActiveVersion(Random() % 2);
+                SetMainCallback2(CB2_InitTitleScreen);
+            }
         }
         break;
     }

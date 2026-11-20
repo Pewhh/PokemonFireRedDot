@@ -21,6 +21,8 @@ PewterCity_PokemonCenter_1F_EventScript_Gentleman::
 PewterCity_PokemonCenter_1F_EventScript_Jigglypuff::
 	lock
 	faceplayer
+	setvar VAR_0x8004, SPECIES_JIGGLYPUFF @ HACK: o JIGGLYPUFF fica visto na POKéDEX
+	special SetSeenMon
 	fadeoutbgm 0
 	playbgm MUS_JIGGLYPUFF, 0
 	message PewterCity_PokemonCenter_1F_Text_Jigglypuff

@@ -1,11 +1,14 @@
 #include "global.h"
+#include "battle_gfx_sfx_util.h"
 #include "gflib.h"
 #include "battle.h"
 #include "battle_anim.h"
 #include "battle_ai_script_commands.h"
+#include "battle_ai_switch_items.h"
 #include "battle_controllers.h"
 #include "battle_interface.h"
 #include "battle_main.h"
+#include "pokemon_animation.h"
 #include "battle_message.h"
 #include "battle_scripts.h"
 #include "battle_setup.h"
@@ -76,6 +79,7 @@ static void CB2_EndLinkBattle(void);
 static void EndLinkBattleInSteps(void);
 static void SpriteCB_MoveWildMonToRight(struct Sprite *sprite);
 static void SpriteCB_WildMonShowHealthbox(struct Sprite *sprite);
+static void SpriteCB_WildMonAnimate(struct Sprite *sprite);
 static void SpriteCB_Flicker(struct Sprite *sprite);
 static void SpriteCB_AnimFaintOpponent(struct Sprite *sprite);
 static void SpriteCB_BlinkVisible(struct Sprite *sprite);
@@ -1888,11 +1892,10 @@ static void SpriteCB_MoveWildMonToRight(struct Sprite *sprite)
 {
     if ((gIntroSlideFlags & 1) == 0)
     {
-        sprite->x2 += 2;
+        sprite->x2 = IntroSlideApproachZero(sprite->x2, 1); // HACK: entrada mais rápida (era += 2)
         if (sprite->x2 == 0)
         {
-            sprite->callback = SpriteCB_WildMonShowHealthbox;
-            PlayCry_Normal(sprite->data[2], 25);
+            sprite->callback = SpriteCB_WildMonShowHealthbox; // HACK: o grito sai junto com a animação (Emerald)
         }
     }
 }
@@ -1903,10 +1906,44 @@ static void SpriteCB_WildMonShowHealthbox(struct Sprite *sprite)
     {
         StartHealthboxSlideIn(sprite->sBattler);
         SetHealthboxSpriteVisible(gHealthboxSpriteIds[sprite->sBattler]);
-        sprite->callback = SpriteCallbackDummy_2;
+        sprite->callback = SpriteCB_WildMonAnimate;
         StartSpriteAnimIfDifferent(sprite, 0);
         BeginNormalPaletteFade(0x20000, 0, 10, 0, RGB(8, 8, 8));
     }
+}
+
+// HACK: animação de entrada do Emerald para o Pokémon selvagem (grito + 2º quadro + movimento)
+static void SpriteCB_WildMonAnimate(struct Sprite *sprite)
+{
+    if (gPaletteFade.active)
+        return;
+    if (gBattleTypeFlags & BATTLE_TYPE_GHOST)
+    {
+        // Fantasma da Pokémon Tower: o desenho é o do fantasma, então só movimento (sem 2º quadro)
+        BattleAnimateGhostFrontSprite(sprite, sprite->sSpeciesId);
+        return;
+    }
+    BattleAnimateFrontSprite(sprite, sprite->sSpeciesId, FALSE, 1);
+}
+
+// HACK: animação do Emerald ao sair da Poké Ball (o grito já sai pela pokébola)
+void SpriteCB_OpponentMonFromBall(struct Sprite *sprite)
+{
+    if (sprite->affineAnimEnded)
+    {
+        if (!(gHitMarker & HITMARKER_NO_ANIMATIONS) || gBattleTypeFlags & BATTLE_TYPE_LINK)
+        {
+            if (HasTwoFramesAnimation(sprite->sSpeciesId))
+                StartSpriteAnim(sprite, 1);
+        }
+        BattleAnimateFrontSprite(sprite, sprite->sSpeciesId, TRUE, 1);
+    }
+}
+
+void SpriteCB_PlayerMonFromBall(struct Sprite *sprite)
+{
+    if (sprite->affineAnimEnded)
+        BattleAnimateBackSprite(sprite, sprite->sSpeciesId);
 }
 
 void SpriteCallbackDummy_2(struct Sprite *sprite)
@@ -2212,6 +2249,7 @@ static void BattleStartClearSetData(void)
 
     TurnValuesCleanUp(FALSE);
     SpecialStatusesClear();
+    AI_ResetSwitchStreak(); // HACK: trocas rápidas seguidas da IA (Fase 5)
 
     for (i = 0; i < MAX_BATTLERS_COUNT; i++)
     {
@@ -3627,6 +3665,8 @@ static void TurnValuesCleanUp(bool8 var0)
                 dataPtr[i] = 0;
             if (gDisableStructs[gActiveBattler].isFirstTurn)
                 --gDisableStructs[gActiveBattler].isFirstTurn;
+            if (gDisableStructs[gActiveBattler].turnsOnField < 0xFF)
+                ++gDisableStructs[gActiveBattler].turnsOnField;
             if (gDisableStructs[gActiveBattler].rechargeTimer)
             {
                 --gDisableStructs[gActiveBattler].rechargeTimer;

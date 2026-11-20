@@ -1336,3 +1336,19 @@ static void RestoreExpertGymLeaderParty(void)
     sExpertGymTrainerId = TRAINER_NONE;
     CalculatePlayerPartyCount();
 }
+#if DEBUG_MENU
+// HACK: menu de debug. Prepara uma luta direta contra o treinador em VAR_0x8008.
+extern const u8 Debug_Text_TrainerDefeat[];
+extern const u8 Debug_EventScript_AfterTrainerBattle[];
+
+void Debug_PrepareTrainerBattle(void)
+{
+    InitTrainerBattleVariables();
+    sTrainerBattleMode = TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT;
+    gTrainerBattleOpponent_A = gSpecialVar_0x8008;
+    sTrainerObjectEventLocalId = LOCALID_NONE;
+    sTrainerADefeatSpeech = (u8 *)Debug_Text_TrainerDefeat;
+    sTrainerBattleEndScript = (u8 *)Debug_EventScript_AfterTrainerBattle;
+    ClearTrainerFlag(gTrainerBattleOpponent_A); // permite repetir a luta
+}
+#endif

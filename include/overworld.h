@@ -85,6 +85,9 @@ void Overworld_ChangeMusicToDefault(void);
 void Overworld_ChangeMusicTo(u16);
 
 bool32 IsUpdateLinkStateCBActive(void);
+extern bool8 gPokedexOpenedWithL; // HACK
+void CB2_ReturnToFieldFromLPokedex(void); // HACK
+void CB2_ReturnToFieldForVersionChange(void); // HACK
 
 void ClearLinkPlayerObjectEvents(void);
 const struct MapHeader *const Overworld_GetMapHeaderByGroupAndId(u16, u16);

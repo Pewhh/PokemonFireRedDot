@@ -738,6 +738,41 @@ static const union AnimCmd *const sAnims_Painter[] =
     sAnim_GeneralFrame0,
 };
 
+static const union AnimCmd *const sAnims_Bill[] = // HACK
+{
+    sAnim_GeneralFrame0,
+};
+
+static const union AnimCmd *const sAnims_RedAdv[] = // HACK
+{
+    sAnim_GeneralFrame0,
+};
+
+static const union AnimCmd *const sAnims_BlueAdv[] = // HACK
+{
+    sAnim_GeneralFrame0,
+};
+
+static const union AnimCmd *const sAnims_GreenAdv[] = // HACK
+{
+    sAnim_GeneralFrame0,
+};
+
+static const union AnimCmd *const sAnims_YellowAdv[] = // HACK
+{
+    sAnim_GeneralFrame0,
+};
+
+static const union AnimCmd *const sAnims_Janine[] = // HACK
+{
+    sAnim_GeneralFrame0,
+};
+
+static const union AnimCmd *const sAnims_JessieJames[] = // HACK
+{
+    sAnim_GeneralFrame0,
+};
+
 const union AnimCmd *const *const gTrainerFrontAnimsPtrTable[] =
 {
     [TRAINER_PIC_AQUA_LEADER_ARCHIE]    = sAnims_AquaLeaderArchie,
@@ -888,4 +923,11 @@ const union AnimCmd *const *const gTrainerFrontAnimsPtrTable[] =
     [TRAINER_PIC_RUIN_MANIAC]           = sAnims_RuinManiac,
     [TRAINER_PIC_LADY]                  = sAnims_Lady,
     [TRAINER_PIC_PAINTER]               = sAnims_Painter,
+    [TRAINER_PIC_BILL]                  = sAnims_Bill, // HACK
+    [TRAINER_PIC_RED_ADV] = sAnims_RedAdv, // HACK
+    [TRAINER_PIC_BLUE_ADV] = sAnims_BlueAdv, // HACK
+    [TRAINER_PIC_GREEN_ADV] = sAnims_GreenAdv, // HACK
+    [TRAINER_PIC_YELLOW_ADV] = sAnims_YellowAdv, // HACK
+    [TRAINER_PIC_JANINE] = sAnims_Janine, // HACK
+    [TRAINER_PIC_JESSIE_JAMES] = sAnims_JessieJames, // HACK
 };

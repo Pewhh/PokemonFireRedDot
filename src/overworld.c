@@ -43,6 +43,8 @@
 #include "script.h"
 #include "script_pokemon_util.h"
 #include "start_menu.h"
+#include "event_object_lock.h"
+#include "pokedex_screen.h"
 #include "tileset_anims.h"
 #include "trainer_pokemon_sprites.h"
 #include "vs_seeker.h"
@@ -1394,6 +1396,130 @@ bool32 IsUpdateLinkStateCBActive(void)
         return FALSE;
 }
 
+// HACK: atalhos no mapa. Disparam ao SOLTAR o botão, e só se o outro (L ou R) não foi apertado
+// junto, porque L+R abre a ajuda. No modo de botões L=A, só o atalho do L fica desligado.
+//   L: abre a Pokédex (depois de recebê-la)
+//   R: salvar o jogo, com pergunta de SIM/NÃO
+static EWRAM_DATA bool8 sLShortcutArmed = FALSE;
+static EWRAM_DATA bool8 sRShortcutArmed = FALSE;
+EWRAM_DATA bool8 gPokedexOpenedWithL = FALSE;
+
+static void Task_ReturnFromLPokedexWaitFade(u8 taskId)
+{
+    if (IsWeatherNotFadingIn() == TRUE)
+    {
+        UnfreezeObjectEvents();
+        UnlockPlayerFieldControls();
+        DestroyTask(taskId);
+    }
+}
+
+static bool8 FieldCB2_ReturnFromLPokedex(void)
+{
+    FreezeObjectEvents();
+    LockPlayerFieldControls();
+    FadeInFromBlack();
+    CreateTask(Task_ReturnFromLPokedexWaitFade, 10);
+    return TRUE;
+}
+
+// HACK: volta do OPTION depois de trocar a versão e pergunta se pode salvar e reiniciar
+static void Task_ReturnForVersionChangeWaitFade(u8 taskId)
+{
+    if (IsWeatherNotFadingIn() == TRUE)
+    {
+        DestroyTask(taskId);
+        VersionChange_AskConfirm();
+    }
+}
+
+static bool8 FieldCB2_ReturnForVersionChange(void)
+{
+    FreezeObjectEvents();
+    LockPlayerFieldControls();
+    FadeInFromBlack();
+    CreateTask(Task_ReturnForVersionChangeWaitFade, 10);
+    return TRUE;
+}
+
+void CB2_ReturnToFieldForVersionChange(void)
+{
+    FieldClearVBlankHBlankCallbacks();
+    gFieldCallback2 = FieldCB2_ReturnForVersionChange;
+    CB2_ReturnToField();
+}
+
+void CB2_ReturnToFieldFromLPokedex(void)
+{
+    FieldClearVBlankHBlankCallbacks();
+    gFieldCallback2 = FieldCB2_ReturnFromLPokedex;
+    CB2_ReturnToField();
+}
+
+static void Task_OpenPokedexFromL(u8 taskId)
+{
+    if (!gPaletteFade.active)
+    {
+        IncrementGameStat(GAME_STAT_CHECKED_POKEDEX);
+        PlayRainStoppingSoundEffect();
+        CleanupOverworldWindowsAndTilemaps();
+        gPokedexOpenedWithL = TRUE;
+        SetMainCallback2(CB2_OpenPokedexFromStartMenu);
+        DestroyTask(taskId);
+    }
+}
+
+static bool8 TryOpenPokedexFromL(void)
+{
+    if (!FlagGet(FLAG_SYS_POKEDEX_GET))
+        return FALSE;
+    LockPlayerFieldControls();
+    FreezeObjectEvents();
+    HandleEnforcedLookDirectionOnPlayerStopMoving();
+    StopPlayerAvatar();
+    PlaySE(SE_WIN_OPEN);
+    StopPokemonLeagueLightingEffectTask();
+    FadeScreen(FADE_TO_BLACK, 0);
+    CreateTask(Task_OpenPokedexFromL, 10);
+    return TRUE;
+}
+
+static bool8 TrySaveFromR(void)
+{
+    if (GetSafariZoneFlag()) // na Safari Zone não dá para salvar pelo menu
+        return FALSE;
+    PlaySE(SE_WIN_OPEN);
+    QuickSave_AskConfirm();
+    return TRUE;
+}
+
+// Retorna TRUE se abriu algo (o jogador perde o controle)
+static bool8 TryShoulderShortcuts(u16 newKeys, u16 heldKeys)
+{
+    bool8 lFree = (gSaveBlock2Ptr->optionsButtonMode != OPTIONS_BUTTON_MODE_L_EQUALS_A); // no L=A, o L é o A
+
+    if ((heldKeys & (L_BUTTON | R_BUTTON)) == (L_BUTTON | R_BUTTON))
+    {
+        sLShortcutArmed = sRShortcutArmed = FALSE;
+        return FALSE;
+    }
+    if ((newKeys & L_BUTTON) && lFree)
+        sLShortcutArmed = TRUE;
+    if (newKeys & R_BUTTON)
+        sRShortcutArmed = TRUE;
+    if (sLShortcutArmed && !(heldKeys & L_BUTTON))
+    {
+        sLShortcutArmed = FALSE;
+        return TryOpenPokedexFromL();
+    }
+    if (sRShortcutArmed && !(heldKeys & R_BUTTON))
+    {
+        sRShortcutArmed = FALSE;
+        return TrySaveFromR();
+    }
+    return FALSE;
+}
+
 static void DoCB1_Overworld(u16 newKeys, u16 heldKeys)
 {
     struct FieldInput fieldInput;
@@ -1403,6 +1529,10 @@ static void DoCB1_Overworld(u16 newKeys, u16 heldKeys)
     FieldClearPlayerInput(&fieldInput);
     FieldGetPlayerInput(&fieldInput, newKeys, heldKeys);
     FieldInput_HandleCancelSignpost(&fieldInput);
+    if (ArePlayerFieldControlsLocked())
+        sLShortcutArmed = sRShortcutArmed = FALSE; // soltar o botão durante um menu/cena não dispara depois
+    else if (TryShoulderShortcuts(newKeys, heldKeys))
+        return;
     if (!ArePlayerFieldControlsLocked())
     {
         if (ProcessPlayerFieldInput(&fieldInput) == TRUE)
@@ -1480,11 +1610,55 @@ void CB2_OverworldBasic(void)
     OverworldBasic();
 }
 
+// HACK: World Speed 2x (OPTION em 2x, ou A segurado durante cenas). Antes do quadro normal, roda um passo extra do mapa: jogador, NPCs,
+// roteiros (inclusive cenas com NPCs andando) e câmera. Não roda com a tela escurecendo,
+// com caixa de texto aberta (o texto segue a velocidade do OPTION), em link ou no Quest Log.
+// As teclas "recém-apertadas" são zeradas no passo extra para nenhum botão contar duas vezes.
+static bool8 CanRunWorldSpeedExtraStep(void)
+{
+    // 2x pelo OPTION, ou com o A segurado só durante cenas: roteiro rodando com o
+    // jogador sem controle (ex.: NPC entrando/saindo, o S.S. Anne partindo).
+    // Andar livre não acelera com o A.
+    if (!gSaveBlock2Ptr->optionsWorldSpeed)
+    {
+        if (!(gMain.heldKeys & A_BUTTON))
+            return FALSE;
+        if (!ScriptContext_IsEnabled() || !ArePlayerFieldControlsLocked())
+            return FALSE;
+    }
+    if (gMain.callback1 != CB1_Overworld)
+        return FALSE;
+    if (!IsFieldMessageBoxHidden())
+        return FALSE;
+    if (QL_GetPlaybackState() == QL_PLAYBACK_STATE_RUNNING || gQuestLogState == QL_STATE_PLAYBACK)
+        return FALSE;
+    return TRUE;
+}
+
+static void RunWorldSpeedExtraStep(void)
+{
+    u16 newKeys = gMain.newKeys;
+    u16 newAndRepeatedKeys = gMain.newAndRepeatedKeys;
+
+    gMain.newKeys = 0;
+    gMain.newAndRepeatedKeys = 0;
+    CB1_Overworld();
+    ScriptContext_RunScript();
+    RunTasks();
+    AnimateSprites();
+    CameraUpdate();
+    UpdateCameraPanning();
+    gMain.newKeys = newKeys;
+    gMain.newAndRepeatedKeys = newAndRepeatedKeys;
+}
+
 static void CB2_Overworld(void)
 {
     bool32 fading = !!gPaletteFade.active;
     if (fading)
         SetVBlankCallback(NULL);
+    else if (CanRunWorldSpeedExtraStep())
+        RunWorldSpeedExtraStep();
     OverworldBasic();
     if (fading)
         SetFieldVBlankCallback();

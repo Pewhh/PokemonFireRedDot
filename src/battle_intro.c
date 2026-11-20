@@ -92,6 +92,35 @@ s32 GetAnimBgAttribute(u8 bgId, u8 attributeId)
     return 0;
 }
 
+// HACK: entrada da batalha e volta do treinador no fim da luta mais rápidas (duram 80%
+// do original), na mesma proporção das transições. O cenário e os sprites (Pokémon selvagem e
+// treinadores) andam 2 px por quadro e, a cada 4 quadros, 4 px. O passo vem do
+// contador de quadros, então é o mesmo para todos no mesmo quadro e eles continuam alinhados.
+static s16 GetIntroSlideStep(void)
+{
+    return (gMain.vblankCounter2 % 4 == 0) ? 4 : 2; // HACK: média 2,5 px/quadro = dura 80% do original (igual à transição)
+}
+
+// Aproxima pos de 0 na direção dir (positivo ou negativo), sem passar do 0
+s16 IntroSlideApproachZero(s16 pos, s16 dir)
+{
+    s16 step = GetIntroSlideStep();
+
+    if (dir > 0)
+    {
+        pos += step;
+        if (pos > 0)
+            pos = 0;
+    }
+    else
+    {
+        pos -= step;
+        if (pos < 0)
+            pos = 0;
+    }
+    return pos;
+}
+
 void HandleIntroSlide(u8 terrain)
 {
     u8 taskId;
@@ -188,7 +217,7 @@ static void BattleIntroSlide1(u8 taskId)
         if (gBattle_WIN0V & 0xFF00)
             gBattle_WIN0V -= 0x3FC;
         if (gTasks[taskId].data[2])
-            gTasks[taskId].data[2] -= 2;
+            gTasks[taskId].data[2] = IntroSlideApproachZero(gTasks[taskId].data[2], -1);
         // Scanline settings have already been set in CB2_InitBattleInternal
         for (i = 0; i < 80; ++i)
             gScanlineEffectRegBuffers[gScanlineEffect.srcBuffer][i] = gTasks[taskId].data[2];
@@ -287,7 +316,7 @@ static void BattleIntroSlide2(u8 taskId)
             gBattle_WIN0V -= 0x3FC;
 
         if (gTasks[taskId].data[2])
-            gTasks[taskId].data[2] -= 2;
+            gTasks[taskId].data[2] = IntroSlideApproachZero(gTasks[taskId].data[2], -1);
         // Scanline settings have already been set in CB2_InitBattleInternal()
         for (i = 0; i < 80; ++i)
             gScanlineEffectRegBuffers[gScanlineEffect.srcBuffer][i] = gTasks[taskId].data[2];
@@ -366,7 +395,7 @@ static void BattleIntroSlide3(u8 taskId)
         if (gBattle_WIN0V & 0xFF00)
             gBattle_WIN0V -= 0x3FC;
         if (gTasks[taskId].data[2])
-            gTasks[taskId].data[2] -= 2;
+            gTasks[taskId].data[2] = IntroSlideApproachZero(gTasks[taskId].data[2], -1);
         // Scanline settings have already been set in CB2_InitBattleInternal()
         for (i = 0; i < 80; ++i)
             gScanlineEffectRegBuffers[gScanlineEffect.srcBuffer][i] = gTasks[taskId].data[2];
@@ -443,7 +472,7 @@ static void BattleIntroSlideLink(u8 taskId)
         if (gBattle_WIN0V & 0xFF00)
             gBattle_WIN0V -= 0x3FC;
         if (gTasks[taskId].data[2])
-            gTasks[taskId].data[2] -= 2;
+            gTasks[taskId].data[2] = IntroSlideApproachZero(gTasks[taskId].data[2], -1);
         // Scanline settings have already been set in CB2_InitBattleInternal()
         for (i = 0; i < 80; ++i)
             gScanlineEffectRegBuffers[gScanlineEffect.srcBuffer][i] = gTasks[taskId].data[2];

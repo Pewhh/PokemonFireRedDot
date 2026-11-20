@@ -2636,3 +2636,33 @@ static void Task_WingFlapSound(u8 taskId)
     if (data[0] == gSpecialVar_0x8004 - 1)
         DestroyTask(taskId);
 }
+
+// HACK: Centro Pokémon. TRUE se todo o time (sem ovos) está com HP cheio, sem status
+// e com todos os PP. No Hardcore/Expert, os mortos são ignorados (não podem ser curados).
+bool8 IsPartyFullyHealed(void)
+{
+    u8 i, j;
+    struct Pokemon *mon;
+    u16 move;
+
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        mon = &gPlayerParty[i];
+        if (GetMonData(mon, MON_DATA_SPECIES) == SPECIES_NONE || GetMonData(mon, MON_DATA_IS_EGG))
+            continue;
+        if ((FlagGet(FLAG_HARDCORE) || FlagGet(FLAG_EXPERT)) && GetMonData(mon, MON_DATA_DEAD))
+            continue;
+        if (GetMonData(mon, MON_DATA_HP) < GetMonData(mon, MON_DATA_MAX_HP))
+            return FALSE;
+        if (GetMonData(mon, MON_DATA_STATUS) != STATUS1_NONE)
+            return FALSE;
+        for (j = 0; j < MAX_MON_MOVES; j++)
+        {
+            move = GetMonData(mon, MON_DATA_MOVE1 + j);
+            if (move != MOVE_NONE
+             && GetMonData(mon, MON_DATA_PP1 + j) < CalculatePPWithBonus(move, GetMonData(mon, MON_DATA_PP_BONUSES), j))
+                return FALSE;
+        }
+    }
+    return TRUE;
+}

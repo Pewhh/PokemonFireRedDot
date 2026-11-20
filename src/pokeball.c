@@ -11,6 +11,7 @@
 #include "util.h"
 #include "link.h"
 #include "battle_gfx_sfx_util.h"
+#include "battle_main.h"
 #include "constants/songs.h"
 #include "constants/sound.h"
 
@@ -822,6 +823,16 @@ static void SpriteCB_ReleaseMonFromBall(struct Sprite *sprite)
     }
 
     StartSpriteAffineAnim(&gSprites[gBattlerSpriteIds[sprite->sBattler]], BATTLER_AFFINE_EMERGE);
+
+    // HACK: animação do Emerald quando o Pokémon termina de sair da Poké Ball
+    if (gMain.inBattle)
+    {
+        if (GetBattlerSide(sprite->sBattler) == B_SIDE_OPPONENT)
+            gSprites[gBattlerSpriteIds[sprite->sBattler]].callback = SpriteCB_OpponentMonFromBall;
+        else
+            gSprites[gBattlerSpriteIds[sprite->sBattler]].callback = SpriteCB_PlayerMonFromBall;
+    }
+
     AnimateSprite(&gSprites[gBattlerSpriteIds[sprite->sBattler]]);
     gSprites[gBattlerSpriteIds[sprite->sBattler]].data[1] = 0x1000;
 }

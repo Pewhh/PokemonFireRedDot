@@ -1,6 +1,7 @@
 #include "global.h"
 #include "gflib.h"
 #include "script.h"
+#include "pokedex.h"
 #include "mystery_event_script.h"
 #include "event_data.h"
 #include "random.h"
@@ -1524,6 +1525,9 @@ bool8 ScrCmd_showmonpic(struct ScriptContext * ctx)
 
     ScriptMenu_ShowPokemonPic(species, x, y);
     PlayCry_Script(species, CRY_MODE_NORMAL);
+    // HACK: Pokémon mostrado numa caixa de imagem conta como visto na Pokédex
+    if (species != SPECIES_NONE && species < NUM_SPECIES)
+        HandleSetPokedexFlag(SpeciesToNationalPokedexNum(species), FLAG_SET_SEEN, 0);
     return FALSE;
 }
 
@@ -2080,6 +2084,9 @@ bool8 ScrCmd_playmoncry(struct ScriptContext * ctx)
     u16 mode = VarGet(ScriptReadHalfword(ctx));
 
     PlayCry_Script(species, mode);
+    // HACK: Pokémon com quem você interage no mapa ficam como vistos na Pokédex
+    if (species != SPECIES_NONE && species < NUM_SPECIES)
+        HandleSetPokedexFlag(SpeciesToNationalPokedexNum(species), FLAG_SET_SEEN, 0);
     return FALSE;
 }
 

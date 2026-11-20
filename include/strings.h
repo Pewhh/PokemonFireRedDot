@@ -649,6 +649,10 @@ extern const u8 gSaveStatName_Player[];
 extern const u8 gSaveStatName_Badges[];
 extern const u8 gSaveStatName_Pokedex[];
 extern const u8 gSaveStatName_Time[];
+extern const u8 gSaveStatName_Mode[];
+extern const u8 gText_Hard[];
+extern const u8 gText_Hardcore[];
+extern const u8 gText_Expert[];
 
 // mail
 extern const u8 gText_From[];
@@ -762,6 +766,8 @@ extern const u8 gText_Surprise[];
 extern const u8 gText_Flareon[];
 extern const u8 gText_Jolteon[];
 extern const u8 gText_Vaporeon[];
+extern const u8 gText_Espeon[];
+extern const u8 gText_Umbreon[];
 extern const u8 gText_QuitLooking[];
 extern const u8 gText_FreshWater[];
 extern const u8 gText_SodaPop[];
@@ -930,6 +936,7 @@ extern const u8 gText_ButtonMode[];
 extern const u8 gText_Frame[];
 extern const u8 gText_OptionMenuCancel[];
 extern const u8 gText_TextSpeedSlow[];
+extern const u8 gText_TextSpeedInstant[];
 extern const u8 gText_TextSpeedMid[];
 extern const u8 gText_TextSpeedFast[];
 extern const u8 gText_BattleSceneOn[];

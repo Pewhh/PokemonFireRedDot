@@ -121,6 +121,27 @@ void RunTextPrinters(void)
         if (sTextPrinters[i].active)
         {
             u16 renderCmd = RenderFont(&sTextPrinters[i]);
+
+            // HACK: texto instantâneo. Com a opção INSTANT, os textos na velocidade do
+            // jogador (atraso 0) imprimem letra após letra no mesmo quadro, até chegar
+            // numa pausa (fim de página, espera de botão, rolagem) ou no fim do texto.
+            if (gSaveBlock2Ptr->optionsTextSpeed == OPTIONS_TEXT_SPEED_INSTANT
+             && sTextPrinters[i].textSpeed == 0)
+            {
+                u16 guard = 0;
+                bool8 printed = FALSE;
+                while (renderCmd == RENDER_PRINT && ++guard < 0x400)
+                {
+                    printed = TRUE;
+                    if (sTextPrinters[i].callback != NULL)
+                        sTextPrinters[i].callback(&sTextPrinters[i].printerTemplate, renderCmd);
+                    renderCmd = RenderFont(&sTextPrinters[i]);
+                }
+                // O texto desenhado no laço só vai para a tela com CopyWindowToVram. Sem isto,
+                // a última página (que termina em RENDER_FINISH) ficava em branco.
+                if (printed && renderCmd != RENDER_PRINT)
+                    CopyWindowToVram(sTextPrinters[i].printerTemplate.windowId, COPYWIN_GFX);
+            }
             switch (renderCmd)
             {
             case RENDER_PRINT:

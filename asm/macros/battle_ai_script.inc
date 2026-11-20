@@ -479,9 +479,10 @@
 	.byte \battler
 	.endm
 
-	@ nullsub
-	.macro ai_52
+	@ HACK (Fase 6): pula se o alvo (jogador) derruba o usuário com um golpe
+	.macro if_target_can_ko_user ptr:req
 	.byte 0x52
+	.4byte \ptr
 	.endm
 
 	@ nullsub

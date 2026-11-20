@@ -2593,6 +2593,13 @@ extern const u32 gTrainerFrontPic_AromaLady[];
 extern const u32 gTrainerFrontPic_RuinManiac[];
 extern const u32 gTrainerFrontPic_Lady[];
 extern const u32 gTrainerFrontPic_Painter[];
+extern const u32 gTrainerFrontPic_Bill[]; // HACK
+extern const u32 gTrainerFrontPic_RedAdv[]; // HACK
+extern const u32 gTrainerFrontPic_BlueAdv[]; // HACK
+extern const u32 gTrainerFrontPic_GreenAdv[]; // HACK
+extern const u32 gTrainerFrontPic_YellowAdv[]; // HACK
+extern const u32 gTrainerFrontPic_Janine[]; // HACK
+extern const u32 gTrainerFrontPic_JessieJames[]; // HACK
 
 extern const u32 gTrainerPalette_AquaLeaderArchie[];
 extern const u32 gTrainerPalette_AquaGruntM[];
@@ -2746,6 +2753,13 @@ extern const u32 gTrainerPalette_AromaLady[];
 extern const u32 gTrainerPalette_RuinManiac[];
 extern const u32 gTrainerPalette_Lady[];
 extern const u32 gTrainerPalette_Painter[];
+extern const u32 gTrainerPalette_Bill[]; // HACK
+extern const u32 gTrainerPalette_RedAdv[]; // HACK
+extern const u32 gTrainerPalette_BlueAdv[]; // HACK
+extern const u32 gTrainerPalette_GreenAdv[]; // HACK
+extern const u32 gTrainerPalette_YellowAdv[]; // HACK
+extern const u32 gTrainerPalette_Janine[]; // HACK
+extern const u32 gTrainerPalette_JessieJames[]; // HACK
 
 extern const u8 gMenuInfoElements_Gfx[];
 extern const u16 gMenuInfoElements1_Pal[];

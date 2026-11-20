@@ -255,6 +255,12 @@ static void VBlankCB_SeaGallop(void)
 
 static void MainCB2_SeaGallop(void)
 {
+    // HACK: segurar A acelera a viagem do Seagallop (como nas cenas do mapa)
+    if ((gMain.heldKeys & A_BUTTON) && !gPaletteFade.active)
+    {
+        RunTasks();
+        AnimateSprites();
+    }
     RunTasks();
     AnimateSprites();
     BuildOamBuffer();

@@ -22,6 +22,9 @@ Route25_SeaCottage_EventScript_SetReturnedAfterSSTicket::
 Route25_SeaCottage_EventScript_Bill::
 	lock
 	faceplayer
+	@ HACK: revanche depois de cada vitória na ELITE 4; antes disso, a 1ª batalha se ainda não venceu
+	goto_if_set FLAG_BILL_REMATCH_READY, Route25_SeaCottage_EventScript_BillRematch
+	goto_if_eq VAR_BILL_BATTLE, 2, Route25_SeaCottage_EventScript_BillBattleAgain
 	goto_if_set RETURN_AFTER_SS_TICKET, Route25_SeaCottage_EventScript_BillGoLookAtPC
 	goto_if_set FLAG_GOT_SS_TICKET, Route25_SeaCottage_EventScript_BillGoToSSAnne
 	goto_if_set FLAG_HELPED_BILL_IN_SEA_COTTAGE, Route25_SeaCottage_EventScript_BillGiveSSTicket
@@ -103,6 +106,7 @@ Route25_SeaCottage_EventScript_BillGiveSSTicket::
 	setflag FLAG_HIDE_NUGGET_BRIDGE_ROCKET
 	setflag FLAG_GOT_SS_TICKET
 	setflag FLAG_SYS_NOT_SOMEONES_PC
+	setvar VAR_BILL_BATTLE, 1 @ HACK: o BILL chama para batalhar quando o jogador sair
 	goto Route25_SeaCottage_EventScript_BillGoToSSAnne
 	end
 
@@ -232,6 +236,8 @@ Route25_SeaCottage_EventScript_OpenBillsMonList::
 Route25_SeaCottage_EventScript_BillsMonList::
 	message Route25_SeaCottage_Text_SeeWhichMon
 	waitmessage
+	specialvar VAR_RESULT, IsNationalPokedexEnabled
+	goto_if_eq VAR_RESULT, TRUE, Route25_SeaCottage_EventScript_BillsMonListNational
 	multichoice 0, 0, MULTICHOICE_EEVEELUTIONS, FALSE
 	switch VAR_RESULT
 	case 0, Route25_SeaCottage_EventScript_ViewEevee
@@ -240,6 +246,38 @@ Route25_SeaCottage_EventScript_BillsMonList::
 	case 3, Route25_SeaCottage_EventScript_ViewVaporeon
 	case 4, Route25_SeaCottage_EventScript_ExitBillsMonList
 	case 127, Route25_SeaCottage_EventScript_ExitBillsMonList
+	end
+
+@ HACK: com a POKéDEX nacional, ESPEON e UMBREON também aparecem
+Route25_SeaCottage_EventScript_BillsMonListNational::
+	multichoice 0, 0, MULTICHOICE_EEVEELUTIONS_NATIONAL, FALSE
+	switch VAR_RESULT
+	case 0, Route25_SeaCottage_EventScript_ViewEevee
+	case 1, Route25_SeaCottage_EventScript_ViewFlareon
+	case 2, Route25_SeaCottage_EventScript_ViewJolteon
+	case 3, Route25_SeaCottage_EventScript_ViewVaporeon
+	case 4, Route25_SeaCottage_EventScript_ViewEspeon
+	case 5, Route25_SeaCottage_EventScript_ViewUmbreon
+	case 6, Route25_SeaCottage_EventScript_ExitBillsMonList
+	case 127, Route25_SeaCottage_EventScript_ExitBillsMonList
+	end
+
+Route25_SeaCottage_EventScript_ViewEspeon::
+	showmonpic SPECIES_ESPEON, 10, 3
+	waitbuttonpress
+	hidemonpic
+	setvar VAR_0x8004, SPECIES_ESPEON
+	special SetSeenMon
+	goto Route25_SeaCottage_EventScript_BillsMonList
+	end
+
+Route25_SeaCottage_EventScript_ViewUmbreon::
+	showmonpic SPECIES_UMBREON, 10, 3
+	waitbuttonpress
+	hidemonpic
+	setvar VAR_0x8004, SPECIES_UMBREON
+	special SetSeenMon
+	goto Route25_SeaCottage_EventScript_BillsMonList
 	end
 
 Route25_SeaCottage_EventScript_ViewEevee::
@@ -294,3 +332,45 @@ Route25_SeaCottage_Movement_BillWalkToMiddleOfRoom::
 Route25_SeaCottage_Movement_BillExitTeleporter::
 	walk_down
 	step_end
+
+@ HACK: 1ª batalha de novo (recusou ou perdeu lá fora)
+Route25_SeaCottage_EventScript_BillBattleAgain::
+	msgbox Route25_SeaCottage_Text_BillBattleAgain, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Route25_SeaCottage_EventScript_BillNoBattle
+	msgbox Route25_Text_BillLetsGo
+	closemessage
+	trainerbattle_earlyrival TRAINER_BILL_1, RIVAL_BATTLE_HEAL_AFTER, Route25_Text_BillDefeat, Route25_Text_BillVictory
+	goto_if_eq VAR_RESULT, FALSE, Route25_SeaCottage_EventScript_BillWonFirst @ FALSE = jogador venceu
+	msgbox Route25_Text_BillBattleMeAnytime
+	release
+	end
+
+Route25_SeaCottage_EventScript_BillWonFirst::
+	msgbox Route25_Text_BillTrainMore
+	setvar VAR_BILL_BATTLE, 3
+	release
+	end
+
+Route25_SeaCottage_EventScript_BillNoBattle::
+	msgbox Route25_SeaCottage_Text_BillNoBattle
+	release
+	end
+
+@ HACK: revanche (time forte), liberada a cada vitória na ELITE 4
+Route25_SeaCottage_EventScript_BillRematch::
+	msgbox Route25_SeaCottage_Text_BillRematchIntro, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, Route25_SeaCottage_EventScript_BillNoBattle
+	msgbox Route25_Text_BillLetsGo
+	closemessage
+	trainerbattle_earlyrival TRAINER_BILL_2, RIVAL_BATTLE_HEAL_AFTER, Route25_SeaCottage_Text_BillRematchDefeat, Route25_SeaCottage_Text_BillRematchVictory
+	goto_if_eq VAR_RESULT, FALSE, Route25_SeaCottage_EventScript_BillWonRematch @ FALSE = jogador venceu
+	msgbox Route25_SeaCottage_Text_BillRematchLost
+	release
+	end
+
+Route25_SeaCottage_EventScript_BillWonRematch::
+	clearflag FLAG_BILL_REMATCH_READY
+	setvar VAR_BILL_BATTLE, 3
+	msgbox Route25_SeaCottage_Text_BillRematchWon
+	release
+	end

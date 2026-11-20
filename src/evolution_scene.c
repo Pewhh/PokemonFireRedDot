@@ -1,4 +1,5 @@
 #include "global.h"
+#include "pokemon_animation.h"
 #include "gflib.h"
 #include "battle.h"
 #include "battle_message.h"
@@ -752,7 +753,8 @@ static void Task_EvolutionScene(u8 taskId)
     case EVOSTATE_EVO_MON_ANIM:
         if (!gPaletteFade.active)
         {
-            PlayCry_Normal(gTasks[taskId].tPostEvoSpecies, 0);
+            // HACK: grito + animação do Emerald no Pokémon evoluído
+            DoMonFrontSpriteAnimation(&gSprites[sEvoStructPtr->postEvoSpriteId], gTasks[taskId].tPostEvoSpecies, FALSE, 0);
             gTasks[taskId].tState++;
         }
         break;
@@ -1177,7 +1179,8 @@ static void Task_TradeEvolutionScene(u8 taskId)
         if (IsSEPlaying())
         {
 //            Free(sBgAnimPal);
-            PlayCry_Normal(gTasks[taskId].tPostEvoSpecies, 0);
+            // HACK: grito + animação do Emerald no Pokémon evoluído (evolução por troca)
+            DoMonFrontSpriteAnimation(&gSprites[sEvoStructPtr->postEvoSpriteId], gTasks[taskId].tPostEvoSpecies, FALSE, 0);
             memcpy(&gPlttBufferUnfaded[BG_PLTT_ID(2)], sEvoStructPtr->savedPalette, sizeof(sEvoStructPtr->savedPalette));
             gTasks[taskId].tState++;
         }

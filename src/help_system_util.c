@@ -49,7 +49,8 @@ u8 RunHelpSystemCallback(void)
             return 0;
         if (JOY_NEW(R_BUTTON) && gHelpSystemToggleWithRButtonDisabled == TRUE)
             return 0;
-        if (JOY_NEW(L_BUTTON | R_BUTTON))
+        // HACK: a ajuda abre só com L e R juntos (L sozinho abre a Pokédex e R sozinho salva, no mapa)
+        if (JOY_NEW(L_BUTTON | R_BUTTON) && (gMain.heldKeys & (L_BUTTON | R_BUTTON)) == (L_BUTTON | R_BUTTON))
         {
             if (!HelpSystem_IsSinglePlayer() || !gHelpSystemEnabled)
             {

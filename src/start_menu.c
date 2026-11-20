@@ -1,4 +1,5 @@
 #include "global.h"
+#include "debug.h"
 #include "gflib.h"
 #include "scanline_effect.h"
 #include "overworld.h"
@@ -48,6 +49,9 @@ enum StartMenuOption
     STARTMENU_EXIT,
     STARTMENU_RETIRE,
     STARTMENU_PLAYER2,
+#if DEBUG_MENU
+    STARTMENU_DEBUG, // HACK: menu de debug (só na versão de teste)
+#endif
     MAX_STARTMENU_ITEMS
 };
 
@@ -87,6 +91,11 @@ static bool8 StartMenuOptionCallback(void);
 static bool8 StartMenuExitCallback(void);
 static bool8 StartMenuSafariZoneRetireCallback(void);
 static bool8 StartMenuLinkPlayerCallback(void);
+#if DEBUG_MENU
+static bool8 StartMenuDebugCallback(void);
+static const u8 sText_MenuDebug[] = _("DEBUG");
+static const u8 sStartMenuDesc_Debug[] = _("Open the test tools for warping, battles,\nPOKéMON, items and events.");
+#endif
 static bool8 StartCB_Save1(void);
 static bool8 StartCB_Save2(void);
 static void StartMenu_PrepareForSave(void);
@@ -121,7 +130,10 @@ static const struct MenuAction sStartMenuActionTable[] = {
     [STARTMENU_OPTION]  = { gText_MenuOption,  {.u8_void = StartMenuOptionCallback} },
     [STARTMENU_EXIT]    = { gText_MenuExit,    {.u8_void = StartMenuExitCallback} },
     [STARTMENU_RETIRE]  = { gText_MenuRetire,  {.u8_void = StartMenuSafariZoneRetireCallback} },
-    [STARTMENU_PLAYER2] = { gText_MenuPlayer,  {.u8_void = StartMenuLinkPlayerCallback} }
+    [STARTMENU_PLAYER2] = { gText_MenuPlayer,  {.u8_void = StartMenuLinkPlayerCallback} },
+#if DEBUG_MENU
+    [STARTMENU_DEBUG]   = { sText_MenuDebug,   {.u8_void = StartMenuDebugCallback} },
+#endif
 };
 
 static const struct WindowTemplate sSafariZoneStatsWindowTemplate = {
@@ -143,7 +155,10 @@ static const u8 *const sStartMenuDescPointers[] = {
     gStartMenuDesc_Option,
     gStartMenuDesc_Exit,
     gStartMenuDesc_Retire,
-    gStartMenuDesc_Player
+    gStartMenuDesc_Player,
+#if DEBUG_MENU
+    [STARTMENU_DEBUG] = sStartMenuDesc_Debug, // FIX: sem esta linha o jogo lia fora da tabela e imprimia lixo
+#endif
 };
 
 static const struct BgTemplate sBGTemplates_AfterLinkSaveMessage[] = {
@@ -175,7 +190,7 @@ static const struct WindowTemplate sSaveStatsWindowTemplate = {
     .tilemapLeft = 1,
     .tilemapTop = 1,
     .width = 14,
-    .height = 9,
+    .height = 11, // HACK: era 9; +1 linha para o modo de dificuldade
     .paletteNum = 13,
     .baseBlock = 0x008
 };
@@ -219,6 +234,9 @@ static void SetUpStartMenu_NormalField(void)
     AppendToStartMenuItems(STARTMENU_PLAYER);
     AppendToStartMenuItems(STARTMENU_SAVE);
     AppendToStartMenuItems(STARTMENU_OPTION);
+#if DEBUG_MENU
+    AppendToStartMenuItems(STARTMENU_DEBUG);
+#endif
     AppendToStartMenuItems(STARTMENU_EXIT);
 }
 
@@ -447,7 +465,11 @@ static void StartMenu_FadeScreenIfLeavingOverworld(void)
 {
     if (sStartMenuCallback != StartMenuSaveCallback
      && sStartMenuCallback != StartMenuExitCallback
-     && sStartMenuCallback != StartMenuSafariZoneRetireCallback)
+     && sStartMenuCallback != StartMenuSafariZoneRetireCallback
+#if DEBUG_MENU
+     && sStartMenuCallback != StartMenuDebugCallback // HACK: o debug abre no próprio mapa, sem escurecer a tela
+#endif
+    )
     {
         StopPokemonLeagueLightingEffectTask();
         FadeScreen(FADE_TO_BLACK, 0);
@@ -542,6 +564,17 @@ static bool8 StartMenuExitCallback(void)
     return TRUE;
 }
 
+#if DEBUG_MENU
+static bool8 StartMenuDebugCallback(void)
+{
+    DestroySafariZoneStatsWindow();
+    DestroyHelpMessageWindow_();
+    CloseStartMenu();
+    Debug_OpenMenu();
+    return TRUE;
+}
+#endif
+
 static bool8 StartMenuSafariZoneRetireCallback(void)
 {
     DestroySafariZoneStatsWindow();
@@ -614,6 +647,76 @@ static u8 RunSaveDialogCB(void)
         return 0;
     sSaveDialogIsPrinting = FALSE;
     return sSaveDialogCB();
+}
+
+// HACK: salvar pelo R no mapa. Diferente do SAVE do menu (Fast Save), pergunta SIM/NÃO
+// antes, para o jogador não salvar sem querer.
+static EWRAM_DATA bool8 sSaveAskConfirm = FALSE;
+static EWRAM_DATA bool8 sVersionChangeConfirm = FALSE; // HACK: troca de versão pelo OPTION
+EWRAM_DATA u8 gPendingVersionChange = 0;                // 0 = nada; 1 = FIRERED; 2 = LEAFGREEN
+static const u8 sText_VersionChangeSave[] = _("Changing the version will save and\nrestart the game. Is that okay?");
+
+static void Task_VersionChangeReset(u8 taskId)
+{
+    if (!gPaletteFade.active)
+        DoSoftReset();
+}
+
+static void Task_QuickSave(u8 taskId)
+{
+    u8 result = RunSaveDialogCB();
+
+    switch (result)
+    {
+    case SAVECB_RETURN_CONTINUE:
+        return;
+    case SAVECB_RETURN_CANCEL:
+        ClearDialogWindowAndFrameToTransparent(0, FALSE);
+        break;
+    default:
+        ClearDialogWindowAndFrameToTransparent(0, TRUE);
+        break;
+    }
+    if (sVersionChangeConfirm)
+    {
+        sVersionChangeConfirm = FALSE;
+        if (result == SAVECB_RETURN_OKAY)
+        {
+            // Salvou na versão nova: reinicia e volta para a tela de título
+            gPendingVersionChange = 0;
+            BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+            gTasks[taskId].func = Task_VersionChangeReset;
+            return;
+        }
+        // NÃO, ou não salvou: a versão continua a anterior
+        SetActiveVersion(gPendingVersionChange == 2 ? 0 : 1);
+        gPendingVersionChange = 0;
+    }
+    sSaveAskConfirm = FALSE;
+    ClearPlayerHeldMovementAndUnfreezeObjectEvents();
+    UnlockPlayerFieldControls();
+    RestoreHelpContext();
+    DestroyTask(taskId);
+}
+
+void QuickSave_AskConfirm(void)
+{
+    LockPlayerFieldControls();
+    FreezeObjectEvents();
+    HandleEnforcedLookDirectionOnPlayerStopMoving();
+    StopPlayerAvatar();
+    BackupHelpContext();
+    SetHelpContext(HELPCONTEXT_SAVE);
+    StartMenu_PrepareForSave();
+    sSaveAskConfirm = TRUE;
+    CreateTask(Task_QuickSave, 80);
+}
+
+// HACK: depois de trocar a versão no OPTION, pergunta se pode salvar e reiniciar
+void VersionChange_AskConfirm(void)
+{
+    QuickSave_AskConfirm();
+    sVersionChangeConfirm = TRUE;
 }
 
 void Field_AskSaveTheGame(void)
@@ -711,7 +814,12 @@ static u8 SaveDialogCB_PrintAskSaveText(void)
     RemoveStartMenuWindow();
     DestroyHelpMessageWindow(0);
     PrintSaveStats();
-    PrintSaveTextWithFollowupFunc(gText_SavingDontTurnOffThePower, SaveDialogCB_DoSave);
+    if (sVersionChangeConfirm) // HACK: troca de versão
+        PrintSaveTextWithFollowupFunc(sText_VersionChangeSave, SaveDialogCB_AskSavePrintYesNoMenu);
+    else if (sSaveAskConfirm) // HACK: salvar pelo R pergunta antes
+        PrintSaveTextWithFollowupFunc(gText_WouldYouLikeToSaveTheGame, SaveDialogCB_AskSavePrintYesNoMenu);
+    else
+        PrintSaveTextWithFollowupFunc(gText_SavingDontTurnOffThePower, SaveDialogCB_DoSave);
     return SAVECB_RETURN_CONTINUE;
 }
 
@@ -727,7 +835,14 @@ static u8 SaveDialogCB_AskSaveHandleInput(void)
     switch (Menu_ProcessInputNoWrapClearOnChoose())
     {
     case 0:
-        if ((gSaveFileStatus != SAVE_STATUS_EMPTY && gSaveFileStatus != SAVE_STATUS_INVALID) || !gDifferentSaveFile)
+        if (sVersionChangeConfirm && gPendingVersionChange != 0)
+            SetActiveVersion(gPendingVersionChange - 1); // salva já na versão nova
+        if (sSaveAskConfirm && !gDifferentSaveFile) // HACK: um SIM basta, sem a segunda pergunta e sem "SAVING…"
+        {
+            SaveQuestLogData();
+            sSaveDialogCB = SaveDialogCB_DoSave;
+        }
+        else if ((gSaveFileStatus != SAVE_STATUS_EMPTY && gSaveFileStatus != SAVE_STATUS_INVALID) || !gDifferentSaveFile)
             sSaveDialogCB = SaveDialogCB_PrintAskOverwriteText;
         else
             sSaveDialogCB = SaveDialogCB_PrintSavingDontTurnOffPower;
@@ -987,6 +1102,14 @@ static void PrintSaveStats(void)
     AddTextPrinterParameterized3(sSaveStatsWindowId, FONT_SMALL, 2, y, sTextColor_StatName, -1, gSaveStatName_Time);
     SaveStatToString(SAVE_STAT_TIME, gStringVar4, 2);
     AddTextPrinterParameterized3(sSaveStatsWindowId, FONT_SMALL, 60, y, sTextColor_StatValue, -1, gStringVar4);
+    // HACK: modo de dificuldade do save
+    y += 14;
+    AddTextPrinterParameterized3(sSaveStatsWindowId, FONT_SMALL, 2, y, sTextColor_StatName, -1, gSaveStatName_Mode);
+    AddTextPrinterParameterized3(sSaveStatsWindowId, FONT_SMALL, 60, y, sTextColor_StatValue, -1,
+                                 FlagGet(FLAG_EXPERT) ? gText_Expert
+                                 : FlagGet(FLAG_HARDCORE) ? gText_Hardcore
+                                 : FlagGet(FLAG_HARD) ? gText_Hard
+                                 : gText_Normal);
     CopyWindowToVram(sSaveStatsWindowId, COPYWIN_GFX);
 }
 

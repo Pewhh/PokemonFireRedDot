@@ -1,4 +1,5 @@
 #include "global.h"
+#include "pokemon_animation.h"
 #include "gflib.h"
 #include "decompress.h"
 #include "scanline_effect.h"
@@ -525,7 +526,11 @@ static void Task_Hof_PlayMonCryAndPrintInfo(u8 taskId)
     if (gSprites[gTasks[taskId].data[5 + currMonId]].data[0])
     {
         if (currMon->species != SPECIES_EGG)
+        {
+            // HACK: grito + animação do Emerald ao entrar no Hall da Fama
             PlayCry_Normal(currMon->species, 0);
+            HallOfFameDoMonAnimation(&gSprites[gTasks[taskId].data[5 + currMonId]], currMon->species);
+        }
         HallOfFame_PrintMonInfo(currMon, 0, 14);
         gTasks[taskId].data[3] = 120;
         gTasks[taskId].func = Task_Hof_TryDisplayAnotherMon;

@@ -23,5 +23,7 @@ enum {
 
 void AI_TrySwitchOrUseItem(void);
 u8 GetMostSuitableMonToSwitchInto(void);
+void AI_ResetSwitchStreak(void);
+bool8 AI_PlayerCanKOBattler(u8 aiBattler, u8 playerBattler);
 
 #endif // GUARD_BATTLE_AI_SWITCH_ITEMS_H

@@ -1,4 +1,5 @@
 #include "global.h"
+#include "debug.h"
 #include "gflib.h"
 #include "bike.h"
 #include "event_data.h"
@@ -509,7 +510,8 @@ static void PlayerNotOnBikeMoving(u8 direction, u16 heldKeys)
 if (gPlayerAvatar.flags & PLAYER_AVATAR_FLAG_SURFING)
 {
     // segurar B = surf “turbo” (um degrau acima)
-    if ((heldKeys & B_BUTTON) && FlagGet(FLAG_SYS_B_DASH))
+    // HACK: com AUTO RUN, o surf rápido fica ligado e segurar B surfa devagar
+    if ((((heldKeys & B_BUTTON) != 0) != gSaveBlock2Ptr->optionsAutoRun) && FlagGet(FLAG_SYS_B_DASH))
         PlayerWalkFaster(direction);   // turbo no surf
     else
         PlayerWalkFast(direction);     // surf normal
@@ -520,7 +522,8 @@ if (gPlayerAvatar.flags & PLAYER_AVATAR_FLAG_SURFING)
     return;
 }
 
-    if ((heldKeys & B_BUTTON) && FlagGet(FLAG_SYS_B_DASH)
+    // HACK: com AUTO RUN ligado, corre sem segurar B (segurar B anda)
+    if ((((heldKeys & B_BUTTON) != 0) != gSaveBlock2Ptr->optionsAutoRun) && FlagGet(FLAG_SYS_B_DASH)
         && !IsRunningDisallowed(gObjectEvents[gPlayerAvatar.objectEventId].currentMetatileBehavior))
     {
         if (PlayerIsMovingOnRockStairs(direction))
@@ -574,7 +577,12 @@ static u8 CheckForPlayerAvatarCollision(u8 direction)
 
 u8 CheckForObjectEventCollision(struct ObjectEvent *objectEvent, s16 x, s16 y, u8 direction, u8 metatileBehavior)
 {
-    u8 collision = GetCollisionAtCoords(objectEvent, x, y, direction);
+    u8 collision;
+#if DEBUG_MENU
+    if (gDebugNoClip && objectEvent->isPlayer)
+        return COLLISION_NONE; // HACK: debug, atravessar paredes
+#endif
+    collision = GetCollisionAtCoords(objectEvent, x, y, direction);
     if (collision == COLLISION_ELEVATION_MISMATCH && CanStopSurfing(x, y, direction))
         return COLLISION_STOP_SURFING;
 

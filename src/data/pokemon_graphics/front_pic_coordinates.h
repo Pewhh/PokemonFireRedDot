@@ -118,12 +118,12 @@ const struct MonCoords gMonFrontPicCoords[] =
     [SPECIES_EKANS] =
     {
         .size = MON_COORDS_SIZE(48, 40),
-        .y_offset = 15,
+        .y_offset = 12, // HACK: 2º quadro animado (sprite deslocado no pacote)
     },
     [SPECIES_ARBOK] =
     {
         .size = MON_COORDS_SIZE(56, 64),
-        .y_offset = 3,
+        .y_offset = 2, // HACK: 2º quadro animado (sprite deslocado no pacote)
     },
     [SPECIES_PIKACHU] =
     {
@@ -133,7 +133,7 @@ const struct MonCoords gMonFrontPicCoords[] =
     [SPECIES_RAICHU] =
     {
         .size = MON_COORDS_SIZE(64, 64),
-        .y_offset = 0,
+        .y_offset = 4, // HACK: 2º quadro animado (sprite deslocado no pacote)
     },
     [SPECIES_SANDSHREW] =
     {
@@ -383,7 +383,7 @@ const struct MonCoords gMonFrontPicCoords[] =
     [SPECIES_GOLEM] =
     {
         .size = MON_COORDS_SIZE(64, 56),
-        .y_offset = 7,
+        .y_offset = 5, // HACK: 2º quadro animado (sprite deslocado no pacote)
     },
     [SPECIES_PONYTA] =
     {
@@ -418,7 +418,7 @@ const struct MonCoords gMonFrontPicCoords[] =
     [SPECIES_FARFETCHD] =
     {
         .size = MON_COORDS_SIZE(56, 48),
-        .y_offset = 11,
+        .y_offset = 8, // HACK: 2º quadro animado (sprite deslocado no pacote)
     },
     [SPECIES_DODUO] =
     {
@@ -448,7 +448,7 @@ const struct MonCoords gMonFrontPicCoords[] =
     [SPECIES_MUK] =
     {
         .size = MON_COORDS_SIZE(64, 48),
-        .y_offset = 10,
+        .y_offset = 5, // HACK: 2º quadro animado (sprite deslocado no pacote)
     },
     [SPECIES_SHELLDER] =
     {
@@ -528,7 +528,7 @@ const struct MonCoords gMonFrontPicCoords[] =
     [SPECIES_MAROWAK] =
     {
         .size = MON_COORDS_SIZE(64, 56),
-        .y_offset = 13,
+        .y_offset = 10, // HACK: 2º quadro animado (sprite deslocado no pacote)
     },
     [SPECIES_HITMONLEE] =
     {
@@ -543,7 +543,7 @@ const struct MonCoords gMonFrontPicCoords[] =
     [SPECIES_LICKITUNG] =
     {
         .size = MON_COORDS_SIZE(64, 48),
-        .y_offset = 8,
+        .y_offset = 6, // HACK: 2º quadro animado (sprite deslocado no pacote)
     },
     [SPECIES_KOFFING] =
     {

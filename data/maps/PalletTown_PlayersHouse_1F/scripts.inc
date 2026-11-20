@@ -7,7 +7,8 @@ PalletTown_PlayersHouse_1F_OnFrame::
 	map_script_2 VAR_MAP_SCENE_PALLET_MOM, 0, PalletTown_PlayersHouse_1F_EventScript_MomGiveRunningShoes
 	.2byte 0
 
-@ O jogador chega pela escada em (10,2). A mãe sai de (8,4) e para logo abaixo dele, em (10,3).
+@ O jogador chega pela escada em (10,2). A mãe chama, e o jogador desce até (9,4), ao lado dela.
+@ (A mãe do FRLG não tem quadros de andar; se ela andasse, deslizaria.)
 PalletTown_PlayersHouse_1F_EventScript_MomGiveRunningShoes::
 	lockall
 	textcolor NPC_TEXT_COLOR_FEMALE
@@ -20,9 +21,9 @@ PalletTown_PlayersHouse_1F_EventScript_MomGiveRunningShoes::
 	waitmovement 0
 	msgbox PalletTown_PlayersHouse_1F_Text_OhSon
 	closemessage
-	applymovement LOCALID_MOM, PalletTown_PlayersHouse_1F_Movement_MomApproachPlayer
+	applymovement LOCALID_PLAYER, PalletTown_PlayersHouse_1F_Movement_PlayerApproachMom
 	waitmovement 0
-	applymovement LOCALID_PLAYER, Common_Movement_WalkInPlaceFasterDown
+	applymovement LOCALID_MOM, Common_Movement_WalkInPlaceFasterRight
 	waitmovement 0
 	msgbox PalletTown_PlayersHouse_1F_Text_DeliveringRunningShoes
 	textcolor NPC_TEXT_COLOR_NEUTRAL
@@ -38,24 +39,16 @@ PalletTown_PlayersHouse_1F_EventScript_MomGiveRunningShoes::
 	textcolor NPC_TEXT_COLOR_FEMALE
 	msgbox PalletTown_PlayersHouse_1F_Text_MomTakeCare
 	closemessage
-	applymovement LOCALID_MOM, PalletTown_PlayersHouse_1F_Movement_MomReturn
+	applymovement LOCALID_MOM, Common_Movement_WalkInPlaceFasterLeft
 	waitmovement 0
 	setflag FLAG_SYS_B_DASH
 	setvar VAR_MAP_SCENE_PALLET_MOM, 1
 	releaseall
 	end
 
-PalletTown_PlayersHouse_1F_Movement_MomApproachPlayer::
-	delay_4
-	walk_right
-	walk_right
-	walk_up
-	walk_in_place_faster_up
-	step_end
-
-PalletTown_PlayersHouse_1F_Movement_MomReturn::
+PalletTown_PlayersHouse_1F_Movement_PlayerApproachMom::
 	walk_down
-	walk_left
+	walk_down
 	walk_left
 	walk_in_place_faster_left
 	step_end

@@ -166,6 +166,14 @@
 #define TRAINER_PIC_RUIN_MANIAC           145
 #define TRAINER_PIC_LADY                  146
 #define TRAINER_PIC_PAINTER               147
+#define TRAINER_PIC_BILL                  148 // HACK: sprite do Fame Checker
+// HACK: Pokémon Adventures (RED, BLUE, GREEN, YELLOW), JANINE e JESSIE & JAMES
+#define TRAINER_PIC_RED_ADV              149 // HACK
+#define TRAINER_PIC_BLUE_ADV             150 // HACK
+#define TRAINER_PIC_GREEN_ADV            151 // HACK
+#define TRAINER_PIC_YELLOW_ADV           152 // HACK
+#define TRAINER_PIC_JANINE               153 // HACK
+#define TRAINER_PIC_JESSIE_JAMES         154 // HACK
 
 // The player back pics are assumed to alternate according to the gender values (MALE/FEMALE)
 #define TRAINER_BACK_PIC_RED                    0

@@ -44,6 +44,7 @@ struct WildPokemonHeader
 extern const struct WildPokemonHeader gWildMonHeaders[];
 
 bool8 IsWildMonHeaderForActiveVersion(const struct WildPokemonHeader *header);
+const struct WildPokemonHeader *GetCurrentMapWildMonHeaderForDex(void); // HACK
 
 void DisableWildEncounters(bool8 disabled);
 bool8 StandardWildEncounter(u32 currMetatileAttrs, u16 previousMetaTileBehavior);

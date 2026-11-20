@@ -341,6 +341,8 @@ struct SaveBlock2
               u16 optionsBattleStyle:1; // OPTIONS_BATTLE_STYLE_[SHIFT/SET]
               u16 optionsBattleSceneOff:1; // whether battle animations are disabled
               u16 regionMapZoom:1; // whether the map is zoomed in
+              u16 optionsWorldSpeed:1; // HACK: 0 = 1x, 1 = 2x (jogador e NPCs no mapa)
+              u16 optionsAutoRun:1;    // HACK: corre sem segurar B (segurar B anda)
     /*0x018*/ struct Pokedex pokedex;
     /*0x090*/ u8 filler_90[0x8];
     /*0x098*/ struct Time localTimeOffset;
@@ -355,7 +357,9 @@ struct SaveBlock2
     /*0xB00*/ struct PokemonJumpRecords pokeJump;
     /*0xB10*/ struct BerryPickingResults berryPick;
     /*0xB20*/ u8 activeVersion;       // 0 = FireRed, 1 = LeafGreen
-    /*0xB21*/ u8 filler_B21[0x3FF];
+    /*0xB21*/ u8 dexAbilityUnlocks[DEX_UNLOCK_BYTES]; // HACK: habilidades vistas na Pokédex (2 bits por espécie)
+              u8 dexItemUnlocks[DEX_UNLOCK_BYTES];    // HACK: itens vistos na Pokédex (comum/raro)
+              u8 filler_B21[0x3FF - 2 * DEX_UNLOCK_BYTES];
     /*0xF20*/ u32 encryptionKey;
 }; // size: 0xF24
 
@@ -783,7 +787,7 @@ struct SaveBlock1
     /*0x054c*/ struct ItemSlot bagPocket_Berries[BAG_BERRIES_COUNT];
     /*0x05F8*/ u8 seen1[DEX_FLAGS_NO];
     /*0x062C*/ u16 berryBlenderRecords[3]; // unused
-    /*0x0632*/ u8 unused_632[6];
+    /*0x0632*/ u16 registeredItemsExtra[3]; // HACK: mais 3 itens no SELECT (era u8 unused_632[6])
     /*0x0638*/ u16 trainerRematchStepCounter;
     /*0x063A*/ u8 ALIGNED(2) trainerRematches[MAX_REMATCH_ENTRIES];
     /*0x06A0*/ struct ObjectEvent objectEvents[OBJECT_EVENTS_COUNT];

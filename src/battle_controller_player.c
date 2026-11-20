@@ -24,6 +24,77 @@
 #include "constants/songs.h"
 #include "constants/sound.h"
 #include "battle_setup.h"
+#include "graphics.h"
+#include "menu_indicators.h"
+#include "list_menu.h"
+#include "menu.h"
+#include "pokemon_summary_screen.h"
+
+// HACK: detalhes do golpe com START (estilo Recharged Yellow) e ícone de categoria.
+// - Escolha de golpe normal: caixinha "Info / START" acima da caixa de golpes.
+// - START: a caixa de golpes mostra nome, prioridade, poder e precisão do golpe, e uma
+//   caixa acima mostra a descrição. O direcional passa de um golpe para outro; A usa o
+//   golpe; B ou START voltam.
+// - Ícone de categoria (físico/especial/status) ao lado do PP, sempre.
+static EWRAM_DATA bool8 sMoveDetailMode = FALSE;
+static EWRAM_DATA u8 sMoveCategoryIconSpriteId = 0;
+static EWRAM_DATA u8 sMoveDetailArrowsTaskId = TASK_NONE;
+static EWRAM_DATA u16 sMoveDetailArrowsOffset = 0;
+#define TAG_MOVE_DETAIL_ARROWS 110
+
+#define TAG_MOVE_CATEGORY_ICONS 0xD7A0
+#define MOVE_CATEGORY_PHYSICAL  0
+#define MOVE_CATEGORY_SPECIAL   1
+#define MOVE_CATEGORY_STATUS    2
+
+static const u32 sMoveCategoryIcons_Gfx[] = INCBIN_U32("graphics/battle_interface/move_category_icons.4bpp");
+static const u16 sMoveCategoryIcons_Pal[] = INCBIN_U16("graphics/battle_interface/move_category_icons.gbapal");
+static const struct SpriteSheet sMoveCategoryIconsSheet = {sMoveCategoryIcons_Gfx, sizeof(sMoveCategoryIcons_Gfx), TAG_MOVE_CATEGORY_ICONS};
+static const struct SpritePalette sMoveCategoryIconsPal = {sMoveCategoryIcons_Pal, TAG_MOVE_CATEGORY_ICONS};
+static const struct OamData sOam_MoveCategoryIcon = {
+    .shape = SPRITE_SHAPE(16x16), // HACK: ícone pequeno (14x12), no estilo da referência
+    .size = SPRITE_SIZE(16x16),
+    .priority = 0,
+};
+static void SpriteCB_MoveCategoryIcon(struct Sprite *sprite);
+static const struct SpriteTemplate sSpriteTemplate_MoveCategoryIcon = {
+    .tileTag = TAG_MOVE_CATEGORY_ICONS,
+    .paletteTag = TAG_MOVE_CATEGORY_ICONS,
+    .oam = &sOam_MoveCategoryIcon,
+    .anims = gDummySpriteAnimTable,
+    .images = NULL,
+    .affineAnims = gDummySpriteAffineAnimTable,
+    .callback = SpriteCB_MoveCategoryIcon,
+};
+
+// HACK: caixinha "Info / START" como sprite, no estilo da caixa de HP (usa a mesma paleta dos ícones)
+#define TAG_MOVE_INFO_BOX 0xD7A1
+static EWRAM_DATA u8 sMoveInfoBoxSpriteId = 0;
+static const u32 sMoveInfoBox_Gfx[] = INCBIN_U32("graphics/battle_interface/move_info_box.4bpp");
+static const struct SpriteSheet sMoveInfoBoxSheet = {sMoveInfoBox_Gfx, sizeof(sMoveInfoBox_Gfx), TAG_MOVE_INFO_BOX};
+static const struct OamData sOam_MoveInfoBox = {
+    .shape = SPRITE_SHAPE(32x32),
+    .size = SPRITE_SIZE(32x32),
+    .priority = 0,
+};
+static void SpriteCB_MoveInfoBox(struct Sprite *sprite);
+static const struct SpriteTemplate sSpriteTemplate_MoveInfoBox = {
+    .tileTag = TAG_MOVE_INFO_BOX,
+    .paletteTag = TAG_MOVE_CATEGORY_ICONS,
+    .oam = &sOam_MoveInfoBox,
+    .anims = gDummySpriteAnimTable,
+    .images = NULL,
+    .affineAnims = gDummySpriteAffineAnimTable,
+    .callback = SpriteCB_MoveInfoBox,
+};
+
+static const u8 sText_NoPriority[] = _("No priority");
+static const u8 sText_PriorityPlus[] = _("Priority +");
+static const u8 sText_PriorityMinus[] = _("Priority -");
+static const u8 sText_PowerLabel[] = _("Power: ");
+static const u8 sText_AccuracyLabel[] = _("Accuracy:");
+static const u8 sText_NoValue[] = _("---");
+static const u8 sMoveInfoBoxColors[] = {14, 13, 15}; // fundo, texto, sombra (paleta 5)
 
 static void PlayerHandleGetMonData(void);
 static void PlayerHandleSetMonData(void);
@@ -87,6 +158,9 @@ static void HandleInputChooseTarget(void);
 static void MoveSelectionDisplayPpNumber(void);
 static void MoveSelectionDisplayPpString(void);
 static void MoveSelectionDisplayMoveType(void);
+static void UpdateMoveCategoryIcon(u16 move);
+static void ShowMoveInfoTab(void);
+static bool8 HandleMoveDetailInput(void);
 static void MoveSelectionDisplayMoveNames(void);
 static void HandleMoveSwitching(void);
 static void WaitForMonSelection(void);
@@ -441,6 +515,8 @@ void HandleInputChooseMove(void)
     struct ChooseMoveStruct *moveInfo = (struct ChooseMoveStruct *)(&gBattleBufferA[gActiveBattler][4]);
 
     PreviewDeterminativeMoveTargets();
+    if (HandleMoveDetailInput())
+        return;
     if (JOY_NEW(A_BUTTON))
     {
         u8 moveTarget;
@@ -1392,8 +1468,8 @@ static void MoveSelectionDisplayPpNumber(void)
 
     if (gBattleBufferA[gActiveBattler][2] == TRUE) // check if we didn't want to display pp number
         return;
-    SetPpNumbersPaletteInMoveSelection();
     moveInfo = (struct ChooseMoveStruct *)(&gBattleBufferA[gActiveBattler][4]);
+    SetPpNumbersPaletteInMoveSelection();
     txtPtr = ConvertIntToDecimalStringN(gDisplayedStringBattle, moveInfo->currentPp[gMoveSelectionCursor[gActiveBattler]], STR_CONV_MODE_RIGHT_ALIGN, 2);
     *txtPtr = CHAR_SLASH;
     ConvertIntToDecimalStringN(++txtPtr, moveInfo->maxPp[gMoveSelectionCursor[gActiveBattler]], STR_CONV_MODE_RIGHT_ALIGN, 2);
@@ -1402,16 +1478,364 @@ static void MoveSelectionDisplayPpNumber(void)
 
 static void MoveSelectionDisplayMoveType(void)
 {
-    u8 *txtPtr;
     struct ChooseMoveStruct *moveInfo = (struct ChooseMoveStruct *)(&gBattleBufferA[gActiveBattler][4]);
+    u16 move = moveInfo->moves[gMoveSelectionCursor[gActiveBattler]];
 
-    txtPtr = StringCopy(gDisplayedStringBattle, gText_MoveInterfaceType);
-    *txtPtr++ = EXT_CTRL_CODE_BEGIN;
-    *txtPtr++ = 6;
-    *txtPtr++ = 1;
-    txtPtr = StringCopy(txtPtr, gText_MoveInterfaceDynamicColors);
-    StringCopy(txtPtr, gTypeNames[gBattleMoves[moveInfo->moves[gMoveSelectionCursor[gActiveBattler]]].type]);
-    BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_MOVE_TYPE);
+    // HACK: ícone de categoria à esquerda e etiqueta colorida do tipo à direita (no lugar de "TYPE/")
+    UpdateMoveCategoryIcon(move);
+    FillWindowPixelBuffer(B_WIN_MOVE_TYPE, PIXEL_FILL(15));
+    BlitMenuInfoIcon(B_WIN_MOVE_TYPE, gBattleMoves[move].type + 1, 32, 2);
+    PutWindowTilemap(B_WIN_MOVE_TYPE);
+    CopyWindowToVram(B_WIN_MOVE_TYPE, COPYWIN_FULL);
+}
+
+// ---- HACK: detalhes do golpe e ícone de categoria ----
+static u8 GetMoveCategory(u16 move)
+{
+    if (gBattleMoves[move].power == 0)
+        return MOVE_CATEGORY_STATUS;
+    if (IS_TYPE_PHYSICAL(gBattleMoves[move].type))
+        return MOVE_CATEGORY_PHYSICAL;
+    return MOVE_CATEGORY_SPECIAL;
+}
+
+// Só aparece com a caixa de golpes na tela (escolha de golpe)
+// data[0] = batalhador dono da escolha de golpe. Antes usava gActiveBattler, que na hora
+// de animar os sprites costuma ser o adversário — por isso o ícone nunca aparecia.
+// data[1] = ícone já atualizado nesta abertura da caixa de golpes. Some junto com a caixa
+// (quando o bg0 sai da linha 320), e não no instante do A, que vinha alguns quadros antes.
+// data[1] = pedido para aparecer; data[2] = a caixa de golpes já entrou na tela (bg0 na linha 320).
+// O pedido vem antes de o bg0 descer até a caixa de golpes, então só cancela depois de ela ter
+// aparecido e saído; assim some no mesmo quadro que a caixa de golpes.
+static bool8 MoveInfoSpriteShouldShow(struct Sprite *sprite)
+{
+    if (gBattle_BG0_Y == 320)
+    {
+        if (sprite->data[1])
+            sprite->data[2] = TRUE;
+    }
+    else if (sprite->data[2])
+    {
+        sprite->data[1] = FALSE;
+        sprite->data[2] = FALSE;
+    }
+    return sprite->data[1] && gBattle_BG0_Y == 320;
+}
+
+static void SpriteCB_MoveCategoryIcon(struct Sprite *sprite)
+{
+    bool8 show = MoveInfoSpriteShouldShow(sprite);
+    sprite->invisible = !show || gBattlerControllerFuncs[sprite->data[0]] == HandleMoveSwitching;
+}
+
+// Mesma regra do ícone; também some no modo de detalhes
+static void SpriteCB_MoveInfoBox(struct Sprite *sprite)
+{
+    bool8 show = MoveInfoSpriteShouldShow(sprite);
+    sprite->invisible = !show || sMoveDetailMode;
+}
+
+static bool8 LoadMoveInfoSpritePalette(void)
+{
+    if (IndexOfSpritePaletteTag(TAG_MOVE_CATEGORY_ICONS) != 0xFF)
+        return TRUE;
+    return LoadSpritePalette(&sMoveCategoryIconsPal) != 0xFF;
+}
+
+static void SetMoveInfoBoxShown(bool8 shown)
+{
+    u8 spriteId = sMoveInfoBoxSpriteId;
+
+    if (!gSprites[spriteId].inUse || gSprites[spriteId].template != &sSpriteTemplate_MoveInfoBox)
+    {
+        if (!shown)
+            return;
+        if (GetSpriteTileStartByTag(TAG_MOVE_INFO_BOX) == 0xFFFF)
+            LoadSpriteSheet(&sMoveInfoBoxSheet);
+        if (!LoadMoveInfoSpritePalette())
+            return; // sem espaço de paleta: segue sem a caixinha
+        spriteId = CreateSprite(&sSpriteTemplate_MoveInfoBox, 17, 100, 0); // caixa de 31x27 a partir de (1, 84)
+        if (spriteId == MAX_SPRITES)
+            return;
+        sMoveInfoBoxSpriteId = spriteId;
+    }
+    gSprites[spriteId].data[1] = shown;
+    gSprites[spriteId].data[2] = FALSE;
+    gSprites[spriteId].invisible = !(shown && gBattle_BG0_Y == 320);
+}
+
+static void UpdateMoveCategoryIcon(u16 move)
+{
+    u8 spriteId = sMoveCategoryIconSpriteId;
+    u16 tileStart;
+
+    if (!gSprites[spriteId].inUse || gSprites[spriteId].template != &sSpriteTemplate_MoveCategoryIcon)
+    {
+        if (GetSpriteTileStartByTag(TAG_MOVE_CATEGORY_ICONS) == 0xFFFF)
+            LoadSpriteSheet(&sMoveCategoryIconsSheet);
+        if (!LoadMoveInfoSpritePalette())
+            return; // sem espaço de paleta: segue sem o ícone
+        spriteId = CreateSprite(&sSpriteTemplate_MoveCategoryIcon, 175, 145, 0); // ícone de 14x12 a partir de (168, 139)
+        if (spriteId == MAX_SPRITES)
+            return;
+        sMoveCategoryIconSpriteId = spriteId;
+    }
+    gSprites[spriteId].data[0] = gActiveBattler;
+    if (!gSprites[spriteId].data[1])
+        gSprites[spriteId].data[2] = FALSE; // novo pedido: espera a caixa de golpes aparecer
+    gSprites[spriteId].data[1] = TRUE;
+    tileStart = GetSpriteTileStartByTag(TAG_MOVE_CATEGORY_ICONS);
+    if (tileStart != 0xFFFF)
+        gSprites[spriteId].oam.tileNum = tileStart + GetMoveCategory(move) * 4;
+    gSprites[spriteId].invisible = (gBattle_BG0_Y != 320);
+}
+
+// HACK: as caixas usam a mesma moldura da caixa de golpes (tiles 0x12-0x1A, paleta 1 do
+// tilemap da batalha). As linhas 40-59 do bg0 são as que aparecem na escolha de golpe.
+#define MOVE_INFO_FRAME_PAL 1
+#define MOVE_INFO_BOX_COLS  18 // largura da caixa da descrição, com a moldura
+#define MOVE_INFO_BOX_BOTTOM 53 // linha da borda de baixo (logo acima da caixa de golpes)
+#define MOVE_INFO_AREA_TOP  46 // primeira linha que essas caixas podem ocupar
+
+static void DrawMoveInfoFrame(u8 left, u8 top, u8 width, u8 height)
+{
+    u8 right = left + width - 1, bottom = top + height - 1;
+
+    FillBgTilemapBufferRect(0, 0x12, left, top, 1, 1, MOVE_INFO_FRAME_PAL);
+    FillBgTilemapBufferRect(0, 0x13, left + 1, top, width - 2, 1, MOVE_INFO_FRAME_PAL);
+    FillBgTilemapBufferRect(0, 0x14, right, top, 1, 1, MOVE_INFO_FRAME_PAL);
+    FillBgTilemapBufferRect(0, 0x15, left, top + 1, 1, height - 2, MOVE_INFO_FRAME_PAL);
+    FillBgTilemapBufferRect(0, 0x17, right, top + 1, 1, height - 2, MOVE_INFO_FRAME_PAL);
+    FillBgTilemapBufferRect(0, 0x18, left, bottom, 1, 1, MOVE_INFO_FRAME_PAL);
+    FillBgTilemapBufferRect(0, 0x19, left + 1, bottom, width - 2, 1, MOVE_INFO_FRAME_PAL);
+    FillBgTilemapBufferRect(0, 0x1A, right, bottom, 1, 1, MOVE_INFO_FRAME_PAL);
+}
+
+// Limpa a área das caixas (descrição e Info) acima da caixa de golpes
+static void ClearMoveInfoArea(void)
+{
+    FillBgTilemapBufferRect(0, 0, 0, MOVE_INFO_AREA_TOP, MOVE_INFO_BOX_COLS, MOVE_INFO_BOX_BOTTOM - MOVE_INFO_AREA_TOP + 1, 0);
+}
+
+// Caixinha "Info" com o botão START, no canto, com a moldura da caixa de golpes
+static void ShowMoveInfoTab(void)
+{
+    ClearMoveInfoArea();
+    SetMoveInfoBoxShown(TRUE); // HACK: agora é um sprite (estilo da caixa de HP)
+}
+
+// As descrições do FireRed têm 4 linhas curtas (feitas para o resumo); aqui o texto é
+// reorganizado em linhas mais longas que caibam na caixa.
+static void ReflowMoveDescription(u8 *dst, const u8 *src, s32 maxWidth)
+{
+    u8 line[96], test[96], word[32];
+    u32 wordLen, len;
+
+    dst[0] = EOS;
+    line[0] = EOS;
+    while (TRUE)
+    {
+        wordLen = 0;
+        while (*src != EOS && *src != CHAR_SPACE && *src != CHAR_NEWLINE && wordLen < sizeof(word) - 1)
+            word[wordLen++] = *src++;
+        word[wordLen] = EOS;
+        if (wordLen != 0)
+        {
+            StringCopy(test, line);
+            if (line[0] != EOS)
+            {
+                len = StringLength(test);
+                test[len] = CHAR_SPACE;
+                test[len + 1] = EOS;
+            }
+            StringAppend(test, word);
+            if (line[0] != EOS && GetStringWidth(FONT_SMALL, test, 0) > maxWidth)
+            {
+                StringAppend(dst, line);
+                len = StringLength(dst);
+                dst[len] = CHAR_NEWLINE;
+                dst[len + 1] = EOS;
+                StringCopy(line, word);
+            }
+            else
+            {
+                StringCopy(line, test);
+            }
+        }
+        if (*src == EOS)
+            break;
+        src++;
+    }
+    StringAppend(dst, line);
+}
+
+static void ShowMoveDescription(u16 move)
+{
+    u8 text[200], line[64];
+    const u8 *src;
+    u8 numLines = 0, i, interiorRows, lineH, y, top;
+
+    ClearMoveInfoArea();
+    FillWindowPixelBuffer(B_WIN_MOVE_DESC, PIXEL_FILL(14));
+    if (move == MOVE_NONE)
+        return;
+    ReflowMoveDescription(text, gMoveDescriptionPointers[move - 1], 16 * 8 - 6);
+    for (src = text; *src != EOS; src++)
+        if (*src == CHAR_NEWLINE)
+            numLines++;
+    numLines++;
+
+    // Caixa do tamanho do texto: 2 linhas = 4 fileiras por dentro, 3 = 5, 4 = 6
+    interiorRows = numLines <= 2 ? 4 : (numLines == 3 ? 5 : 6);
+    lineH = numLines >= 4 ? 11 : 12;
+    top = MOVE_INFO_BOX_BOTTOM - interiorRows - 1;
+    y = (6 - interiorRows) * 8 + (interiorRows * 8 - numLines * lineH) / 2;
+
+    src = text;
+    for (i = 0; i < numLines; i++)
+    {
+        u8 len = 0;
+
+        while (*src != EOS && *src != CHAR_NEWLINE && len < sizeof(line) - 1)
+            line[len++] = *src++;
+        line[len] = EOS;
+        if (*src == CHAR_NEWLINE)
+            src++;
+        AddTextPrinterParameterized3(B_WIN_MOVE_DESC, FONT_SMALL, 3, y + i * lineH, sMoveInfoBoxColors, TEXT_SKIP_DRAW, line);
+    }
+    PutWindowTilemap(B_WIN_MOVE_DESC);
+    // a janela cobre 6 fileiras; as que sobram acima da caixa ficam vazias
+    FillBgTilemapBufferRect(0, 0, 0, MOVE_INFO_AREA_TOP, MOVE_INFO_BOX_COLS, top - MOVE_INFO_AREA_TOP, 0);
+    DrawMoveInfoFrame(0, top, MOVE_INFO_BOX_COLS, interiorRows + 2);
+    CopyWindowToVram(B_WIN_MOVE_DESC, COPYWIN_FULL);
+}
+
+static void PutMoveDetailText(const u8 *text, u8 windowId)
+{
+    u8 *txtPtr = StringCopy(gDisplayedStringBattle, gText_MoveInterfaceDynamicColors);
+
+    StringCopy(txtPtr, text);
+    BattlePutTextOnWindow(gDisplayedStringBattle, windowId);
+}
+
+static void MoveSelectionDisplayMoveDetails(void)
+{
+    struct ChooseMoveStruct *moveInfo = (struct ChooseMoveStruct *)(&gBattleBufferA[gActiveBattler][4]);
+    u16 move = moveInfo->moves[gMoveSelectionCursor[gActiveBattler]];
+    s8 priority = gBattleMoves[move].priority;
+    u8 text[32];
+    u8 *ptr;
+
+    PutMoveDetailText(gMoveNames[move], B_WIN_MOVE_NAME_1);
+
+    if (priority == 0)
+    {
+        StringCopy(text, sText_NoPriority);
+    }
+    else
+    {
+        ptr = StringCopy(text, priority > 0 ? sText_PriorityPlus : sText_PriorityMinus);
+        ConvertIntToDecimalStringN(ptr, priority > 0 ? priority : -priority, STR_CONV_MODE_LEFT_ALIGN, 1);
+    }
+    PutMoveDetailText(text, B_WIN_MOVE_NAME_2);
+
+    ptr = StringCopy(text, sText_PowerLabel);
+    if (gBattleMoves[move].power <= 1) // 0 = sem dano; 1 = poder variável
+        StringCopy(ptr, sText_NoValue);
+    else
+        ConvertIntToDecimalStringN(ptr, gBattleMoves[move].power, STR_CONV_MODE_LEFT_ALIGN, 3);
+    PutMoveDetailText(text, B_WIN_MOVE_NAME_3);
+
+    ptr = StringCopy(text, sText_AccuracyLabel);
+    if (gBattleMoves[move].accuracy == 0) // nunca erra
+        StringCopy(ptr, sText_NoValue);
+    else
+        ConvertIntToDecimalStringN(ptr, gBattleMoves[move].accuracy, STR_CONV_MODE_LEFT_ALIGN, 3);
+    PutMoveDetailText(text, B_WIN_MOVE_NAME_4);
+
+    ShowMoveDescription(move);
+}
+
+// Setas ◀ ▶ nas laterais da caixa de golpes (as mesmas do OPTION, deitadas)
+static void ShowMoveDetailArrows(void)
+{
+    if (sMoveDetailArrowsTaskId != TASK_NONE)
+        return;
+    sMoveDetailArrowsOffset = 1; // no meio: as duas setas ficam visíveis
+    sMoveDetailArrowsTaskId = AddScrollIndicatorArrowPairParameterized(SCROLL_ARROW_LEFT, 136, 8, 152, 2,
+                                                                       TAG_MOVE_DETAIL_ARROWS, TAG_MOVE_DETAIL_ARROWS,
+                                                                       &sMoveDetailArrowsOffset);
+}
+
+static void HideMoveDetailArrows(void)
+{
+    if (sMoveDetailArrowsTaskId == TASK_NONE)
+        return;
+    RemoveScrollIndicatorArrowPair(sMoveDetailArrowsTaskId);
+    sMoveDetailArrowsTaskId = TASK_NONE;
+}
+
+static void EnterMoveDetailMode(void)
+{
+    sMoveDetailMode = TRUE;
+    if (gNumberOfMovesToChoose > 1)
+        ShowMoveDetailArrows();
+    MoveSelectionDestroyCursorAt(gMoveSelectionCursor[gActiveBattler]);
+    MoveSelectionDisplayMoveDetails();
+}
+
+static void ExitMoveDetailMode(void)
+{
+    sMoveDetailMode = FALSE;
+    HideMoveDetailArrows();
+    ShowMoveInfoTab(); // limpa a descrição e redesenha a caixinha
+    MoveSelectionDisplayMoveNames();
+    MoveSelectionCreateCursorAt(gMoveSelectionCursor[gActiveBattler], 0);
+    CopyBgTilemapBufferToVram(0);
+}
+
+// Retorna TRUE se o botão já foi tratado aqui
+static bool8 HandleMoveDetailInput(void)
+{
+    s32 cursor;
+
+    if (JOY_NEW(START_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        if (sMoveDetailMode)
+            ExitMoveDetailMode();
+        else
+            EnterMoveDetailMode();
+        return TRUE;
+    }
+    if (!sMoveDetailMode)
+        return FALSE;
+
+    if (JOY_NEW(A_BUTTON))
+    {
+        ExitMoveDetailMode();
+        return FALSE; // segue para usar o golpe normalmente
+    }
+    if (JOY_NEW(B_BUTTON))
+    {
+        PlaySE(SE_SELECT);
+        ExitMoveDetailMode();
+        return TRUE;
+    }
+    if (gNumberOfMovesToChoose > 1 && JOY_NEW(DPAD_LEFT | DPAD_RIGHT | DPAD_UP | DPAD_DOWN))
+    {
+        cursor = gMoveSelectionCursor[gActiveBattler];
+        if (JOY_NEW(DPAD_LEFT | DPAD_UP))
+            cursor = (cursor == 0) ? gNumberOfMovesToChoose - 1 : cursor - 1;
+        else
+            cursor = (cursor + 1 >= gNumberOfMovesToChoose) ? 0 : cursor + 1;
+        gMoveSelectionCursor[gActiveBattler] = cursor;
+        PlaySE(SE_SELECT);
+        MoveSelectionDisplayMoveDetails();
+        MoveSelectionDisplayPpNumber();
+        MoveSelectionDisplayMoveType();
+    }
+    return TRUE; // no modo de detalhes, os outros botões não fazem nada
 }
 
 void MoveSelectionCreateCursorAt(u8 cursorPosition, u8 arg1)
@@ -2440,6 +2864,9 @@ static void PlayerHandleChooseMove(void)
 
 void InitMoveSelectionsVarsAndStrings(void)
 {
+    sMoveDetailMode = FALSE;
+    sMoveDetailArrowsTaskId = TASK_NONE; // as setas nunca sobrevivem de um turno para o outro
+    ShowMoveInfoTab();
     MoveSelectionDisplayMoveNames();
     gMultiUsePlayerCursor = 0xFF;
     MoveSelectionCreateCursorAt(gMoveSelectionCursor[gActiveBattler], 0);

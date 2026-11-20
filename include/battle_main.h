@@ -72,6 +72,8 @@ void CB2_InitEndLinkBattle(void);
 u32 GetBattleBgTemplateData(u8 arrayId, u8 caseId);
 void SpriteCB_EnemyMon(struct Sprite *sprite);
 void SpriteCallbackDummy_2(struct Sprite *sprite);
+void SpriteCB_OpponentMonFromBall(struct Sprite *sprite);
+void SpriteCB_PlayerMonFromBall(struct Sprite *sprite);
 void SpriteCB_FaintOpponentMon(struct Sprite *sprite);
 void SpriteCB_ShowAsMoveTarget(struct Sprite *sprite);
 void SpriteCB_HideAsMoveTarget(struct Sprite *sprite);

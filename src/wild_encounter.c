@@ -1,4 +1,5 @@
 #include "global.h"
+#include "debug.h"
 #include "random.h"
 #include "wild_encounter.h"
 #include "event_data.h"
@@ -220,6 +221,16 @@ static u16 GetCurrentMapWildMonHeaderId(void)
     return HEADER_NONE;
 }
 
+// HACK: tabela do mapa atual para o AREA LIST da Pokédex (NULL se não houver)
+const struct WildPokemonHeader *GetCurrentMapWildMonHeaderForDex(void)
+{
+    u16 id = GetCurrentMapWildMonHeaderId();
+
+    if (id == HEADER_NONE)
+        return NULL;
+    return &gWildMonHeaders[id];
+}
+
 static bool8 UnlockedTanobyOrAreNotInTanoby(void)
 {
     if (FlagGet(FLAG_SYS_UNLOCKED_TANOBY_RUINS))
@@ -374,6 +385,10 @@ bool8 StandardWildEncounter(u32 currMetatileAttrs, u16 previousMetatileBehavior)
 
     if (sWildEncountersDisabled == TRUE)
         return FALSE;
+#if DEBUG_MENU
+    if (gDebugNoEncounters)
+        return FALSE; // HACK: debug, sem encontros selvagens
+#endif
 
     headerId = GetCurrentMapWildMonHeaderId();
     if (headerId != HEADER_NONE)

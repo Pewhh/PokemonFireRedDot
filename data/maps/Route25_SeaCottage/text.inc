@@ -106,3 +106,38 @@ Route25_SeaCottage_Text_BillsFavoriteMonList::
 Route25_SeaCottage_Text_SeeWhichMon::
     .string "Which POKéMON do you want to see?$"
 
+
+@ HACK: batalhas com o BILL
+Route25_SeaCottage_Text_BillBattleAgain::
+    .string "BILL: Hey, {PLAYER}!\n"
+    .string "Up for that battle now?$"
+
+Route25_SeaCottage_Text_BillNoBattle::
+    .string "BILL: No? All right.\n"
+    .string "Come back anytime!$"
+
+Route25_SeaCottage_Text_BillRematchIntro::
+    .string "BILL: Hey, {PLAYER}!\n"
+    .string "I heard you beat the ELITE FOUR!\p"
+    .string "My POKéMON have gotten a lot\n"
+    .string "stronger, too.\p"
+    .string "How about a battle?$"
+
+Route25_SeaCottage_Text_BillRematchDefeat::
+    .string "You're really something,\n"
+    .string "{PLAYER}!$"
+
+Route25_SeaCottage_Text_BillRematchVictory::
+    .string "See? My POKéMON have really\n"
+    .string "grown!$"
+
+Route25_SeaCottage_Text_BillRematchWon::
+    .string "BILL: Phew! You're as tough\n"
+    .string "as ever!\p"
+    .string "Beat the ELITE FOUR again, and\n"
+    .string "we'll have another battle!$"
+
+Route25_SeaCottage_Text_BillRematchLost::
+    .string "BILL: That was fun!\p"
+    .string "You can battle me again anytime.\n"
+    .string "Just come back!$"

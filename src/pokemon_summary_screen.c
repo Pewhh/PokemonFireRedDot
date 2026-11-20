@@ -1,4 +1,5 @@
 #include "global.h"
+#include "pokemon_animation.h"
 #include "gflib.h"
 #include "pokemon.h"
 #include "pokemon_summary_screen.h"
@@ -4022,6 +4023,36 @@ static void SpriteCB_MonPicDummy(struct Sprite *sprite)
 {
 }
 
+// HACK: animação do Emerald no resumo (2º quadro + movimento), uma vez quando o Pokémon aparece
+static EWRAM_DATA u16 sPokeSumAnimSpecies = 0;
+
+static void SpriteCB_PokeSum_MonPicAnimate(struct Sprite *sprite)
+{
+    u8 i;
+
+    if (gPaletteFade.active || sprite->invisible)
+        return;
+    for (i = 0; i < ARRAY_COUNT(sprite->data); i++)
+        sprite->data[i] = 0;
+    sprite->data[1] = IsMonSpriteNotFlipped(sPokeSumAnimSpecies); // sDontFlip
+    sprite->callback = SpriteCallbackDummy;
+    PokemonSummaryDoMonAnimation(sprite, sPokeSumAnimSpecies, FALSE);
+}
+
+static void PokeSum_StopMonPicAnimation(void)
+{
+    struct Sprite *sprite = &gSprites[sMonSummaryScreen->monPicSpriteId];
+
+    StopPokemonAnimationDelayTask();
+    sprite->callback = SpriteCallbackDummy;
+    if (sprite->oam.affineMode & ST_OAM_AFFINE_ON_MASK)
+    {
+        FreeOamMatrix(sprite->oam.matrixNum);
+        sprite->oam.matrixNum = 0;
+        sprite->oam.affineMode = ST_OAM_AFFINE_OFF;
+    }
+}
+
 static void PokeSum_CreateMonPicSprite(void)
 {
     u16 spriteId;
@@ -4097,6 +4128,14 @@ static void PokeSum_SetMonPicSpriteCallback(u16 spriteId)
         return;
     }
 
+    // HACK: fora o ovo, o Pokémon faz a animação do Emerald (no lugar dos pulos do FRLG)
+    sPokeSumAnimSpecies = GetMonData(&sMonSummaryScreen->currentMon, MON_DATA_SPECIES);
+    if (sPokeSumAnimSpecies != SPECIES_NONE)
+    {
+        gSprites[spriteId].callback = SpriteCB_PokeSum_MonPicAnimate;
+        return;
+    }
+
     curHp = GetMonData(&sMonSummaryScreen->currentMon, MON_DATA_HP);
     maxHp = GetMonData(&sMonSummaryScreen->currentMon, MON_DATA_MAX_HP);
 
@@ -4119,6 +4158,7 @@ static void PokeSum_ShowOrHideMonPicSprite(u8 invisible)
 
 static void PokeSum_DestroyMonPicSprite(void)
 {
+    PokeSum_StopMonPicAnimation(); // HACK
     FreeAndDestroyMonPicSprite(sMonSummaryScreen->monPicSpriteId);
     FREE_AND_SET_NULL(sMonPicBounceState);
 }
@@ -4407,6 +4447,121 @@ static void ShowOrHideStatusIcon(u8 invisible)
     }
 }
 
+// HACK: setas da natureza ao lado dos stats (cima = stat que a natureza aumenta,
+// baixo = stat que diminui), no cinza das etiquetas HP/ATTACK. Aparecem e somem junto
+// com a barra de HP, que também só existe na página de stats.
+#define TAG_PSS_NATURE_ARROW 0xD7C0
+// u32 para ficar alinhado: como u8 caía num endereço ímpar e a cópia de 16 bits para a VRAM embaralhava os bytes
+static const u32 sNatureArrow_Gfx[8] = {
+    0x00000000, 0x00001000, 0x00011100, 0x00111110, 0x01111111, 0x00011100, 0x00011100, 0x00000000,
+};
+static const u16 sNatureArrow_Pal[16] = {RGB(0, 0, 0), RGB(15, 16, 18)};
+static const struct OamData sNatureArrowOamData = {
+    .affineMode = ST_OAM_AFFINE_OFF,
+    .shape = SPRITE_SHAPE(8x8),
+    .size = SPRITE_SIZE(8x8),
+    .priority = 2,
+};
+static EWRAM_DATA u8 sNatureArrowSpriteIds[2] = {0}; // [0] cima, [1] baixo
+static EWRAM_DATA bool8 sNatureArrowShown[2] = {0};
+
+// y do texto de cada stat na janela da direita (ATK, DEF, SPA, SPD, SPE) e índice na tabela de natureza
+static const u8 sNatureArrowRowY[5] = {22, 35, 48, 61, 74};
+static const u8 sNatureArrowStatIdx[5] = {STAT_ATK - 1, STAT_DEF - 1, STAT_SPATK - 1, STAT_SPDEF - 1, STAT_SPEED - 1};
+#define NATURE_ARROW_X 212 // centro da seta: à esquerda do número, na caixa do valor
+
+// Acompanha a barra de HP: mesma prioridade (a caixa dos stats troca de camada a cada
+// troca de página) e mesmo deslocamento horizontal durante o deslize da página.
+static void SpriteCB_NatureArrow(struct Sprite *sprite)
+{
+    if (sHpBarObjs == NULL || sHpBarObjs->sprites[0] == NULL)
+        return;
+    sprite->oam.priority = sHpBarObjs->sprites[0]->oam.priority;
+    sprite->x = NATURE_ARROW_X + (sHpBarObjs->sprites[0]->x - 172);
+}
+
+static void CreateNatureArrowObjs(void)
+{
+    struct SpriteSheet sheet = {sNatureArrow_Gfx, sizeof(sNatureArrow_Gfx), TAG_PSS_NATURE_ARROW};
+    struct SpritePalette pal = {sNatureArrow_Pal, TAG_PSS_NATURE_ARROW};
+    struct SpriteTemplate template = {
+        .tileTag = TAG_PSS_NATURE_ARROW,
+        .paletteTag = TAG_PSS_NATURE_ARROW,
+        .oam = &sNatureArrowOamData,
+        .anims = gDummySpriteAnimTable,
+        .images = NULL,
+        .affineAnims = gDummySpriteAffineAnimTable,
+        .callback = SpriteCB_NatureArrow,
+    };
+    u8 i;
+
+    LoadSpriteSheet(&sheet);
+    LoadSpritePalette(&pal);
+    for (i = 0; i < 2; i++)
+    {
+        sNatureArrowSpriteIds[i] = CreateSprite(&template, NATURE_ARROW_X, 0, 0);
+        if (sNatureArrowSpriteIds[i] == MAX_SPRITES)
+        {
+            sNatureArrowSpriteIds[i] = SPRITE_NONE;
+            continue;
+        }
+        if (i == 1) // a de baixo é a de cima de ponta-cabeça (direto no OAM: o vFlip do sprite só vale ao iniciar a animação)
+            gSprites[sNatureArrowSpriteIds[i]].oam.matrixNum |= ST_OAM_VFLIP;
+        gSprites[sNatureArrowSpriteIds[i]].invisible = TRUE;
+    }
+}
+
+static void ShowOrHideNatureArrowObjs(u8 invisible);
+
+static void UpdateNatureArrowObjs(void)
+{
+    const s8 *natureMod = sNatureStatTable[GetNature(&sMonSummaryScreen->currentMon)];
+    u8 i;
+
+    sNatureArrowShown[0] = sNatureArrowShown[1] = FALSE;
+    for (i = 0; i < 5; i++)
+    {
+        s8 mod = natureMod[sNatureArrowStatIdx[i]];
+        u8 which;
+
+        if (mod == 0)
+            continue;
+        which = mod > 0 ? 0 : 1;
+        if (sNatureArrowSpriteIds[which] == SPRITE_NONE)
+            continue;
+        gSprites[sNatureArrowSpriteIds[which]].y = 16 + sNatureArrowRowY[i] + 7;
+        sNatureArrowShown[which] = TRUE;
+    }
+    if (sMonSummaryScreen->isEgg)
+        sNatureArrowShown[0] = sNatureArrowShown[1] = FALSE;
+    // mesma visibilidade atual da barra de HP (ao trocar de Pokémon na página de stats)
+    if (sHpBarObjs != NULL && sHpBarObjs->sprites[0] != NULL)
+        ShowOrHideNatureArrowObjs(sHpBarObjs->sprites[0]->invisible);
+}
+
+static void ShowOrHideNatureArrowObjs(u8 invisible)
+{
+    u8 i;
+
+    for (i = 0; i < 2; i++)
+        if (sNatureArrowSpriteIds[i] != SPRITE_NONE)
+            gSprites[sNatureArrowSpriteIds[i]].invisible = invisible || !sNatureArrowShown[i];
+}
+
+static void DestroyNatureArrowObjs(void)
+{
+    u8 i;
+
+    for (i = 0; i < 2; i++)
+    {
+        if (sNatureArrowSpriteIds[i] != SPRITE_NONE)
+            DestroySprite(&gSprites[sNatureArrowSpriteIds[i]]);
+        sNatureArrowSpriteIds[i] = SPRITE_NONE;
+    }
+    FreeSpriteTilesByTag(TAG_PSS_NATURE_ARROW);
+    FreeSpritePaletteByTag(TAG_PSS_NATURE_ARROW);
+}
+
 static void CreateHpBarObjs(u16 tileTag, u16 palTag)
 {
     u8 i;
@@ -4468,6 +4623,7 @@ static void CreateHpBarObjs(u16 tileTag, u16 palTag)
         StartSpriteAnim(sHpBarObjs->sprites[i], 8);
     }
 
+    CreateNatureArrowObjs(); // HACK
     UpdateHpBarObjs();
     ShowOrHideHpBarObjs(TRUE);
 
@@ -4487,7 +4643,10 @@ static void UpdateHpBarObjs(void)
     s64 totalPoints;
 
     if (sMonSummaryScreen->isEgg)
+    {
+        UpdateNatureArrowObjs(); // HACK: ovo não mostra setas
         return;
+    }
 
     curHp = GetMonData(&sMonSummaryScreen->currentMon, MON_DATA_HP);
     maxHp = GetMonData(&sMonSummaryScreen->currentMon, MON_DATA_MAX_HP);
@@ -4546,6 +4705,7 @@ static void UpdateHpBarObjs(void)
     StartSpriteAnim(sHpBarObjs->sprites[0], 9);
     StartSpriteAnim(sHpBarObjs->sprites[1], 10);
     StartSpriteAnim(sHpBarObjs->sprites[8], 11);
+    UpdateNatureArrowObjs(); // HACK: setas da natureza do Pokémon atual
 }
 
 static void DestroyHpBarObjs(void)
@@ -4557,6 +4717,7 @@ static void DestroyHpBarObjs(void)
             DestroySpriteAndFreeResources(sHpBarObjs->sprites[i]);
 
     FREE_AND_SET_NULL_IF_SET(sHpBarObjs);
+    DestroyNatureArrowObjs(); // HACK
 }
 
 static void ShowOrHideHpBarObjs(u8 invisible)
@@ -4565,6 +4726,7 @@ static void ShowOrHideHpBarObjs(u8 invisible)
 
     for (i = 0; i < 9; i++)
         sHpBarObjs->sprites[i]->invisible = invisible;
+    ShowOrHideNatureArrowObjs(invisible); // HACK: setas da natureza seguem a barra de HP
 }
 
 static void CreateExpBarObjs(u16 tileTag, u16 palTag)

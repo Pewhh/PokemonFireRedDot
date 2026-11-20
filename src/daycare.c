@@ -1,4 +1,5 @@
 #include "global.h"
+#include "pokemon_animation.h"
 #include "gflib.h"
 #include "data.h"
 #include "battle.h"
@@ -1952,12 +1953,13 @@ static void CB2_EggHatch_1(void)
     case 3:
         if (gSprites[sEggHatchData->eggSpriteID].callback == SpriteCallbackDummy)
         {
-            PlayCry_Normal(sEggHatchData->species, 0);
+            // HACK: grito + animação do Emerald ao sair do ovo
+            DoMonFrontSpriteAnimation(&gSprites[sEggHatchData->pokeSpriteID], sEggHatchData->species, FALSE, 1);
             sEggHatchData->CB2_state++;
         }
         break;
     case 4:
-        if (IsCryFinished())
+        if (IsCryFinished() && gSprites[sEggHatchData->pokeSpriteID].callback == SpriteCallbackDummy)
         {
             sEggHatchData->CB2_state++;
         }

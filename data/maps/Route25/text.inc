@@ -117,3 +117,40 @@ Route25_Text_AreYouHereAlone::
     .string "If you're out at CERULEAN's cape…\n"
     .string "Well, it should be as a couple.$"
 
+
+@ HACK: batalha com o BILL depois do S.S. TICKET
+Route25_Text_BillHowAboutABattle::
+    .string "BILL: Hey, {PLAYER}! Wait up!\p"
+    .string "Before you go, how about a quick\n"
+    .string "battle?\p"
+    .string "I want to see your POKéMON\n"
+    .string "in action!$"
+
+Route25_Text_BillLetsGo::
+    .string "BILL: All right!\n"
+    .string "Here I come!$"
+
+Route25_Text_BillDefeat::
+    .string "Wow! Your POKéMON are\n"
+    .string "something else!$"
+
+Route25_Text_BillVictory::
+    .string "Ha! My POKéMON came\n"
+    .string "through for me!$"
+
+Route25_Text_BillTrainMore::
+    .string "BILL: That was a great battle!\p"
+    .string "I'd better train my POKéMON\n"
+    .string "some more.\p"
+    .string "Let's battle again sometime,\n"
+    .string "okay?$"
+
+Route25_Text_BillBattleMeAnytime::
+    .string "BILL: That was fun!\p"
+    .string "You can battle me again anytime.\n"
+    .string "Just drop by my place!$"
+
+Route25_Text_BillDeclined::
+    .string "BILL: Oh, that's too bad.\p"
+    .string "It'd be my pleasure to battle you\n"
+    .string "anytime. Just drop by my place!$"

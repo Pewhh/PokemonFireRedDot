@@ -71,6 +71,7 @@
 #define MULTICHOICE_TRAINER_TOWER_MODE                         64
 #define MULTICHOICE_GAME_CORNER_POKEMON_PRIZES_LG              65
 #define MULTICHOICE_OAK_OTHER_MONS                             66
+#define MULTICHOICE_EEVEELUTIONS_NATIONAL                      67 // HACK: com ESPEON e UMBREON
 
 #define MULTICHOICE_NONE                                      255
 

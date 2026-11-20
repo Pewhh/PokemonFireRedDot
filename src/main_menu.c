@@ -18,6 +18,8 @@
 #include "text_window_graphics.h"
 #include "load_save.h"
 #include "key_system_menu.h"
+#include "option_menu.h"
+#include "main_menu.h"
 #include "constants/songs.h"
 
 enum MainMenuType
@@ -207,9 +209,25 @@ static void VBlankCB_MainMenu(void)
     TransferPlttBuffer();
 }
 
+// HACK: sem save, a escolha de versão aparece logo depois da intro, antes da tela-título,
+// para a tela-título já mostrar a versão escolhida. Depois disso, o NEW GAME não pergunta de novo.
+static EWRAM_DATA bool8 sChoosingVersionBeforeTitle = FALSE;
+static EWRAM_DATA bool8 sVersionChosenBeforeTitle = FALSE;
+
 void CB2_InitMainMenu(void)
 {
     MainMenuGpuInit(1);
+}
+
+void CB2_InitVersionChoiceBeforeTitle(void)
+{
+    sChoosingVersionBeforeTitle = TRUE;
+    MainMenuGpuInit(1);
+}
+
+bool8 WasVersionChosenBeforeTitle(void)
+{
+    return sVersionChosenBeforeTitle;
 }
 
 static void CB2_InitMainMenu_2(void)
@@ -414,7 +432,7 @@ static void Task_PrintMainMenuText(u8 taskId)
         FillWindowPixelBuffer(MAIN_MENU_WINDOW_KEYSYSTEM, PIXEL_FILL(10));
         AddTextPrinterParameterized3(MAIN_MENU_WINDOW_CONTINUE, FONT_NORMAL, 2, 2, sTextColor1, -1, gText_Continue);
         AddTextPrinterParameterized3(MAIN_MENU_WINDOW_NEWGAME, FONT_NORMAL, 2, 2, sTextColor1, -1, gText_NewGame);
-        AddTextPrinterParameterized3(MAIN_MENU_WINDOW_KEYSYSTEM, FONT_NORMAL, 2, 2, sTextColor1, -1, gText_KeySystemSettings);
+        AddTextPrinterParameterized3(MAIN_MENU_WINDOW_KEYSYSTEM, FONT_NORMAL, 2, 2, sTextColor1, -1, gText_Option); // HACK: OPTION no lugar do KEY SYSTEM SETTINGS
         PrintContinueStats();
         MainMenu_DrawWindow(&sWindowTemplate[MAIN_MENU_WINDOW_CONTINUE]);
         MainMenu_DrawWindow(&sWindowTemplate[MAIN_MENU_WINDOW_NEWGAME]);
@@ -435,7 +453,7 @@ static void Task_PrintMainMenuText(u8 taskId)
         AddTextPrinterParameterized3(MAIN_MENU_WINDOW_NEWGAME, FONT_NORMAL, 2, 2, sTextColor1, -1, gText_NewGame);
         gTasks[taskId].tMGErrorType = 1;
         AddTextPrinterParameterized3(MAIN_MENU_WINDOW_MYSTERYGIFT, FONT_NORMAL, 2, 2, sTextColor1, -1, gText_MysteryGift);
-        AddTextPrinterParameterized3(MAIN_MENU_WINDOW_KEYSYSTEM_MYSTERYGIFT, FONT_NORMAL, 2, 2, sTextColor1, -1, gText_KeySystemSettings);
+        AddTextPrinterParameterized3(MAIN_MENU_WINDOW_KEYSYSTEM_MYSTERYGIFT, FONT_NORMAL, 2, 2, sTextColor1, -1, gText_Option); // HACK: OPTION no lugar do KEY SYSTEM SETTINGS
         PrintContinueStats();
         MainMenu_DrawWindow(&sWindowTemplate[MAIN_MENU_WINDOW_CONTINUE]);
         MainMenu_DrawWindow(&sWindowTemplate[MAIN_MENU_WINDOW_NEWGAME]);
@@ -539,7 +557,11 @@ static void Task_ExecuteMainMenuSelection(u8 taskId)
         default:
         case MAIN_MENU_NEWGAME:
             // Ask which version to play before starting Oak's speech
-            gTasks[taskId].func = Task_ChooseVersion_Init;
+            // (unless it was already asked before the title screen)
+            if (!sChoosingVersionBeforeTitle && sVersionChosenBeforeTitle && gSaveFileStatus == SAVE_STATUS_EMPTY)
+                gTasks[taskId].func = Task_ChooseVersion_StartNewGame;
+            else
+                gTasks[taskId].func = Task_ChooseVersion_Init;
             break;
         case MAIN_MENU_CONTINUE:
             gPlttBufferUnfaded[0] = RGB_BLACK;
@@ -555,8 +577,8 @@ static void Task_ExecuteMainMenuSelection(u8 taskId)
             DestroyTask(taskId);
             break;
         case MAIN_MENU_KEYSYSTEM:
-            // Opens the version switch. It returns to this menu when closed.
-            SetMainCallback2(CB2_KeySystemMenuFromContinueScreen);
+            // HACK: abre o OPTION (com a troca FIRERED/LEAFGREEN). Volta para este menu ao fechar.
+            SetMainCallback2(CB2_OptionsMenuFromMainMenu);
             FreeAllWindowBuffers();
             DestroyTask(taskId);
             break;
@@ -644,9 +666,19 @@ static void Task_ChooseVersion_HandleInput(u8 taskId)
         PlaySE(SE_SELECT);
         SetActiveVersion(gTasks[taskId].tCursorPos); // 0 = FireRed, 1 = LeafGreen
         BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
-        gTasks[taskId].func = Task_ChooseVersion_StartNewGame;
+        if (sChoosingVersionBeforeTitle)
+        {
+            // Escolha antes da tela-título: segue para a tela-título da versão escolhida
+            sChoosingVersionBeforeTitle = FALSE;
+            sVersionChosenBeforeTitle = TRUE;
+            gTasks[taskId].func = Task_ReturnToTileScreen;
+        }
+        else
+        {
+            gTasks[taskId].func = Task_ChooseVersion_StartNewGame;
+        }
     }
-    else if (JOY_NEW(B_BUTTON))
+    else if (JOY_NEW(B_BUTTON) && !sChoosingVersionBeforeTitle) // antes da tela-título, B não volta
     {
         PlaySE(SE_SELECT);
         BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);

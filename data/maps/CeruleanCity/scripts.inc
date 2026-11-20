@@ -314,6 +314,8 @@ CeruleanCity_EventScript_SlowbroFailed3::
 
 CeruleanCity_EventScript_Slowbro::
 	lock
+	setvar VAR_0x8004, SPECIES_SLOWBRO @ HACK: o SLOWBRO fica visto na POKéDEX
+	special SetSeenMon
 	random 4
 	copyvar VAR_0x8008, VAR_RESULT
 	call_if_eq VAR_0x8008, 0, CeruleanCity_EventScript_SlowbroText1

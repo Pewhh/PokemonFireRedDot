@@ -442,6 +442,24 @@ const u32 gTrainerPalette_Lady[] = INCBIN_U32("graphics/trainers/palettes/lady.g
 const u32 gTrainerFrontPic_Painter[] = INCBIN_U32("graphics/trainers/front_pics/painter_front_pic.4bpp.lz");
 const u32 gTrainerPalette_Painter[] = INCBIN_U32("graphics/trainers/palettes/painter.gbapal.lz");
 
+// HACK: BILL (mesmo desenho do Fame Checker)
+const u32 gTrainerFrontPic_Bill[] = INCBIN_U32("graphics/trainers/front_pics/bill_front_pic.4bpp.lz");
+const u32 gTrainerPalette_Bill[] = INCBIN_U32("graphics/trainers/palettes/bill.gbapal.lz");
+
+// HACK: Pokémon Adventures, JANINE e JESSIE & JAMES (ainda sem uso)
+const u32 gTrainerFrontPic_RedAdv[] = INCBIN_U32("graphics/trainers/front_pics/red_adv_front_pic.4bpp.lz");
+const u32 gTrainerPalette_RedAdv[] = INCBIN_U32("graphics/trainers/palettes/red_adv.gbapal.lz");
+const u32 gTrainerFrontPic_BlueAdv[] = INCBIN_U32("graphics/trainers/front_pics/blue_adv_front_pic.4bpp.lz");
+const u32 gTrainerPalette_BlueAdv[] = INCBIN_U32("graphics/trainers/palettes/blue_adv.gbapal.lz");
+const u32 gTrainerFrontPic_GreenAdv[] = INCBIN_U32("graphics/trainers/front_pics/green_adv_front_pic.4bpp.lz");
+const u32 gTrainerPalette_GreenAdv[] = INCBIN_U32("graphics/trainers/palettes/green_adv.gbapal.lz");
+const u32 gTrainerFrontPic_YellowAdv[] = INCBIN_U32("graphics/trainers/front_pics/yellow_adv_front_pic.4bpp.lz");
+const u32 gTrainerPalette_YellowAdv[] = INCBIN_U32("graphics/trainers/palettes/yellow_adv.gbapal.lz");
+const u32 gTrainerFrontPic_Janine[] = INCBIN_U32("graphics/trainers/front_pics/janine_front_pic.4bpp.lz");
+const u32 gTrainerPalette_Janine[] = INCBIN_U32("graphics/trainers/palettes/janine.gbapal.lz");
+const u32 gTrainerFrontPic_JessieJames[] = INCBIN_U32("graphics/trainers/front_pics/jessie_james_front_pic.4bpp.lz");
+const u32 gTrainerPalette_JessieJames[] = INCBIN_U32("graphics/trainers/palettes/jessie_james.gbapal.lz");
+
 const u8 gTrainerBackPic_Red[] = INCBIN_U8("graphics/trainers/back_pics/red_back_pic.4bpp");
 const u8 gTrainerBackPic_Leaf[] = INCBIN_U8("graphics/trainers/back_pics/leaf_back_pic.4bpp");
 const u8 gTrainerBackPic_Pokedude[] = INCBIN_U8("graphics/trainers/back_pics/pokedude_back_pic.4bpp");

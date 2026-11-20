@@ -204,6 +204,7 @@ void SetAnimBgAttribute(u8 bgId, u8 attributeId, u8 value);
 s32 GetAnimBgAttribute(u8 bgId, u8 attributeId);
 void HandleIntroSlide(u8 terrain);
 void BattleIntroSlideEnd(u8 taskId);
+s16 IntroSlideApproachZero(s16 pos, s16 dir);
 void CopyBattlerSpriteToBg(s32 bgId, u8 x, u8 y, u8 battlerPosition, u8 palno, u8 *tilesDest, u16 *tilemapDest, u16 tilesOffset);
 void SetSpriteNextToMonHead(u8 battler, struct Sprite* sprite);
 void TryShinyAnimation(u8 battler, struct Pokemon *mon);

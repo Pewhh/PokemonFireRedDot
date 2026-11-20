@@ -27,6 +27,7 @@
 #define AI_WEATHER_RAIN      1
 #define AI_WEATHER_SANDSTORM 2
 #define AI_WEATHER_HAIL      3
+#define AI_WEATHER_NONE      4 // HACK: sem clima (Fase 6)
 
 // get_how_powerful_move_is
 #define MOVE_POWER_DISCOURAGED  0
@@ -44,6 +45,26 @@
 #define AI_SCRIPT_DOUBLE_BATTLE (1 << 7)
 #define AI_SCRIPT_HP_AWARE (1 << 8)
 #define AI_SCRIPT_UNKNOWN (1 << 9)
+// Módulos novos (Fase 6), nos índices livres da tabela de scripts
+#define AI_SCRIPT_SUICIDE (1 << 10) // Explosion/Selfdestruct só com HP baixo
+#define AI_SCRIPT_PRIORITY_AWARE (1 << 11) // golpe de prioridade quando cairia antes de agir
+#define AI_SCRIPT_ANTI_SETUP (1 << 12) // Haze/Roar/Encore contra boosts do jogador
+#define AI_SCRIPT_SETUP_SWEEPER (1 << 13) // boost só quando aguenta o próximo golpe
+#define AI_SCRIPT_STALL (1 << 14) // desgaste: Toxic, Leech Seed, Protect alternado, cura
+#define AI_SCRIPT_WEATHER (1 << 15) // abre e renova o clima que favorece o Pokémon
+#define AI_SCRIPT_STALL_LIGHT (1 << 16) // desgaste leve: só Toxic e Leech Seed
+
+// Flags novas (não são scripts: os índices 20 e 21 da tabela de scripts são AI_Ret)
+#define AI_SCRIPT_SMART_SWITCH (1 << 20) // troca de Pokémon nova (Fase 5)
+#define AI_SCRIPT_ACE_LAST     (1 << 21) // guarda o último do time (o ás) para o fim
+#define AI_SCRIPT_FREQUENT_SWITCH (1 << 22) // personalidade: troca mais vezes (Fase 6)
+
+// Perfis de IA (Fase 4)
+#define AI_PROFILE_NOVICE  1
+#define AI_PROFILE_COMMON  2
+#define AI_PROFILE_SKILLED 3
+#define AI_PROFILE_BOSS    4
+#define AI_PROFILE_ELITE   5
 // 10 - 28 are not used
 #define AI_SCRIPT_ROAMING (1 << 29)
 #define AI_SCRIPT_SAFARI (1 << 30)

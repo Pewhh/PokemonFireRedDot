@@ -81,6 +81,7 @@ SECTIONS {
         src/battle_ai_switch_items.o(.text);
         src/battle_controller_link_opponent.o(.text);
         src/pokemon.o(.text);
+        src/pokemon_animation.o(.text);
         src/trig.o(.text);
         src/random.o(.text);
         src/util.o(.text);
@@ -111,6 +112,7 @@ SECTIONS {
         src/coord_event_weather.o(.text);
         src/field_tasks.o(.text);
         src/start_menu.o(.text);
+        src/debug.o(.text);
         src/tileset_anims.o(.text);
         src/palette.o(.text);
         src/sound.o(.text);
@@ -419,6 +421,7 @@ SECTIONS {
         src/battle_controller_opponent.o(.rodata);
         src/battle_controller_link_opponent.o(.rodata);
         src/pokemon.o(.rodata);
+        src/pokemon_animation.o(.rodata);
         src/trig.o(.rodata);
         src/util.o(.rodata);
         src/daycare.o(.rodata);
@@ -439,6 +442,7 @@ SECTIONS {
         src/coord_event_weather.o(.rodata);
         src/field_tasks.o(.rodata);
         src/start_menu.o(.rodata);
+        src/debug.o(.rodata);
         src/tileset_anims.o(.rodata);
         src/palette.o(.rodata);
         src/sound.o(.rodata);

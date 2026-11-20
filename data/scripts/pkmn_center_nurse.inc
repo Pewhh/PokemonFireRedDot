@@ -1,5 +1,8 @@
 EventScript_PkmnCenterNurse::
 	goto_if_questlog EventScript_ReleaseEnd
+	@ HACK: time já está todo curado (HP, status e PP): a enfermeira só avisa
+	specialvar VAR_RESULT, IsPartyFullyHealed
+	goto_if_eq VAR_RESULT, TRUE, EventScript_PkmnCenterNurse_AlreadyHealthy
     goto_if_set FLAG_USED_POKECENTER_ONCE, EventScript_PkmnCenterNurse_Fast
 	message Text_WelcomeWantToHealPkmn
 	waitmessage
@@ -76,3 +79,18 @@ EventScript_PkmnCenterNurse_Fast::
 	goto EventScript_PkmnCenterNurse_CheckTrainerTowerAndUnionRoom
 	end
 
+
+EventScript_PkmnCenterNurse_AlreadyHealthy::
+	msgbox Text_PkmnAlreadyHealthy
+	return
+
+@ HACK: Chansey ao lado da enfermeira em todos os Centros Pokémon
+EventScript_PkmnCenterChansey::
+	lock
+	faceplayer
+	waitse
+	playmoncry SPECIES_CHANSEY, CRY_MODE_NORMAL
+	msgbox Text_PkmnCenterChansey
+	waitmoncry
+	release
+	end

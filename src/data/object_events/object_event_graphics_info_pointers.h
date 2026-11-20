@@ -72,6 +72,8 @@ const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_TrainerTowerDude;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_ProfOak;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_Blue;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_Bill;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_Jessie;
+const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_James;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_Lance;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_Agatha;
 const struct ObjectEventGraphicsInfo gObjectEventGraphicsInfo_Daisy;
@@ -305,4 +307,6 @@ const struct ObjectEventGraphicsInfo *const gObjectEventGraphicsInfoPointers[NUM
     [OBJ_EVENT_GFX_DEOXYS_A]                 = &gObjectEventGraphicsInfo_DeoxysA,
     [OBJ_EVENT_GFX_DEOXYS_N]                 = &gObjectEventGraphicsInfo_DeoxysN,
     [OBJ_EVENT_GFX_SS_ANNE]                  = &gObjectEventGraphicsInfo_SSAnne,
+    [OBJ_EVENT_GFX_JESSIE]                   = &gObjectEventGraphicsInfo_Jessie, // HACK
+    [OBJ_EVENT_GFX_JAMES]                    = &gObjectEventGraphicsInfo_James, // HACK
 };

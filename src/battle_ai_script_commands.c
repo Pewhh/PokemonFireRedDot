@@ -1,10 +1,14 @@
 #include "global.h"
+#include "constants/opponents.h"
+#include "constants/trainers.h"
+#include "event_data.h"
 #include "battle.h"
 #include "battle_anim.h"
 #include "util.h"
 #include "item.h"
 #include "random.h"
 #include "battle_ai_script_commands.h"
+#include "battle_ai_switch_items.h"
 #include "constants/abilities.h"
 #include "constants/battle_ai.h"
 #include "constants/battle_move_effects.h"
@@ -124,7 +128,7 @@ static void Cmd_get_move_type_from_result(void);
 static void Cmd_get_move_power_from_result(void);
 static void Cmd_get_move_effect_from_result(void);
 static void Cmd_get_protect_count(void);
-static void Cmd_nullsub_52(void);
+static void Cmd_if_target_can_ko_user(void);
 static void Cmd_nullsub_53(void);
 static void Cmd_nullsub_54(void);
 static void Cmd_nullsub_55(void);
@@ -228,7 +232,7 @@ static const BattleAICmdFunc sBattleAICmdTable[] =
     Cmd_get_move_power_from_result,       // 0x4F
     Cmd_get_move_effect_from_result,      // 0x50
     Cmd_get_protect_count,                // 0x51
-    Cmd_nullsub_52,                       // 0x52
+    Cmd_if_target_can_ko_user,            // 0x52 HACK: era nullsub (Fase 6)
     Cmd_nullsub_53,                       // 0x53
     Cmd_nullsub_54,                       // 0x54
     Cmd_nullsub_55,                       // 0x55
@@ -282,6 +286,191 @@ void BattleAI_HandleItemUseBeforeAISetup(void)
     }
 
     BattleAI_SetupAIData();
+}
+
+// ============================================================================
+// Perfis de IA (Fase 4 do projeto de IA). A inteligência de cada treinador vem da
+// CLASSE dele (e de algumas exceções), ajustada pelo modo de dificuldade.
+// Os módulos extras escritos em .aiFlags no trainers.h (além dos 3 básicos) são somados,
+// para dar personalidade a um treinador específico sem mexer nas tabelas abaixo.
+// ============================================================================
+
+#define AI_BASIC_FLAGS (AI_SCRIPT_CHECK_BAD_MOVE | AI_SCRIPT_TRY_TO_FAINT | AI_SCRIPT_CHECK_VIABILITY)
+
+static const u32 sAIProfileFlags[] =
+{
+    [AI_PROFILE_NOVICE]  = AI_SCRIPT_CHECK_BAD_MOVE,
+    [AI_PROFILE_COMMON]  = AI_SCRIPT_CHECK_BAD_MOVE | AI_SCRIPT_TRY_TO_FAINT,
+    [AI_PROFILE_SKILLED] = AI_BASIC_FLAGS,
+    [AI_PROFILE_BOSS]    = AI_BASIC_FLAGS | AI_SCRIPT_HP_AWARE,
+    [AI_PROFILE_ELITE]   = AI_BASIC_FLAGS | AI_SCRIPT_HP_AWARE | AI_SCRIPT_PREFER_BATON_PASS,
+};
+
+// Treinadores de ginásio (lista de data/scripts/set_gym_trainers.inc): sempre Experiente ou mais
+static const u16 sGymTrainers[] =
+{
+    TRAINER_CAMPER_LIAM,
+    TRAINER_PICNICKER_DIANA,
+    TRAINER_SWIMMER_MALE_LUIS,
+    TRAINER_SAILOR_DWAYNE,
+    TRAINER_ENGINEER_BAILY,
+    TRAINER_GENTLEMAN_TUCKER,
+    TRAINER_LASS_KAY,
+    TRAINER_LASS_LISA,
+    TRAINER_PICNICKER_TINA,
+    TRAINER_BEAUTY_BRIDGET,
+    TRAINER_BEAUTY_TAMIA,
+    TRAINER_BEAUTY_LORI,
+    TRAINER_COOLTRAINER_MARY,
+    TRAINER_TAMER_PHIL,
+    TRAINER_TAMER_EDGAR,
+    TRAINER_JUGGLER_KIRK,
+    TRAINER_JUGGLER_SHAWN,
+    TRAINER_JUGGLER_KAYDEN,
+    TRAINER_JUGGLER_NATE,
+    TRAINER_PSYCHIC_JOHAN,
+    TRAINER_PSYCHIC_TYRON,
+    TRAINER_PSYCHIC_CAMERON,
+    TRAINER_PSYCHIC_PRESTON,
+    TRAINER_CHANNELER_AMANDA,
+    TRAINER_CHANNELER_STACY,
+    TRAINER_CHANNELER_TASHA,
+    TRAINER_SUPER_NERD_ERIK,
+    TRAINER_SUPER_NERD_AVERY,
+    TRAINER_SUPER_NERD_DEREK,
+    TRAINER_SUPER_NERD_ZAC,
+    TRAINER_BURGLAR_QUINN,
+    TRAINER_BURGLAR_RAMON,
+    TRAINER_BURGLAR_DUSTY,
+    TRAINER_TAMER_JASON,
+    TRAINER_TAMER_COLE,
+    TRAINER_BLACK_BELT_ATSUSHI,
+    TRAINER_BLACK_BELT_KIYO,
+    TRAINER_BLACK_BELT_TAKASHI,
+    TRAINER_COOLTRAINER_SAMUEL,
+    TRAINER_COOLTRAINER_YUJI,
+    TRAINER_COOLTRAINER_WARREN,
+};
+
+static u8 GetTrainerClassAIProfile(u8 trainerClass)
+{
+    switch (trainerClass)
+    {
+    case TRAINER_CLASS_BUG_CATCHER:
+    case TRAINER_CLASS_YOUNGSTER:
+    case TRAINER_CLASS_LASS:
+    case TRAINER_CLASS_CAMPER:
+    case TRAINER_CLASS_PICNICKER:
+    case TRAINER_CLASS_TUBER:
+    case TRAINER_CLASS_TWINS:
+    case TRAINER_CLASS_SIS_AND_BRO:
+    case TRAINER_CLASS_YOUNG_COUPLE:
+        return AI_PROFILE_NOVICE;
+    case TRAINER_CLASS_COOLTRAINER:
+    case TRAINER_CLASS_COOL_COUPLE:
+    case TRAINER_CLASS_BLACK_BELT:
+    case TRAINER_CLASS_PSYCHIC:
+    case TRAINER_CLASS_CHANNELER:
+    case TRAINER_CLASS_JUGGLER:
+    case TRAINER_CLASS_TAMER:
+    case TRAINER_CLASS_SCIENTIST:
+    case TRAINER_CLASS_PKMN_RANGER:
+    case TRAINER_CLASS_CRUSH_GIRL:
+        return AI_PROFILE_SKILLED;
+    case TRAINER_CLASS_LEADER:
+    case TRAINER_CLASS_RIVAL_EARLY:
+    case TRAINER_CLASS_RIVAL_LATE:
+    case TRAINER_CLASS_BOSS:
+        return AI_PROFILE_BOSS;
+    case TRAINER_CLASS_ELITE_FOUR:
+    case TRAINER_CLASS_CHAMPION:
+        return AI_PROFILE_ELITE;
+    default:
+        return AI_PROFILE_COMMON;
+    }
+}
+
+u8 GetTrainerAIProfile(u16 trainerId)
+{
+    u8 profile = GetTrainerClassAIProfile(gTrainers[trainerId].trainerClass);
+    u32 i;
+
+    for (i = 0; i < NELEMS(sGymTrainers); i++)
+    {
+        if (sGymTrainers[i] == trainerId && profile < AI_PROFILE_SKILLED)
+            profile = AI_PROFILE_SKILLED;
+    }
+    // Brock é o primeiro desafio: Experiente em vez de Chefe
+    if (trainerId == TRAINER_LEADER_BROCK)
+        profile = AI_PROFILE_SKILLED;
+
+    // Ajuste por modo: Hardcore sobe Novato e Comum um degrau; Expert sobe todos um degrau
+    if (FlagGet(FLAG_EXPERT))
+        profile++;
+    else if (FlagGet(FLAG_HARDCORE) && profile <= AI_PROFILE_COMMON)
+        profile++;
+    if (profile > AI_PROFILE_ELITE)
+        profile = AI_PROFILE_ELITE;
+    return profile;
+}
+
+// Fase 6, passo 7: personalidade dos chefes. Só os módulos que o perfil ainda não dá.
+// (Misty/Bruno: PRIORITY_AWARE; Sabrina/Lance: SETUP_SWEEPER; Giovanni: ANTI_SETUP;
+// Lorelei: WEATHER; Koga: SUICIDE já vêm do perfil.)
+static u32 GetBossPersonalityFlags(u16 trainerId)
+{
+    switch (trainerId)
+    {
+    case TRAINER_LEADER_LT_SURGE:
+        return AI_SCRIPT_SETUP_FIRST_TURN;          // abre com Thunder Wave
+    case TRAINER_LEADER_ERIKA:
+    case TRAINER_LEADER_ERIKA_5:
+    case TRAINER_LEADER_ERIKA_6:
+        return AI_SCRIPT_STALL_LIGHT;               // status e dreno
+    case TRAINER_LEADER_KOGA:
+    case TRAINER_LEADER_KOGA_4:
+    case TRAINER_LEADER_KOGA_6:
+        return AI_SCRIPT_STALL;                     // Toxic e evasão
+    case TRAINER_LEADER_BLAINE:
+        return AI_SCRIPT_RISKY;                     // dano bruto
+    case TRAINER_ELITE_FOUR_AGATHA:
+    case TRAINER_ELITE_FOUR_AGATHA_2:
+        return AI_SCRIPT_STALL | AI_SCRIPT_FREQUENT_SWITCH;
+    }
+    switch (gTrainers[trainerId].trainerClass)
+    {
+    case TRAINER_CLASS_RIVAL_EARLY:
+    case TRAINER_CLASS_RIVAL_LATE:
+    case TRAINER_CLASS_CHAMPION:
+        return AI_SCRIPT_FREQUENT_SWITCH;           // rival se adapta ao jogador
+    }
+    return 0;
+}
+
+u32 GetTrainerAIFlags(u16 trainerId)
+{
+    u8 profile = GetTrainerAIProfile(trainerId);
+    u32 flags = sAIProfileFlags[profile];
+
+    // Fase 5: todos os perfis usam a troca nova (a chance muda por perfil); a Elite guarda o ás para o fim
+    flags |= AI_SCRIPT_SMART_SWITCH;
+    // Fase 6: módulos novos
+    if (profile >= AI_PROFILE_COMMON)
+        flags |= AI_SCRIPT_PRIORITY_AWARE;
+    if (profile >= AI_PROFILE_SKILLED)
+        flags |= AI_SCRIPT_SUICIDE | AI_SCRIPT_ANTI_SETUP | AI_SCRIPT_SETUP_SWEEPER | AI_SCRIPT_WEATHER;
+    if (profile >= AI_PROFILE_ELITE)
+        flags |= AI_SCRIPT_ACE_LAST;
+
+    // Expert: chefes e Elite também preparam o primeiro turno
+    if (FlagGet(FLAG_EXPERT) && profile >= AI_PROFILE_BOSS)
+        flags |= AI_SCRIPT_SETUP_FIRST_TURN;
+
+    flags |= GetBossPersonalityFlags(trainerId);
+
+    // Módulos extras escritos à mão no trainers.h (personalidade de um treinador específico)
+    flags |= gTrainers[trainerId].aiFlags & ~AI_BASIC_FLAGS;
+    return flags;
 }
 
 void BattleAI_SetupAIData(void)
@@ -355,7 +544,11 @@ void BattleAI_SetupAIData(void)
         AI_THINKING_STRUCT->aiFlags = (AI_SCRIPT_CHECK_BAD_MOVE | AI_SCRIPT_TRY_TO_FAINT | AI_SCRIPT_CHECK_VIABILITY);
         return;
     }
-    AI_THINKING_STRUCT->aiFlags = gTrainers[gTrainerBattleOpponent_A].aiFlags;
+    // Batalha tutorial (rival no laboratório): mantém a IA escrita na ficha, sem perfil
+    if (gBattleTypeFlags & BATTLE_TYPE_FIRST_BATTLE)
+        AI_THINKING_STRUCT->aiFlags = gTrainers[gTrainerBattleOpponent_A].aiFlags;
+    else
+        AI_THINKING_STRUCT->aiFlags = GetTrainerAIFlags(gTrainerBattleOpponent_A);
 }
 
 u8 BattleAI_ChooseMoveOrAction(void)
@@ -961,6 +1154,19 @@ static void Cmd_get_considered_move_power(void)
     sAIScriptPtr += 1;
 }
 
+// Princípio "informação justa": a IA só considera o item do Pokémon do jogador depois que ele
+// apareceu em batalha (Leftovers curando, Berry usada etc., registrado em BATTLE_HISTORY).
+// Antes disso, o cálculo de dano da IA trata o Pokémon do jogador como se não tivesse item.
+static void AI_CalcDmgFair(u8 attacker, u8 target)
+{
+    u16 savedItem = gBattleMons[target].item;
+
+    if (GetBattlerSide(target) == B_SIDE_PLAYER && BATTLE_HISTORY->itemEffects[GET_BATTLER_SIDE(target)] == 0)
+        gBattleMons[target].item = 0; // ITEM_NONE
+    AI_CalcDmg(attacker, target);
+    gBattleMons[target].item = savedItem;
+}
+
 static void Cmd_get_how_powerful_move_is(void)
 {
     s32 i, checkedMove;
@@ -994,7 +1200,7 @@ static void Cmd_get_how_powerful_move_is(void)
                 && gBattleMoves[gBattleMons[gBattlerAttacker].moves[checkedMove]].power > 1)
             {
                 gCurrentMove = gBattleMons[gBattlerAttacker].moves[checkedMove];
-                AI_CalcDmg(gBattlerAttacker, gBattlerTarget);
+                AI_CalcDmgFair(gBattlerAttacker, gBattlerTarget);
                 TypeCalc(gCurrentMove, gBattlerAttacker, gBattlerTarget);
                 moveDmgs[checkedMove] = gBattleMoveDamage * AI_THINKING_STRUCT->simulatedRNG[checkedMove] / 100;
                 if (moveDmgs[checkedMove] == 0)
@@ -1382,6 +1588,9 @@ extern u16 gBattleWeather;
 
 static void Cmd_get_weather(void)
 {
+    // HACK (Fase 6): sem clima, o original deixava o resultado do comando anterior
+    // (muitas vezes 0 = Sol), e a IA achava que já havia Sol em campo.
+    AI_THINKING_STRUCT->funcResult = AI_WEATHER_NONE;
     if (gBattleWeather & B_WEATHER_RAIN)
         AI_THINKING_STRUCT->funcResult = WEATHER_TYPE_RAIN;
     if (gBattleWeather & B_WEATHER_SANDSTORM)
@@ -1484,7 +1693,7 @@ static void Cmd_if_can_faint(void)
     gMoveResultFlags = 0;
     gCritMultiplier = 1;
     gCurrentMove = AI_THINKING_STRUCT->moveConsidered;
-    AI_CalcDmg(gBattlerAttacker, gBattlerTarget);
+    AI_CalcDmgFair(gBattlerAttacker, gBattlerTarget);
     TypeCalc(gCurrentMove, gBattlerAttacker, gBattlerTarget);
 
     gBattleMoveDamage = gBattleMoveDamage * AI_THINKING_STRUCT->simulatedRNG[AI_THINKING_STRUCT->movesetIndex] / 100;
@@ -1513,7 +1722,7 @@ static void Cmd_if_cant_faint(void)
     gMoveResultFlags = 0;
     gCritMultiplier = 1;
     gCurrentMove = AI_THINKING_STRUCT->moveConsidered;
-    AI_CalcDmg(gBattlerAttacker, gBattlerTarget);
+    AI_CalcDmgFair(gBattlerAttacker, gBattlerTarget);
     TypeCalc(gCurrentMove, gBattlerAttacker, gBattlerTarget);
 
     gBattleMoveDamage = gBattleMoveDamage * AI_THINKING_STRUCT->simulatedRNG[AI_THINKING_STRUCT->movesetIndex] / 100;
@@ -1856,8 +2065,14 @@ static void Cmd_get_protect_count(void)
     sAIScriptPtr += 2;
 }
 
-static void Cmd_nullsub_52(void)
+// HACK (Fase 6): pula se o Pokémon do jogador (alvo) consegue derrubar o da máquina
+// (usuário) com um golpe, usando só informação justa. Ver AI_PlayerCanKOBattler.
+static void Cmd_if_target_can_ko_user(void)
 {
+    if (AI_PlayerCanKOBattler(gBattlerAttacker, gBattlerTarget))
+        sAIScriptPtr = T1_READ_PTR(sAIScriptPtr + 1);
+    else
+        sAIScriptPtr += 5;
 }
 
 static void Cmd_nullsub_53(void)

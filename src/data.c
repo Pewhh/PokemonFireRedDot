@@ -296,6 +296,8 @@ const union AnimCmd *const gAnims_MonPic[] =
 #include "data/trainer_graphics/back_pic_anims.h"
 #include "data/trainer_graphics/back_pic_tables.h"
 
+#include "data/pokemon_graphics/front_pic_anims.h" // HACK: animações de 2 quadros do Emerald
+
 #include "data/pokemon_graphics/enemy_mon_elevation.h"
 
 #include "data/trainer_parties.h"

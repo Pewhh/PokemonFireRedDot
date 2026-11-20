@@ -179,6 +179,10 @@ const u16 gObjectEventPal_Meteorite[] = INCBIN_U16("graphics/object_events/palet
 const u16 gObjectEventPic_BirthIslandStone[] = INCBIN_U16("graphics/object_events/pics/misc/birth_island_stone.4bpp");
 const u16 gObjectEventPic_LaprasDoll[] = INCBIN_U16("graphics/object_events/pics/misc/lapras_doll.4bpp");
 const u16 gObjectEventPal_Seagallop[] = INCBIN_U16("graphics/object_events/palettes/seagallop.gbapal");
+// HACK: JESSIE e JAMES (paleta única para os dois, no slot especial)
+const u16 gObjectEventPic_Jessie[] = INCBIN_U16("graphics/object_events/pics/people/jessie.4bpp");
+const u16 gObjectEventPic_James[] = INCBIN_U16("graphics/object_events/pics/people/james.4bpp");
+const u16 gObjectEventPal_JessieJames[] = INCBIN_U16("graphics/object_events/palettes/jessie_james.gbapal");
 const u16 gObjectEventPic_Seagallop[] = INCBIN_U16("graphics/object_events/pics/misc/seagallop.4bpp");
 const u16 gObjectEventPal_SSAnne[] = INCBIN_U16("graphics/object_events/palettes/ss_anne.gbapal");
 const u16 gObjectEventPic_SSAnne[] = INCBIN_U16("graphics/object_events/pics/misc/ss_anne.4bpp");

@@ -34,6 +34,7 @@ PokemonLeague_HallOfFame_EventScript_EnterRoom::
 	waitfieldeffect FLDEFF_HALL_OF_FAME_RECORD
 	delay 40
 	setvar VAR_TEMP_1, 1
+	setflag FLAG_BILL_REMATCH_READY @ HACK: revanche com o BILL a cada vitória na ELITE 4
 	call EventScript_SetDefeatedEliteFourFlagsVars
 	setrespawn HEAL_LOCATION_PALLET_TOWN
 	fadescreenspeed FADE_TO_BLACK, 24

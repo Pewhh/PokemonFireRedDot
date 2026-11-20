@@ -26,13 +26,13 @@ gBattleAI_ScriptsTable::
 	.4byte AI_DoubleBattle
 	.4byte AI_HPAware
 	.4byte AI_Unknown
-	.4byte AI_Ret
-	.4byte AI_Ret
-	.4byte AI_Ret
-	.4byte AI_Ret
-	.4byte AI_Ret
-	.4byte AI_Ret
-	.4byte AI_Ret
+	.4byte AI_Suicide                 @ HACK: AI_SCRIPT_SUICIDE (Fase 6)
+	.4byte AI_PriorityAware           @ HACK: AI_SCRIPT_PRIORITY_AWARE (Fase 6)
+	.4byte AI_AntiSetup               @ HACK: AI_SCRIPT_ANTI_SETUP (Fase 6)
+	.4byte AI_SetupSweeper            @ HACK: AI_SCRIPT_SETUP_SWEEPER (Fase 6)
+	.4byte AI_Stall                   @ HACK: AI_SCRIPT_STALL (Fase 6)
+	.4byte AI_Weather                 @ HACK: AI_SCRIPT_WEATHER (Fase 6)
+	.4byte AI_StallLight              @ HACK: AI_SCRIPT_STALL_LIGHT (Fase 6)
 	.4byte AI_Ret
 	.4byte AI_Ret
 	.4byte AI_Ret
@@ -50,8 +50,8 @@ gBattleAI_ScriptsTable::
 	.4byte AI_FirstBattle
 
 AI_CheckBadMove::
-@	if_move MOVE_FISSURE, AI_CBM_CheckIfNegatesType  @ Improvement in Emerald
-@	if_move MOVE_HORN_DRILL, AI_CBM_CheckIfNegatesType
+	if_move MOVE_FISSURE, AI_CBM_CheckIfNegatesType  @ Improvement in Emerald (reativado)
+	if_move MOVE_HORN_DRILL, AI_CBM_CheckIfNegatesType
 	get_how_powerful_move_is
 	if_equal MOVE_POWER_DISCOURAGED, AI_CheckBadMove_CheckSoundproof
 
@@ -217,7 +217,7 @@ AI_CBM_Sleep::
 	if_equal ABILITY_INSOMNIA, Score_Minus10
 	if_equal ABILITY_VITAL_SPIRIT, Score_Minus10
 	if_status AI_TARGET, STATUS1_ANY, Score_Minus10
-@	if_side_affecting AI_TARGET, SIDE_STATUS_SAFEGUARD, Score_Minus10  @ Improvement in Emerald
+	if_side_affecting AI_TARGET, SIDE_STATUS_SAFEGUARD, Score_Minus10  @ Improvement in Emerald (reativado)
 	end
 
 AI_CBM_Explosion::
@@ -272,6 +272,8 @@ AI_CBM_AccUp::
 
 AI_CBM_EvasionUp::
 	if_stat_level_equal AI_USER, STAT_EVASION, 12, Score_Minus10
+	get_ability AI_TARGET
+	if_equal ABILITY_ILLUMINATE, Score_Minus10 @ HACK: Illuminate ignora aumentos de evasão
 	end
 
 AI_CBM_AttackDown::
@@ -286,8 +288,8 @@ AI_CBM_DefenseDown::
 
 AI_CBM_SpeedDown::
 	if_stat_level_equal AI_TARGET, STAT_SPEED, 0, Score_Minus10
-@	get_ability AI_TARGET  @ Improvement in Emerald
-@	if_equal ABILITY_SPEED_BOOST, Score_Minus10
+	get_ability AI_TARGET  @ Improvement in Emerald (reativado)
+	if_equal ABILITY_SPEED_BOOST, Score_Minus10
 	goto CheckIfAbilityBlocksStatChange
 
 AI_CBM_SpAtkDown::
@@ -302,6 +304,7 @@ AI_CBM_AccDown::
 	if_stat_level_equal AI_TARGET, STAT_ACC, 0, Score_Minus10
 	get_ability AI_TARGET
 	if_equal ABILITY_KEEN_EYE, Score_Minus10
+	if_equal ABILITY_ILLUMINATE, Score_Minus10 @ HACK: Illuminate impede perda de precisão
 	goto CheckIfAbilityBlocksStatChange
 
 AI_CBM_EvasionDown::
@@ -350,7 +353,7 @@ AI_CBM_Poison::
 	get_ability AI_TARGET
 	if_equal ABILITY_IMMUNITY, Score_Minus10
 	if_status AI_TARGET, STATUS1_ANY, Score_Minus10
-@	if_side_affecting AI_TARGET, SIDE_STATUS_SAFEGUARD, Score_Minus10  @ Improvement in Emerald
+	if_side_affecting AI_TARGET, SIDE_STATUS_SAFEGUARD, Score_Minus10  @ Improvement in Emerald (reativado)
 	end
 
 AI_CBM_LightScreen::
@@ -390,7 +393,7 @@ AI_CBM_Confuse::
 	if_status2 AI_TARGET, STATUS2_CONFUSION, Score_Minus5
 	get_ability AI_TARGET
 	if_equal ABILITY_OWN_TEMPO, Score_Minus10
-@	if_side_affecting AI_TARGET, SIDE_STATUS_SAFEGUARD, Score_Minus10  @ Improvement in Emerald
+	if_side_affecting AI_TARGET, SIDE_STATUS_SAFEGUARD, Score_Minus10  @ Improvement in Emerald (reativado)
 	end
 
 AI_CBM_Reflect::
@@ -402,7 +405,7 @@ AI_CBM_Paralyze::
 	get_ability AI_TARGET
 	if_equal ABILITY_LIMBER, Score_Minus10
 	if_status AI_TARGET, STATUS1_ANY, Score_Minus10
-@	if_side_affecting AI_TARGET, SIDE_STATUS_SAFEGUARD, Score_Minus10  @ Improvement in Emerald
+	if_side_affecting AI_TARGET, SIDE_STATUS_SAFEGUARD, Score_Minus10  @ Improvement in Emerald (reativado)
 	end
 
 AI_CBM_Substitute::
@@ -503,7 +506,7 @@ AI_CBM_SunnyDay::
 
 AI_CBM_FutureSight::
 	if_side_affecting AI_TARGET, SIDE_STATUS_FUTUREATTACK, Score_Minus10
-@	if_side_affecting AI_USER, SIDE_STATUS_FUTUREATTACK, Score_Minus12  @ Improvement in Emerald
+	if_side_affecting AI_USER, SIDE_STATUS_FUTUREATTACK, Score_Minus12  @ Improvement in Emerald (reativado)
 	end
 
 AI_CBM_FakeOut::
@@ -535,10 +538,12 @@ AI_CBM_WillOWisp::
 	get_ability AI_TARGET
 	if_equal ABILITY_WATER_VEIL, Score_Minus10
 	if_status AI_TARGET, STATUS1_ANY, Score_Minus10
-	if_type_effectiveness AI_EFFECTIVENESS_x0, Score_Minus10
-	if_type_effectiveness AI_EFFECTIVENESS_x0_5, Score_Minus10
-	if_type_effectiveness AI_EFFECTIVENESS_x0_25, Score_Minus10
-@	if_side_affecting AI_TARGET, SIDE_STATUS_SAFEGUARD, Score_Minus10  @ Improvement in Emerald
+	@ FIX: golpe de status; só o tipo Fogo não pode ser queimado (antes recusava Água, Pedra e Dragão)
+	get_target_type1
+	if_equal TYPE_FIRE, Score_Minus10
+	get_target_type2
+	if_equal TYPE_FIRE, Score_Minus10
+	if_side_affecting AI_TARGET, SIDE_STATUS_SAFEGUARD, Score_Minus10  @ Improvement in Emerald (reativado)
 	end
 
 AI_CBM_HelpingHand::
@@ -644,10 +649,10 @@ Score_Plus5::
 	score +5
 	end
 
-@ Improvement in Emerald
-@Score_Plus10::
-@	score +10
-@	end
+@ Improvement in Emerald (reativado)
+Score_Plus10::
+	score +10
+	end
 
 AI_CheckViability::
 	if_effect EFFECT_SLEEP, AI_CV_Sleep
@@ -700,7 +705,7 @@ AI_CheckViability::
 	if_effect EFFECT_REFLECT, AI_CV_Reflect
 	if_effect EFFECT_POISON, AI_CV_Poison
 	if_effect EFFECT_PARALYZE, AI_CV_Paralyze
-	@ if_effect EFFECT_SWAGGER, AI_CV_Swagger  @ Improvement in Emerald
+	if_effect EFFECT_SWAGGER, AI_CV_Swagger  @ Improvement in Emerald (reativado)
 	if_effect EFFECT_SPEED_DOWN_HIT, AI_CV_SpeedDownFromChance
 	if_effect EFFECT_VITAL_THROW, AI_CV_VitalThrow
 	if_effect EFFECT_SUBSTITUTE, AI_CV_Substitute
@@ -741,6 +746,8 @@ AI_CheckViability::
 	if_effect EFFECT_SPIT_UP, AI_CV_SpitUp
 	if_effect EFFECT_SWALLOW, AI_CV_Heal
 	if_effect EFFECT_HAIL, AI_CV_Hail
+	if_effect EFFECT_SANDSTORM, AI_CV_Sandstorm
+	if_effect EFFECT_STOCKPILE, AI_CV_Stockpile
 	if_effect EFFECT_FLATTER, AI_CV_Flatter
 	if_effect EFFECT_MEMENTO, AI_CV_SelfKO
 	if_effect EFFECT_FACADE, AI_CV_Facade
@@ -1389,25 +1396,37 @@ AI_CV_HealWeather::
 AI_CV_HealWeather_ScoreDown2::
 	score -2
 
+@ FIX: antes, mais rápida = nunca curava (-8); mais lenta = curava sempre abaixo de 70% (ciclo apanha/cura).
+@ Agora: cura com HP baixo, desencoraja curar duas vezes seguidas e, se for mais lenta, só abaixo de 50%.
 AI_CV_Heal::
 	if_hp_equal AI_USER, 100, AI_CV_Heal3
+	get_last_used_move AI_USER
+	get_move_effect_from_result
+	if_equal EFFECT_RESTORE_HP, AI_CV_HealAgain
+	if_equal EFFECT_SOFTBOILED, AI_CV_HealAgain
+	if_equal EFFECT_MORNING_SUN, AI_CV_HealAgain
+	if_equal EFFECT_SYNTHESIS, AI_CV_HealAgain
+	if_equal EFFECT_MOONLIGHT, AI_CV_HealAgain
+	if_equal EFFECT_REST, AI_CV_HealAgain
 	if_target_faster AI_CV_Heal4
-	score -8
-	goto AI_CV_Heal_End
 
-@ Never reached
 AI_CV_Heal2:
 	if_hp_less_than AI_USER, 50, AI_CV_Heal5
 	if_hp_more_than AI_USER, 80, AI_CV_Heal3
 	if_random_less_than 70, AI_CV_Heal5
+	goto AI_CV_Heal_End
+
+AI_CV_HealAgain::
+	score -2
+	if_hp_less_than AI_USER, 30, AI_CV_Heal5
+	goto AI_CV_Heal_End
 
 AI_CV_Heal3::
 	score -3
 	goto AI_CV_Heal_End
 
 AI_CV_Heal4::
-	if_hp_less_than AI_USER, 70, AI_CV_Heal5
-	if_random_less_than 30, AI_CV_Heal5
+	if_hp_less_than AI_USER, 50, AI_CV_Heal5
 	score -3
 	goto AI_CV_Heal_End
 
@@ -1543,9 +1562,9 @@ AI_CV_HighCrit2::
 AI_CV_HighCrit_End::
 	end
 
-@ Improvement in Emerald
-@AI_CV_Swagger:
-@	if_has_move AI_USER, MOVE_PSYCH_UP, AI_CV_SwaggerHasPsychUp
+@ Improvement in Emerald (reativado)
+AI_CV_Swagger:
+	if_has_move AI_USER, MOVE_PSYCH_UP, AI_CV_SwaggerHasPsychUp
 
 AI_CV_Flatter::
 	if_random_less_than 128, AI_CV_Confuse
@@ -1565,20 +1584,20 @@ AI_CV_Confuse2::
 AI_CV_Confuse_End::
 	end
 
-@ Improvement in Emerald
-@AI_CV_SwaggerHasPsychUp:
-@	if_stat_level_more_than AI_TARGET, STAT_ATK, 3, AI_CV_SwaggerHasPsychUp_Minus5
-@	score +3
-@	get_turn_count
-@	if_not_equal 0, AI_CV_SwaggerHasPsychUp_End
-@	score +2
-@	goto AI_CV_SwaggerHasPsychUp_End
-@
-@AI_CV_SwaggerHasPsychUp_Minus5:
-@	score -5
-@
-@AI_CV_SwaggerHasPsychUp_End:
-@	end
+@ Improvement in Emerald (reativado)
+AI_CV_SwaggerHasPsychUp:
+	if_stat_level_more_than AI_TARGET, STAT_ATK, 3, AI_CV_SwaggerHasPsychUp_Minus5
+	score +3
+	get_turn_count
+	if_not_equal 0, AI_CV_SwaggerHasPsychUp_End
+	score +2
+	goto AI_CV_SwaggerHasPsychUp_End
+
+AI_CV_SwaggerHasPsychUp_Minus5:
+	score -5
+
+AI_CV_SwaggerHasPsychUp_End:
+	end
 
 AI_CV_Reflect::
 	if_hp_less_than AI_USER, 50, AI_CV_Reflect_ScoreDown2
@@ -1733,7 +1752,7 @@ AI_CV_Counter2::
 	score -1
 
 AI_CV_Counter3::
-@	if_has_move AI_USER, MOVE_MIRROR_COAT, AI_CV_Counter7  @ Improvement in Emerald
+	if_has_move AI_USER, MOVE_MIRROR_COAT, AI_CV_Counter7  @ Improvement in Emerald (reativado)
 	get_last_used_move AI_TARGET
 	get_move_power_from_result
 	if_equal 0, AI_CV_Counter5
@@ -1761,13 +1780,13 @@ AI_CV_Counter6::
 	if_in_bytes AI_CV_Counter_PhysicalTypeList, AI_CV_Counter_End
 	if_random_less_than 50, AI_CV_Counter_End
 
-@ Improvement in Emerald
-@AI_CV_Counter7:
-@	if_random_less_than 100, AI_CV_Counter8
-@	score +4
-@
-@AI_CV_Counter8:
-@	end
+@ Improvement in Emerald (reativado)
+AI_CV_Counter7:
+	if_random_less_than 100, AI_CV_Counter8
+	score +4
+
+AI_CV_Counter8:
+	end
 
 AI_CV_Counter_ScoreDown1::
 	score -1
@@ -1893,6 +1912,8 @@ AI_CV_Snore::
 	end
 
 AI_CV_LockOn::
+	get_ability AI_TARGET
+	if_equal ABILITY_STENCH, Score_Plus2 @ HACK: Stench dá 20% de evasão; Lock-On anula
 	if_random_less_than 128, AI_CV_LockOn_End
 	score +2
 
@@ -1900,7 +1921,7 @@ AI_CV_LockOn_End::
 	end
 
 AI_CV_SleepTalk::
-@	if_status AI_USER, STATUS1_SLEEP, Score_Plus10  @ Improvement in Emerald
+	if_status AI_USER, STATUS1_SLEEP, Score_Plus10  @ Improvement in Emerald (reativado)
 	score +2   @ Change to -5
 	end
 
@@ -2010,7 +2031,7 @@ AI_CV_Curse_End::
 
 AI_CV_Protect::
 	get_protect_count AI_USER
-	if_more_than 1, AI_CV_Protect_ScoreDown2
+	if_more_than 0, AI_CV_Protect_ScoreDown2 @ FIX: penaliza já a partir do 2º Protect seguido (antes só do 3º)
 	if_status AI_USER, STATUS1_TOXIC_POISON, AI_CV_Protect3
 	if_status2 AI_USER, STATUS2_CURSED, AI_CV_Protect3
 	if_status3 AI_USER, STATUS3_PERISH_SONG, AI_CV_Protect3
@@ -2034,8 +2055,8 @@ AI_CV_Protect_ScoreUp2::
 	score +2
 
 AI_CV_Protect2::
-@	if_random_less_than 128, AI_CV_Protect4  @ Improvement in Emerald
-@	score -1
+	if_random_less_than 128, AI_CV_Protect4  @ Improvement in Emerald (reativado)
+	score -1
 
 AI_CV_Protect4::
 	get_protect_count AI_USER
@@ -2229,7 +2250,7 @@ AI_CV_PsychUp_ScoreUp1::
 AI_CV_PsychUp3::
 	if_random_less_than 128, AI_CV_PsychUp_End  @ Remove this line
 	score +1
-@	end  @ Improvement in Emerald
+	end  @ Improvement in Emerald (reativado)
 
 AI_CV_PsychUp_ScoreDown2::
 	score -2
@@ -2251,7 +2272,7 @@ AI_CV_MirrorCoat2::
 	score -1
 
 AI_CV_MirrorCoat3::
-@	if_has_move AI_USER, MOVE_COUNTER, AI_CV_MirrorCoat_ScoreUp4  @ Improvement in Emerald
+	if_has_move AI_USER, MOVE_COUNTER, AI_CV_MirrorCoat_ScoreUp4  @ Improvement in Emerald (reativado)
 	get_last_used_move AI_TARGET
 	get_move_power_from_result
 	if_equal 0, AI_CV_MirrorCoat5
@@ -2279,13 +2300,13 @@ AI_CV_MirrorCoat6::
 	if_in_bytes AI_CV_MirrorCoat_SpecialTypeList, AI_CV_MirrorCoat_End
 	if_random_less_than 50, AI_CV_MirrorCoat_End
 
-@ Improvement in Emerald
-@AI_CV_MirrorCoat_ScoreUp4:
-@	if_random_less_than 100, AI_CV_MirrorCoat_ScoreUp4_End
-@	score +4
-@
-@AI_CV_MirrorCoat_ScoreUp4_End:
-@	end
+@ Improvement in Emerald (reativado)
+AI_CV_MirrorCoat_ScoreUp4:
+	if_random_less_than 100, AI_CV_MirrorCoat_ScoreUp4_End
+	score +4
+
+AI_CV_MirrorCoat_ScoreUp4_End:
+	end
 
 AI_CV_MirrorCoat_ScoreDown1::
 	score -1
@@ -2331,8 +2352,8 @@ AI_CV_SemiInvulnerable2::
 	if_status2 AI_TARGET, STATUS2_CURSED, AI_CV_SemiInvulnerable_TryEncourage
 	if_status3 AI_TARGET, STATUS3_LEECHSEED, AI_CV_SemiInvulnerable_TryEncourage
 	get_weather
-	if_equal AI_WEATHER_HAIL, AI_CV_SemiInvulnerable_CheckSandstormTypes
-	if_equal AI_WEATHER_SANDSTORM, AI_CV_SemiInvulnerable_CheckIceType
+	if_equal AI_WEATHER_HAIL, AI_CV_SemiInvulnerable_CheckIceType @ FIX: estavam trocados
+	if_equal AI_WEATHER_SANDSTORM, AI_CV_SemiInvulnerable_CheckSandstormTypes
 	goto AI_CV_SemiInvulnerable5
 
 AI_CV_SemiInvulnerable_CheckSandstormTypes::
@@ -2383,6 +2404,12 @@ AI_CV_SpitUp_End::
 
 AI_CV_Hail::
 	if_hp_less_than AI_USER, 40, AI_CV_Hail_ScoreDown1
+	@ HACK: no granizo, o tipo Gelo ganha +50% de Defesa e o Blizzard nunca erra
+	if_has_move AI_USER, MOVE_BLIZZARD, AI_CV_Hail2
+	get_user_type1
+	if_equal TYPE_ICE, AI_CV_Hail2
+	get_user_type2
+	if_equal TYPE_ICE, AI_CV_Hail2
 	get_weather
 	if_equal AI_WEATHER_SUN, AI_CV_Hail2
 	if_equal AI_WEATHER_RAIN, AI_CV_Hail2
@@ -2399,9 +2426,40 @@ AI_CV_Hail_ScoreDown1::
 AI_CV_Hail_End::
 	end
 
+@ HACK: na tempestade de areia, o tipo Pedra e quem tem Sand Veil ganham +50% de Sp. Def
+AI_CV_Sandstorm::
+	if_hp_less_than AI_USER, 40, AI_CV_Sandstorm_ScoreDown1
+	get_ability AI_USER
+	if_equal ABILITY_SAND_VEIL, AI_CV_Sandstorm_ScoreUp1
+	get_user_type1
+	if_equal TYPE_ROCK, AI_CV_Sandstorm_ScoreUp1
+	get_user_type2
+	if_equal TYPE_ROCK, AI_CV_Sandstorm_ScoreUp1
+	goto AI_CV_Sandstorm_End
+
+AI_CV_Sandstorm_ScoreUp1::
+	score +1
+	goto AI_CV_Sandstorm_End
+
+AI_CV_Sandstorm_ScoreDown1::
+	score -1
+
+AI_CV_Sandstorm_End::
+	end
+
+@ HACK: Stockpile também dá +1 Def e +1 Sp. Def; vale como preparação defensiva com HP alto
+AI_CV_Stockpile::
+	if_hp_less_than AI_USER, 50, AI_CV_Stockpile_End
+	if_stat_level_more_than AI_USER, STAT_DEF, 9, AI_CV_Stockpile_End
+	if_random_less_than 80, AI_CV_Stockpile_End
+	score +1
+
+AI_CV_Stockpile_End::
+	end
+
 @ BUG: Facade score is increased if the target is statused, but should be if the user is. Replace AI_TARGET with AI_USER
 AI_CV_Facade::
-	if_not_status AI_TARGET, STATUS1_POISON | STATUS1_BURN | STATUS1_PARALYSIS | STATUS1_TOXIC_POISON, AI_CV_Facade_End
+	if_not_status AI_USER, STATUS1_POISON | STATUS1_BURN | STATUS1_PARALYSIS | STATUS1_TOXIC_POISON, AI_CV_Facade_End @ FIX: era AI_TARGET
 	score +1
 
 AI_CV_Facade_End::
@@ -2547,7 +2605,7 @@ AI_CV_MagicCoat2::
 	if_random_less_than 50, AI_CV_MagicCoat_End
 
 AI_CV_MagicCoat3::
-@	if_random_less_than 50, AI_CV_MagicCoat_End  @ Improvement in Emerald
+	if_random_less_than 50, AI_CV_MagicCoat_End  @ Improvement in Emerald (reativado)
 
 AI_CV_MagicCoat4::
 	if_random_less_than 30, AI_CV_MagicCoat_End
@@ -2765,14 +2823,14 @@ AI_TryToFaint::
 	if_can_faint AI_TryToFaint_TryToEncourageQuickAttack
 	get_how_powerful_move_is
 	if_equal MOVE_NOT_MOST_POWERFUL, Score_Minus1
-@	if_type_effectiveness AI_EFFECTIVENESS_x4, AI_TryToFaint_DoubleSuperEffective  @ Improvement in Emerald
+	if_type_effectiveness AI_EFFECTIVENESS_x4, AI_TryToFaint_DoubleSuperEffective  @ Improvement in Emerald (reativado)
 	end
 
-@ Improvement in Emerald
-@AI_TryToFaint_DoubleSuperEffective:
-@	if_random_less_than 80, AI_TryToFaint_End
-@	score +2
-@	end
+@ Improvement in Emerald (reativado)
+AI_TryToFaint_DoubleSuperEffective:
+	if_random_less_than 80, AI_TryToFaint_End
+	score +2
+	end
 
 AI_TryToFaint_TryToEncourageQuickAttack::
 	if_effect EFFECT_EXPLOSION, AI_TryToFaint_End
@@ -2902,43 +2960,43 @@ AI_PreferBatonPass::
 	if_has_move_with_effect AI_USER, EFFECT_BATON_PASS, AI_PreferBatonPass_GoForBatonPass
 	if_random_less_than 80, AI_Risky_End
 
-@ Improvement in Emerald (several below)
+@ Improvement in Emerald (reativado)
 AI_PreferBatonPass_GoForBatonPass::
-@	if_move MOVE_SWORDS_DANCE, AI_PreferBatonPass2
-@	if_move MOVE_DRAGON_DANCE, AI_PreferBatonPass2
-@	if_move MOVE_CALM_MIND, AI_PreferBatonPass2
-@	if_effect EFFECT_PROTECT, AI_PreferBatonPass3
-@	if_move MOVE_BATON_PASS, AI_PreferBatonPass_EncourageIfHighStats
+	if_move MOVE_SWORDS_DANCE, AI_PreferBatonPass2
+	if_move MOVE_DRAGON_DANCE, AI_PreferBatonPass2
+	if_move MOVE_CALM_MIND, AI_PreferBatonPass2
+	if_effect EFFECT_PROTECT, AI_PreferBatonPass3
+	if_move MOVE_BATON_PASS, AI_PreferBatonPass_EncourageIfHighStats
 	if_random_less_than 20, AI_Risky_End
 	score +3
 
-@AI_PreferBatonPass2:
-@	get_turn_count
-@	if_equal 0, Score_Plus5
-@	if_hp_less_than AI_USER, 60, Score_Minus10
-@	goto Score_Plus1
-@
-@AI_PreferBatonPass3::
-@	get_last_used_move AI_USER
-@	if_in_hwords AI_PreferBatonPass_ProtectMoves, Score_Minus2
-@	score +2
-@	end
-@
-@AI_PreferBatonPass_ProtectMoves:
-@   .2byte MOVE_PROTECT
-@   .2byte MOVE_DETECT
-@   .2byte -1
-@
-@AI_PreferBatonPass_EncourageIfHighStats:
-@	get_turn_count
-@	if_equal 0, Score_Minus2
-@	if_stat_level_more_than AI_USER, STAT_ATK, 8, Score_Plus3
-@	if_stat_level_more_than AI_USER, STAT_ATK, 7, Score_Plus2
-@	if_stat_level_more_than AI_USER, STAT_ATK, 6, Score_Plus1
-@	if_stat_level_more_than AI_USER, STAT_SPATK, 8, Score_Plus3
-@	if_stat_level_more_than AI_USER, STAT_SPATK, 7, Score_Plus2
-@	if_stat_level_more_than AI_USER, STAT_SPATK, 6, Score_Plus1
-@	end
+AI_PreferBatonPass2:
+	get_turn_count
+	if_equal 0, Score_Plus5
+	if_hp_less_than AI_USER, 60, Score_Minus10
+	goto Score_Plus1
+
+AI_PreferBatonPass3::
+	get_last_used_move AI_USER
+	if_in_hwords AI_PreferBatonPass_ProtectMoves, Score_Minus2
+	score +2
+	end
+
+AI_PreferBatonPass_ProtectMoves:
+   .2byte MOVE_PROTECT
+   .2byte MOVE_DETECT
+   .2byte -1
+
+AI_PreferBatonPass_EncourageIfHighStats:
+	get_turn_count
+	if_equal 0, Score_Minus2
+	if_stat_level_more_than AI_USER, STAT_ATK, 8, Score_Plus3
+	if_stat_level_more_than AI_USER, STAT_ATK, 7, Score_Plus2
+	if_stat_level_more_than AI_USER, STAT_ATK, 6, Score_Plus1
+	if_stat_level_more_than AI_USER, STAT_SPATK, 8, Score_Plus3
+	if_stat_level_more_than AI_USER, STAT_SPATK, 7, Score_Plus2
+	if_stat_level_more_than AI_USER, STAT_SPATK, 6, Score_Plus1
+	end
 
 AI_PreferBatonPass_End::
 	end
@@ -3251,6 +3309,307 @@ AI_FirstBattle::
 
 AI_FirstBattle_Flee::
 	flee
+
+@ HACK: módulo novo (Fase 6). Explosion e Selfdestruct só com HP baixo
+@ e nunca com o último Pokémon do time.
+AI_Suicide::
+	if_effect EFFECT_EXPLOSION, AI_Suicide_Explosion
+	end
+
+AI_Suicide_Explosion::
+	count_alive_pokemon AI_USER
+	if_equal 0, Score_Minus10              @ último Pokémon: nunca explode
+	if_hp_more_than AI_USER, 50, Score_Minus8   @ acima de 50% de HP: não explode
+	if_hp_less_than AI_USER, 26, AI_Suicide_LowHP
+	if_can_faint Score_Plus1               @ entre 26% e 50%: só se nocautear
+	end
+
+AI_Suicide_LowHP::
+	score +2                               @ 25% ou menos: vale a pena
+	if_cant_faint AI_Suicide_End
+	score +1                               @ e mais ainda se nocautear
+
+AI_Suicide_End::
+	end
+
+@ HACK: módulo novo (Fase 6). Quando o Pokémon do jogador é mais rápido e
+@ consegue derrubar o da máquina com um golpe (cai antes de agir), prefere golpe de
+@ prioridade (Quick Attack, Mach Punch, ExtremeSpeed) para acertar antes.
+@ Nocautear com prioridade já é incentivado pelo AI_TryToFaint.
+AI_PriorityAware::
+	if_user_faster AI_PriorityAware_End
+	if_target_can_ko_user AI_PriorityAware_Danger
+	end
+
+AI_PriorityAware_Danger::
+	if_effect EFFECT_QUICK_ATTACK, AI_PriorityAware_Priority
+	get_considered_move_power
+	if_equal 0, AI_PriorityAware_End        @ golpe de status: não mexe
+	if_has_move_with_effect AI_USER, EFFECT_QUICK_ATTACK, Score_Minus2   @ golpe sem prioridade não chega a sair
+	end
+
+AI_PriorityAware_Priority::
+	if_type_effectiveness AI_EFFECTIVENESS_x0, AI_PriorityAware_End
+	score +3
+
+AI_PriorityAware_End::
+	end
+
+@ HACK: módulo novo (Fase 6). Responde aos boosts do jogador.
+@ Haze e Roar/Whirlwind quando o Pokémon do jogador tem +2 ou mais em ataque,
+@ ataque especial, velocidade ou evasão; Encore quando o último golpe dele foi
+@ de boost. As proibições do AI_CheckBadMove (Suction Cups, último Pokémon,
+@ alvo já com Encore) continuam valendo.
+AI_AntiSetup::
+	if_effect EFFECT_HAZE, AI_AntiSetup_HazeRoar
+	if_effect EFFECT_ROAR, AI_AntiSetup_Roar
+	if_effect EFFECT_ENCORE, AI_AntiSetup_Encore
+	end
+
+AI_AntiSetup_Roar::
+	if_status3 AI_TARGET, STATUS3_ROOTED, AI_AntiSetup_End   @ Ingrain impede o Roar
+AI_AntiSetup_HazeRoar::
+	if_stat_level_more_than AI_TARGET, STAT_ATK, 7, AI_AntiSetup_Plus4
+	if_stat_level_more_than AI_TARGET, STAT_SPATK, 7, AI_AntiSetup_Plus4
+	if_stat_level_more_than AI_TARGET, STAT_SPEED, 7, AI_AntiSetup_Plus4
+	if_stat_level_more_than AI_TARGET, STAT_EVASION, 7, AI_AntiSetup_Plus4
+	end
+
+AI_AntiSetup_Plus4::
+	score +4
+	end
+
+AI_AntiSetup_Encore::
+	get_last_used_move AI_TARGET
+	get_move_effect_from_result
+	if_in_bytes AI_AntiSetup_SetupEffects, AI_AntiSetup_Plus3
+	end
+
+AI_AntiSetup_Plus3::
+	score +3
+
+AI_AntiSetup_End::
+	end
+
+AI_AntiSetup_SetupEffects::
+	.byte EFFECT_ATTACK_UP
+	.byte EFFECT_ATTACK_UP_2
+	.byte EFFECT_DEFENSE_UP
+	.byte EFFECT_DEFENSE_UP_2
+	.byte EFFECT_SPEED_UP
+	.byte EFFECT_SPEED_UP_2
+	.byte EFFECT_SPECIAL_ATTACK_UP
+	.byte EFFECT_SPECIAL_ATTACK_UP_2
+	.byte EFFECT_SPECIAL_DEFENSE_UP
+	.byte EFFECT_SPECIAL_DEFENSE_UP_2
+	.byte EFFECT_EVASION_UP
+	.byte EFFECT_EVASION_UP_2
+	.byte EFFECT_DRAGON_DANCE
+	.byte EFFECT_CALM_MIND
+	.byte EFFECT_BULK_UP
+	.byte EFFECT_COSMIC_POWER
+	.byte EFFECT_BELLY_DRUM
+	.byte EFFECT_MINIMIZE
+	.byte EFFECT_DEFENSE_CURL
+	.byte -1
+
+@ HACK: módulo novo (Fase 6). Usa boost só quando aguenta o próximo golpe do
+@ jogador e para de se fortalecer quando já tem +2; aí ataca.
+AI_SetupSweeper::
+	get_considered_move_effect
+	if_in_bytes AI_SetupSweeper_AtkEffects, AI_SetupSweeper_Atk
+	if_in_bytes AI_SetupSweeper_SpAtkEffects, AI_SetupSweeper_SpAtk
+	if_in_bytes AI_SetupSweeper_SpeedEffects, AI_SetupSweeper_Speed
+	end
+
+AI_SetupSweeper_Atk::
+	if_stat_level_more_than AI_USER, STAT_ATK, 7, Score_Minus3   @ já tem +2: hora de atacar
+	if_target_can_ko_user Score_Minus5                             @ não aguenta o próximo golpe
+	if_stat_level_equal AI_USER, STAT_ATK, 7, Score_Plus1          @ segundo boost
+	goto Score_Plus3                                               @ primeiro boost
+
+AI_SetupSweeper_SpAtk::
+	if_stat_level_more_than AI_USER, STAT_SPATK, 7, Score_Minus3
+	if_target_can_ko_user Score_Minus5
+	if_stat_level_equal AI_USER, STAT_SPATK, 7, Score_Plus1
+	goto Score_Plus3
+
+AI_SetupSweeper_Speed::
+	if_user_faster Score_Minus3                                    @ já é mais rápido: não precisa
+	if_target_can_ko_user Score_Minus5
+	goto Score_Plus3
+
+AI_SetupSweeper_AtkEffects::
+	.byte EFFECT_ATTACK_UP
+	.byte EFFECT_ATTACK_UP_2
+	.byte EFFECT_DRAGON_DANCE
+	.byte EFFECT_BULK_UP
+	.byte -1
+
+AI_SetupSweeper_SpAtkEffects::
+	.byte EFFECT_SPECIAL_ATTACK_UP
+	.byte EFFECT_SPECIAL_ATTACK_UP_2
+	.byte EFFECT_CALM_MIND
+	.byte -1
+
+AI_SetupSweeper_SpeedEffects::
+	.byte EFFECT_SPEED_UP
+	.byte EFFECT_SPEED_UP_2
+	.byte -1
+
+@ HACK: módulo novo (Fase 6). Estilo de desgaste: aplica Toxic e Leech Seed,
+@ alterna Protect enquanto o dano passivo corre e cura no momento certo.
+@ Para não deixar a batalha infinita: a chance de repetir o Protect cai a cada uso e a cura
+@ só acontece quando o jogador não derruba o Pokémon com um golpe.
+AI_Stall::
+	if_effect EFFECT_TOXIC, AI_Stall_Toxic
+	if_effect EFFECT_LEECH_SEED, AI_Stall_LeechSeed
+	if_effect EFFECT_PROTECT, AI_Stall_Protect
+	get_considered_move_effect
+	if_in_bytes AI_Stall_HealEffects, AI_Stall_Heal
+	end
+
+AI_Stall_Toxic::
+	if_status AI_TARGET, STATUS1_ANY, AI_Stall_End          @ já tem status: não adianta
+	if_type_effectiveness AI_EFFECTIVENESS_x0, AI_Stall_End
+	score +3
+	end
+
+AI_Stall_LeechSeed::
+	if_status3 AI_TARGET, STATUS3_LEECHSEED, AI_Stall_End   @ já semeado
+	score +2
+	end
+
+AI_Stall_Protect::
+	get_protect_count AI_USER
+	if_equal 0, AI_Stall_ProtectCheck
+	@ Protect seguido: a chance de repetir cai a cada uso, como a chance de dar certo
+	if_equal 1, AI_Stall_Protect2
+	if_equal 2, AI_Stall_Protect3
+	if_random_less_than 32, AI_Stall_ProtectCheck           @ 4º seguido ou mais: 12%
+	goto Score_Minus3
+
+AI_Stall_Protect2::
+	if_random_less_than 128, AI_Stall_ProtectCheck          @ 2º seguido: 50%
+	goto Score_Minus3
+
+AI_Stall_Protect3::
+	if_random_less_than 64, AI_Stall_ProtectCheck           @ 3º seguido: 25%
+	goto Score_Minus3
+
+AI_Stall_ProtectCheck::
+	if_status AI_TARGET, STATUS1_POISON | STATUS1_TOXIC_POISON | STATUS1_BURN, Score_Plus2
+	if_status3 AI_TARGET, STATUS3_LEECHSEED, Score_Plus2
+	end
+
+AI_Stall_Heal::
+	if_hp_more_than AI_USER, 70, Score_Minus3               @ ainda saudável: não cura
+	if_hp_more_than AI_USER, 50, AI_Stall_End
+	if_target_can_ko_user AI_Stall_End                      @ curar não salva: deixa os outros módulos decidirem
+	score +3
+
+AI_Stall_End::
+	end
+
+AI_Stall_HealEffects::
+	.byte EFFECT_RESTORE_HP
+	.byte EFFECT_SOFTBOILED
+	.byte EFFECT_MORNING_SUN
+	.byte EFFECT_SYNTHESIS
+	.byte EFFECT_MOONLIGHT
+	.byte EFFECT_REST
+	.byte -1
+
+@ HACK: módulo novo (Fase 6). Abre com o clima que favorece o próprio Pokémon e
+@ renova quando acaba. Não usa clima que favorece o Pokémon do jogador.
+@ (Clima igual ao atual já é proibido pelo AI_CheckBadMove.)
+AI_Weather::
+	if_effect EFFECT_SUNNY_DAY, AI_Weather_Sun
+	if_effect EFFECT_RAIN_DANCE, AI_Weather_Rain
+	if_effect EFFECT_SANDSTORM, AI_Weather_Sand
+	if_effect EFFECT_HAIL, AI_Weather_Hail
+	end
+
+AI_Weather_Sun::
+	get_target_type1
+	if_equal TYPE_FIRE, AI_Weather_End
+	get_target_type2
+	if_equal TYPE_FIRE, AI_Weather_End
+	get_user_type1
+	if_equal TYPE_FIRE, AI_Weather_Plus
+	get_user_type2
+	if_equal TYPE_FIRE, AI_Weather_Plus
+	get_ability AI_USER
+	if_equal ABILITY_CHLOROPHYLL, AI_Weather_Plus
+	if_has_move AI_USER, MOVE_SOLAR_BEAM, AI_Weather_Plus
+	end
+
+AI_Weather_Rain::
+	get_target_type1
+	if_equal TYPE_WATER, AI_Weather_End
+	get_target_type2
+	if_equal TYPE_WATER, AI_Weather_End
+	get_user_type1
+	if_equal TYPE_WATER, AI_Weather_Plus
+	get_user_type2
+	if_equal TYPE_WATER, AI_Weather_Plus
+	get_ability AI_USER
+	if_equal ABILITY_SWIFT_SWIM, AI_Weather_Plus
+	if_has_move AI_USER, MOVE_THUNDER, AI_Weather_Plus
+	end
+
+AI_Weather_Sand::
+	get_user_type1
+	if_in_bytes AI_Weather_SandTypes, AI_Weather_Plus
+	get_user_type2
+	if_in_bytes AI_Weather_SandTypes, AI_Weather_Plus
+	get_ability AI_USER
+	if_equal ABILITY_SAND_VEIL, AI_Weather_Plus
+	end
+
+AI_Weather_Hail::
+	get_target_type1
+	if_equal TYPE_ICE, AI_Weather_End
+	get_target_type2
+	if_equal TYPE_ICE, AI_Weather_End
+	get_user_type1
+	if_equal TYPE_ICE, AI_Weather_Plus
+	get_user_type2
+	if_equal TYPE_ICE, AI_Weather_Plus
+	if_has_move AI_USER, MOVE_BLIZZARD, AI_Weather_Plus
+	end
+
+AI_Weather_Plus::
+	score +3
+
+AI_Weather_End::
+	end
+
+AI_Weather_SandTypes::
+	.byte TYPE_ROCK
+	.byte TYPE_GROUND
+	.byte TYPE_STEEL
+	.byte -1
+
+@ HACK: módulo novo (Fase 6). Desgaste leve (Erika): só prefere aplicar Toxic e
+@ Leech Seed, com peso menor que o STALL. Sem Protect alternado nem cura especial.
+AI_StallLight::
+	if_effect EFFECT_TOXIC, AI_StallLight_Toxic
+	if_effect EFFECT_LEECH_SEED, AI_StallLight_LeechSeed
+	end
+
+AI_StallLight_Toxic::
+	if_status AI_TARGET, STATUS1_ANY, AI_StallLight_End
+	if_type_effectiveness AI_EFFECTIVENESS_x0, AI_StallLight_End
+	score +2
+	end
+
+AI_StallLight_LeechSeed::
+	if_status3 AI_TARGET, STATUS3_LEECHSEED, AI_StallLight_End
+	score +1
+
+AI_StallLight_End::
+	end
 
 AI_Ret::
 	end

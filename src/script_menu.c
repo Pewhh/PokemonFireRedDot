@@ -309,6 +309,17 @@ static const struct MenuAction sMultichoiceList_Eeveelutions[] = {
     { gText_QuitLooking }
 };
 
+// HACK: lista do PC do BILL depois da POKéDEX nacional
+static const struct MenuAction sMultichoiceList_EeveelutionsNational[] = {
+    { gText_Eevee },
+    { gText_Flareon },
+    { gText_Jolteon },
+    { gText_Vaporeon },
+    { gText_Espeon },
+    { gText_Umbreon },
+    { gText_QuitLooking }
+};
+
 static const struct MenuAction sMultichoiceList_BikeShop[] = {
     { gText_Bicycle_Price },
     { gText_NoThanks }
@@ -574,6 +585,7 @@ static const struct MultichoiceListStruct sMultichoiceLists[] = {
     [MULTICHOICE_TRAINER_TOWER_MODE]                         = MULTICHOICE(sMultichoiceList_TrainerTowerMode),
     [MULTICHOICE_GAME_CORNER_POKEMON_PRIZES_LG]              = MULTICHOICE(sMultichoiceList_GameCornerPokemonPrizes_LG),
     [MULTICHOICE_OAK_OTHER_MONS]                             = MULTICHOICE(sMultichoiceList_OakOtherMons),
+    [MULTICHOICE_EEVEELUTIONS_NATIONAL]                      = MULTICHOICE(sMultichoiceList_EeveelutionsNational),
 };
 
 // From Cool to Berries goes unused

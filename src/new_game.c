@@ -32,6 +32,7 @@
 
 // this file's functions
 static void ResetMiniGamesResults(void);
+static void SetAdventuresNameLocks(void);
 
 // EWRAM vars
 EWRAM_DATA bool8 gDifferentSaveFile = FALSE;
@@ -59,7 +60,7 @@ static void InitPlayerTrainerId(void)
 
 static void SetDefaultOptions(void)
 {
-    gSaveBlock2Ptr->optionsTextSpeed = OPTIONS_TEXT_SPEED_MID;
+    gSaveBlock2Ptr->optionsTextSpeed = OPTIONS_TEXT_SPEED_FAST; // HACK: jogo novo começa com texto rápido
     gSaveBlock2Ptr->optionsWindowFrameType = 0;
     gSaveBlock2Ptr->optionsSound = OPTIONS_SOUND_MONO;
     gSaveBlock2Ptr->optionsBattleStyle = OPTIONS_BATTLE_STYLE_SHIFT;
@@ -141,6 +142,7 @@ void NewGameInitData(void)
     ResetPokemonStorageSystem();
     ClearRoamerData();
     gSaveBlock1Ptr->registeredItem = 0;
+    memset(gSaveBlock1Ptr->registeredItemsExtra, 0, sizeof(gSaveBlock1Ptr->registeredItemsExtra)); // HACK
     ClearBag();
     NewGameInitPCItems();
     ClearEnigmaBerries();
@@ -157,6 +159,54 @@ void NewGameInitData(void)
     hardPrev ? FlagSet(FLAG_HARD) : FlagClear(FLAG_HARD);
     hardcorePrev ? FlagSet(FLAG_HARDCORE) : FlagClear(FLAG_HARDCORE);
     expertPrev ? FlagSet(FLAG_EXPERT) : FlagClear(FLAG_EXPERT);
+    SetAdventuresNameLocks(); // HACK
+}
+
+// HACK: trava dos personagens do Adventures pelo nome escolhido (jogador ou rival)
+static const u8 sAdvName_Red[] = _("RED");
+static const u8 sAdvName_Blue[] = _("BLUE");
+static const u8 sAdvName_Green[] = _("GREEN");
+static const u8 sAdvName_Yellow[] = _("YELLOW");
+
+static u8 ToUpperChar(u8 c)
+{
+    if (c >= CHAR_a && c <= CHAR_z)
+        return c - CHAR_a + CHAR_A;
+    return c;
+}
+
+static bool8 NameEqualsIgnoreCase(const u8 *name, const u8 *target)
+{
+    u8 i;
+
+    for (i = 0; i <= PLAYER_NAME_LENGTH; i++)
+    {
+        if (ToUpperChar(name[i]) != target[i])
+            return FALSE;
+        if (target[i] == EOS)
+            return TRUE;
+    }
+    return FALSE;
+}
+
+static void SetAdventuresNameLocks(void)
+{
+    static const struct { const u8 *name; u16 flag; } sLocks[] = {
+        {sAdvName_Red,    FLAG_HIDE_ADV_RED},
+        {sAdvName_Blue,   FLAG_HIDE_ADV_BLUE},
+        {sAdvName_Green,  FLAG_HIDE_ADV_GREEN},
+        {sAdvName_Yellow, FLAG_HIDE_ADV_YELLOW},
+    };
+    u8 i;
+
+    for (i = 0; i < ARRAY_COUNT(sLocks); i++)
+    {
+        if (NameEqualsIgnoreCase(gSaveBlock2Ptr->playerName, sLocks[i].name)
+         || NameEqualsIgnoreCase(gSaveBlock1Ptr->rivalName, sLocks[i].name))
+            FlagSet(sLocks[i].flag);
+        else
+            FlagClear(sLocks[i].flag);
+    }
 }
 
 static void ResetMiniGamesResults(void)

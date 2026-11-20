@@ -8,6 +8,9 @@ void Task_StartMenuHandleInput(u8 taskId);
 void SetUpReturnToStartMenu(void);
 void ShowStartMenu(void);
 void Field_AskSaveTheGame(void);
+void QuickSave_AskConfirm(void); // HACK: salvar pelo R, com SIM/NÃO
 void CB2_SetUpSaveAfterLinkBattle(void);
+void VersionChange_AskConfirm(void); // HACK
+extern u8 gPendingVersionChange;     // HACK
 
 #endif // GUARD_START_MENU_H

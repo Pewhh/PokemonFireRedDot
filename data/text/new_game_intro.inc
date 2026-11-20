@@ -4,6 +4,10 @@ gOtherText_NewName::
 gNameChoice_Green::
     .string "GREEN$"
 
+@ HACK: nome do rival (Blue/Gary são o mesmo personagem)
+gNameChoice_Blue::
+    .string "BLUE$"
+
 gNameChoice_Red::
     .string "RED$"
 

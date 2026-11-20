@@ -36,6 +36,7 @@
 #include "constants/quest_log.h"
 #include "constants/global.h"
 #include "event_data.h"
+#include "event_object_lock.h"
 
 static const u16 sItemsByType[ITEMS_COUNT];
 void BagMenu_Print(u8, u8, const u8*, u8, u8, u8, u8, u8, u8);
@@ -66,6 +67,7 @@ struct BagSlots
     u16 itemsAbove[NUM_BAG_POCKETS_NO_CASES];
     u16 cursorPos[NUM_BAG_POCKETS_NO_CASES];
     u16 registeredItem;
+    u16 registeredItemsExtra[3]; // HACK
     u16 pocket;
 };
 
@@ -127,6 +129,9 @@ static void Task_SelectQuantityToToss(u8 taskId);
 static void Task_TossItem_Yes(u8 taskId);
 static void Task_WaitAB_RedrawAndReturnToBag(u8 taskId);
 static void Task_ItemMenuAction_ToggleSelect(u8 taskId);
+static bool8 IsItemRegistered(u16 itemId);
+static bool8 ToggleItemRegistration(u16 itemId);
+static const u8 sText_RegisteredItemsFull[] = _("You can register up to four\nitems to the SELECT Button.");
 static void Task_ItemMenuAction_Give(u8 taskId);
 static void Task_PrintThereIsNoPokemon(u8 taskId);
 static void Task_ItemMenuAction_Cancel(u8 taskId);
@@ -746,7 +751,7 @@ static void BagListMenuItemPrintFunc(u8 windowId, u32 itemId, u8 y)
             StringExpandPlaceholders(gStringVar4, gText_TimesStrVar1);
             BagPrintTextOnWindow(windowId, FONT_SMALL, gStringVar4, 0x6e, y, 0, 0, 0xFF, 1);
         }
-        else if (gSaveBlock1Ptr->registeredItem != ITEM_NONE && gSaveBlock1Ptr->registeredItem == bagItemId)
+        else if (IsItemRegistered(bagItemId)) // HACK: até 4 itens no SELECT
         {
             BlitBitmapToWindow(windowId, sBlit_SelectButton, 0x70, y, 0x18, 0x10);
         }
@@ -1451,7 +1456,7 @@ static void OpenContextMenu(u8 taskId)
                 sContextMenuItemsPtr = sContextMenuItemsBuffer;
                 sContextMenuNumItems = 3;
                 sContextMenuItemsBuffer[2] = ITEMMENUACTION_CANCEL;
-                if (gSaveBlock1Ptr->registeredItem == gSpecialVar_ItemId)
+                if (IsItemRegistered(gSpecialVar_ItemId))
                     sContextMenuItemsBuffer[1] = ITEMMENUACTION_DESELECT;
                 else
                     sContextMenuItemsBuffer[1] = ITEMMENUACTION_REGISTER;
@@ -1649,10 +1654,17 @@ static void Task_ItemMenuAction_ToggleSelect(u8 taskId)
     u16 itemId;
     s16 *data = gTasks[taskId].data;
     itemId = BagGetItemIdByPocketPosition(gBagMenuState.pocket + 1, data[1]);
-    if (gSaveBlock1Ptr->registeredItem == itemId)
-        gSaveBlock1Ptr->registeredItem = ITEM_NONE;
-    else
-        gSaveBlock1Ptr->registeredItem = itemId;
+    if (!ToggleItemRegistration(itemId))
+    {
+        // HACK: já há 4 itens registrados
+        HideBagWindow(10);
+        HideBagWindow(6);
+        PutWindowTilemap(0);
+        PutWindowTilemap(1);
+        CopyWindowToVram(0, COPYWIN_MAP);
+        DisplayItemMessageInBag(taskId, FONT_NORMAL, sText_RegisteredItemsFull, Task_WaitAButtonAndCloseContextMenu);
+        return;
+    }
 
     DestroyListMenuTask(data[0], &gBagMenuState.cursorPos[gBagMenuState.pocket], &gBagMenuState.itemsAbove[gBagMenuState.pocket]);
     Bag_BuildListMenuTemplate(gBagMenuState.pocket);
@@ -2088,27 +2100,204 @@ static void Task_TryDoItemDeposit(u8 taskId)
     }
 }
 
-bool8 UseRegisteredKeyItemOnField(void)
+// ---- HACK: até 4 itens registrados no SELECT (estilo Gen VI) ----
+// Posição 0 = registeredItem original; 1 a 3 = registeredItemsExtra.
+#define NUM_REGISTERED_ITEMS 4
+
+static u16 *GetRegisteredItemSlot(u8 i)
+{
+    if (i == 0)
+        return &gSaveBlock1Ptr->registeredItem;
+    return &gSaveBlock1Ptr->registeredItemsExtra[i - 1];
+}
+
+static bool8 IsItemRegistered(u16 itemId)
+{
+    u8 i;
+
+    if (itemId == ITEM_NONE)
+        return FALSE;
+    for (i = 0; i < NUM_REGISTERED_ITEMS; i++)
+    {
+        if (*GetRegisteredItemSlot(i) == itemId)
+            return TRUE;
+    }
+    return FALSE;
+}
+
+// Junta os itens registrados no começo da lista. Com removeMissing, tira os que não estão mais na Bag.
+static u8 CompactRegisteredItems(bool8 removeMissing)
+{
+    u16 items[NUM_REGISTERED_ITEMS];
+    u8 i, count = 0;
+
+    for (i = 0; i < NUM_REGISTERED_ITEMS; i++)
+    {
+        u16 item = *GetRegisteredItemSlot(i);
+
+        if (item == ITEM_NONE)
+            continue;
+        if (removeMissing && !CheckBagHasItem(item, 1))
+            continue;
+        items[count++] = item;
+    }
+    for (i = 0; i < NUM_REGISTERED_ITEMS; i++)
+        *GetRegisteredItemSlot(i) = (i < count) ? items[i] : ITEM_NONE;
+    return count;
+}
+
+// Registra ou tira o registro. Retorna FALSE se a lista já está cheia.
+static bool8 ToggleItemRegistration(u16 itemId)
+{
+    u8 i;
+
+    for (i = 0; i < NUM_REGISTERED_ITEMS; i++)
+    {
+        if (*GetRegisteredItemSlot(i) == itemId)
+        {
+            *GetRegisteredItemSlot(i) = ITEM_NONE;
+            CompactRegisteredItems(FALSE);
+            return TRUE;
+        }
+    }
+    for (i = 0; i < NUM_REGISTERED_ITEMS; i++)
+    {
+        if (*GetRegisteredItemSlot(i) == ITEM_NONE)
+        {
+            *GetRegisteredItemSlot(i) = itemId;
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
+static void UseRegisteredItemNow(u16 itemId)
 {
     u8 taskId;
+
+    gSpecialVar_ItemId = itemId;
+    taskId = CreateTask(ItemId_GetFieldFunc(itemId), 8);
+    gTasks[taskId].data[3] = 1;
+}
+
+// Escolha do item quando há mais de um registrado: cada item fica numa direção do
+// direcional (cima, baixo, esquerda, direita), em cruz. A direção usa o item; B cancela.
+#define tWindowId   data[0]
+
+static const u8 sText_RegDpadUp[]    = _("{DPAD_UP}");
+static const u8 sText_RegDpadDown[]  = _("{DPAD_DOWN}");
+static const u8 sText_RegDpadLeft[]  = _("{DPAD_LEFT}");
+static const u8 sText_RegDpadRight[] = _("{DPAD_RIGHT}");
+static const u8 *const sRegisteredDpadIcons[NUM_REGISTERED_ITEMS] = {
+    sText_RegDpadUp, sText_RegDpadDown, sText_RegDpadLeft, sText_RegDpadRight
+};
+static const u16 sRegisteredDpadKeys[NUM_REGISTERED_ITEMS] = {DPAD_UP, DPAD_DOWN, DPAD_LEFT, DPAD_RIGHT};
+
+#define REG_WIN_WIDTH 26 // em tiles
+
+static void Task_ChooseRegisteredItem(u8 taskId)
+{
+    s16 *data = gTasks[taskId].data;
+    u8 i, count = CompactRegisteredItems(FALSE);
+    s8 chosen = -1;
+
+    if (JOY_NEW(B_BUTTON))
+    {
+        chosen = -2;
+    }
+    else
+    {
+        for (i = 0; i < count; i++)
+        {
+            if (JOY_NEW(sRegisteredDpadKeys[i]))
+            {
+                chosen = i;
+                break;
+            }
+        }
+    }
+    if (chosen == -1)
+        return;
+    PlaySE(SE_SELECT);
+    ClearStdWindowAndFrameToTransparent(tWindowId, TRUE);
+    RemoveWindow(tWindowId);
+    DestroyTask(taskId);
+    if (chosen == -2)
+    {
+        ClearPlayerHeldMovementAndUnfreezeObjectEvents();
+        UnlockPlayerFieldControls();
+        return;
+    }
+    UseRegisteredItemNow(*GetRegisteredItemSlot(chosen));
+}
+
+static void ShowRegisteredItemsMenu(u8 count)
+{
+    static const u8 sColors[] = {TEXT_COLOR_WHITE, TEXT_COLOR_DARK_GRAY, TEXT_COLOR_LIGHT_GRAY};
+    struct WindowTemplate winTemplate;
+    u8 str[ITEM_NAME_LENGTH + 4];
+    u8 i, taskId, windowId;
+    s16 x, y, width;
+
+    taskId = CreateTask(Task_ChooseRegisteredItem, 80);
+    winTemplate = SetWindowTemplateFields(0, 2, 1, REG_WIN_WIDTH, 6, 15, 0x008);
+    windowId = AddWindow(&winTemplate);
+    gTasks[taskId].tWindowId = windowId;
+    LoadStdWindowFrameGfx();
+    SetStdWindowBorderStyle(windowId, FALSE);
+    FillWindowPixelBuffer(windowId, PIXEL_FILL(1));
+    for (i = 0; i < count; i++)
+    {
+        StringCopy(str, sRegisteredDpadIcons[i]);
+        CopyItemName(*GetRegisteredItemSlot(i), str + StringLength(str));
+        width = GetStringWidth(FONT_NORMAL, str, 0);
+        switch (i)
+        {
+        case 0: // cima: centro, linha de cima
+            x = (REG_WIN_WIDTH * 8 - width) / 2;
+            y = 1;
+            break;
+        case 1: // baixo: centro, linha de baixo
+            x = (REG_WIN_WIDTH * 8 - width) / 2;
+            y = 33;
+            break;
+        case 2: // esquerda: linha do meio
+            x = 2;
+            y = 17;
+            break;
+        default: // direita: linha do meio
+            x = REG_WIN_WIDTH * 8 - width - 2;
+            y = 17;
+            break;
+        }
+        AddTextPrinterParameterized3(windowId, FONT_NORMAL, x, y, sColors, TEXT_SKIP_DRAW, str);
+    }
+    PutWindowTilemap(windowId);
+    CopyWindowToVram(windowId, COPYWIN_FULL);
+}
+
+#undef tWindowId
+
+bool8 UseRegisteredKeyItemOnField(void)
+{
+    u8 count;
+
     if (InUnionRoom() == TRUE)
         return FALSE;
     DismissMapNamePopup();
     ChangeBgY(0, 0, 0);
-    if (gSaveBlock1Ptr->registeredItem != ITEM_NONE)
+    count = CompactRegisteredItems(TRUE);
+    if (count != 0)
     {
-        if (CheckBagHasItem(gSaveBlock1Ptr->registeredItem, 1) == TRUE)
-        {
-            LockPlayerFieldControls();
-            FreezeObjectEvents();
-            HandleEnforcedLookDirectionOnPlayerStopMoving();
-            StopPlayerAvatar();
-            gSpecialVar_ItemId = gSaveBlock1Ptr->registeredItem;
-            taskId = CreateTask(ItemId_GetFieldFunc(gSaveBlock1Ptr->registeredItem), 8);
-            gTasks[taskId].data[3] = 1;
-            return TRUE;
-        }
-        gSaveBlock1Ptr->registeredItem = ITEM_NONE;
+        LockPlayerFieldControls();
+        FreezeObjectEvents();
+        HandleEnforcedLookDirectionOnPlayerStopMoving();
+        StopPlayerAvatar();
+        if (count == 1)
+            UseRegisteredItemNow(gSaveBlock1Ptr->registeredItem);
+        else
+            ShowRegisteredItemsMenu(count); // HACK: mais de um registrado, o jogador escolhe
+        return TRUE;
     }
     ScriptContext_SetupScript(EventScript_BagItemCanBeRegistered);
     return TRUE;
@@ -2135,6 +2324,8 @@ static void BackUpPlayerBag(void)
     memcpy(sBackupPlayerBag->bagPocket_KeyItems, gSaveBlock1Ptr->bagPocket_KeyItems, BAG_KEYITEMS_COUNT * sizeof(struct ItemSlot));
     memcpy(sBackupPlayerBag->bagPocket_PokeBalls, gSaveBlock1Ptr->bagPocket_PokeBalls, BAG_POKEBALLS_COUNT * sizeof(struct ItemSlot));
     sBackupPlayerBag->registeredItem = gSaveBlock1Ptr->registeredItem;
+    memcpy(sBackupPlayerBag->registeredItemsExtra, gSaveBlock1Ptr->registeredItemsExtra, sizeof(gSaveBlock1Ptr->registeredItemsExtra));
+    memset(gSaveBlock1Ptr->registeredItemsExtra, 0, sizeof(gSaveBlock1Ptr->registeredItemsExtra));
     sBackupPlayerBag->pocket = gBagMenuState.pocket;
     for (i = 0; i < NUM_BAG_POCKETS_NO_CASES; i++)
     {
@@ -2155,6 +2346,7 @@ static void RestorePlayerBag(void)
     memcpy(gSaveBlock1Ptr->bagPocket_KeyItems, sBackupPlayerBag->bagPocket_KeyItems, BAG_KEYITEMS_COUNT * sizeof(struct ItemSlot));
     memcpy(gSaveBlock1Ptr->bagPocket_PokeBalls, sBackupPlayerBag->bagPocket_PokeBalls, BAG_POKEBALLS_COUNT * sizeof(struct ItemSlot));
     gSaveBlock1Ptr->registeredItem = sBackupPlayerBag->registeredItem;
+    memcpy(gSaveBlock1Ptr->registeredItemsExtra, sBackupPlayerBag->registeredItemsExtra, sizeof(gSaveBlock1Ptr->registeredItemsExtra));
     gBagMenuState.pocket = sBackupPlayerBag->pocket;
     for (i = 0; i < NUM_BAG_POCKETS_NO_CASES; i++)
     {

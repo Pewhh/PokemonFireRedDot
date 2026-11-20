@@ -1004,7 +1004,7 @@ static void SpriteCB_ThrowBall_Bounce(struct Sprite *sprite)
 
 static void SpriteCB_ThrowBall_InitShake(struct Sprite *sprite)
 {
-    if (++sprite->data[3] == 31)
+    if (++sprite->data[3] == 20) // HACK: espera antes do 1º balanço (era 31)
     {
         sprite->data[3] = 0;
         sprite->affineAnimPaused = TRUE;
@@ -1143,7 +1143,7 @@ static void SpriteCB_ThrowBall_DoShake(struct Sprite *sprite)
         break;
     case 6:
     default:
-        if (++sprite->data[5] == 31)
+        if (++sprite->data[5] == 20) // HACK: espera entre balanços da Poké Ball (era 31)
         {
             sprite->data[5] = 0;
             sprite->data[3] &= -0x100;
@@ -1161,7 +1161,7 @@ static void SpriteCB_ThrowBall_DoShake(struct Sprite *sprite)
 
 static void SpriteCB_ThrowBall_DelayThenBreakOut(struct Sprite *sprite)
 {
-    if (++sprite->data[5] == 31)
+    if (++sprite->data[5] == 45) // HACK: espera antes de o Pokémon escapar (era 31)
     {
         sprite->data[5] = 0;
         sprite->callback = SpriteCB_ThrowBall_BeginBreakOut;
@@ -1181,25 +1181,27 @@ static void SpriteCB_ThrowBall_DoClick(struct Sprite *sprite)
 {
     u8 *battler = &gBattleAnimTarget;
 
+    // HACK: espera antes do "clique" da captura aumentada de 40 para 50 quadros (mais tensão).
+    // Os passos seguintes foram empurrados os mesmos 10 quadros para manter o ritmo original.
     sprite->data[4]++;
-    if (sprite->data[4] == 40)
+    if (sprite->data[4] == 50)
     {
         PlaySE(SE_BALL_CLICK);
         BlendPalettes(0x10000 << sprite->oam.paletteNum, 6, RGB_BLACK);
         CreateStarsWhenBallClicks(sprite);
     }
-    else if (sprite->data[4] == 60)
+    else if (sprite->data[4] == 70)
     {
         BeginNormalPaletteFade(0x10000 << sprite->oam.paletteNum, 2, 6, 0, RGB_BLACK);
     }
-    else if (sprite->data[4] == 95)
+    else if (sprite->data[4] == 105)
     {
         gDoingBattleAnim = FALSE;
         UpdateOamPriorityInAllHealthboxes(1);
         m4aMPlayAllStop();
         PlaySE(MUS_CAUGHT_INTRO);
     }
-    else if (sprite->data[4] == 315)
+    else if (sprite->data[4] == 325)
     {
         FreeOamMatrix(gSprites[gBattlerSpriteIds[*battler]].oam.matrixNum);
         DestroySprite(&gSprites[gBattlerSpriteIds[*battler]]);

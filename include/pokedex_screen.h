@@ -18,6 +18,7 @@
 #define DEX_ORDER_LIGHTEST           3
 #define DEX_ORDER_SMALLEST           4
 #define DEX_ORDER_NUMERICAL_NATIONAL 5
+#define DEX_ORDER_AREA_LIST          6 // HACK: só como item do menu (não é uma ordem de lista)
 
 #define DEX_MODE(name) (DEX_CATEGORY_COUNT + DEX_ORDER_##name)
 
@@ -26,6 +27,12 @@
 extern const struct PokedexEntry gPokedexEntries[];
 
 void CB2_OpenPokedexFromStartMenu(void);
+
+// HACK: desbloqueios da Pokédex (habilidades e itens)
+struct Pokemon;
+void DexUnlock_FromMon(struct Pokemon *mon);
+void DexUnlock_AbilitySeenInBattle(u8 ability);
+void DexUnlock_ItemSeenInBattle(u16 item);
 s8 DexScreen_GetSetPokedexFlag(u16 nationalDexNo, u8 caseId, bool8 indexIsSpecies);
 
 #endif //GUARD_POKEDEX_SCREEN_H

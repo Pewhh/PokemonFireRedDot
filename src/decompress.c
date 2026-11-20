@@ -8,7 +8,7 @@
 extern const struct CompressedSpriteSheet gMonFrontPicTable[];
 extern const struct CompressedSpriteSheet gMonBackPicTable[];
 
-static void DuplicateDeoxysTiles(void *pointer, s32 species);
+static void DuplicateDeoxysTiles(void *pointer, s32 species, bool8 isFrontPic);
 
 // The pic tables point at FireRed's Deoxys (Attack Forme).
 // When playing LeafGreen, use the Defense Forme pics instead.
@@ -82,7 +82,7 @@ void DecompressPicFromTable(const struct CompressedSpriteSheet *src, void *buffe
         LZ77UnCompWram(gMonFrontPicTable[0].data, buffer);
     else
         LZ77UnCompWram(GetMonPicDataForVersion(src, species), buffer);
-    DuplicateDeoxysTiles(buffer, species);
+    DuplicateDeoxysTiles(buffer, species, src == &gMonFrontPicTable[species]);
 }
 
 void HandleLoadSpecialPokePic(const struct CompressedSpriteSheet *src, void *dest, s32 species, u32 personality)
@@ -117,14 +117,28 @@ void LoadSpecialPokePic(const struct CompressedSpriteSheet *src, void *dest, s32
     else
         LZ77UnCompWram(GetMonPicDataForVersion(src, species), dest);
 
-    DuplicateDeoxysTiles(dest, species);
+    DuplicateDeoxysTiles(dest, species, isFrontPic);
     DrawSpindaSpots(species, personality, dest, isFrontPic);
 }
 
-static void DuplicateDeoxysTiles(void *pointer, s32 species)
+// HACK: no FireRed o front pic do Deoxys tem 3 quadros (Normal, Attack 1, Attack 2);
+// a forma de batalha vai para os quadros 0 e 1 (animação de 2 quadros).
+// No LeafGreen (Normal, Defense) o quadro 1 continua igual ao 0.
+static void DuplicateDeoxysTiles(void *pointer, s32 species, bool8 isFrontPic)
 {
     if (species == SPECIES_DEOXYS)
+    {
         CpuCopy32(pointer + 0x800, pointer, 0x800);
+        if (isFrontPic && !IsLeafGreenVersion())
+            CpuCopy32(pointer + 0x1000, pointer + 0x800, 0x800);
+    }
+}
+
+// Forma Normal (sem DuplicateDeoxysTiles): o quadro 1 vira cópia do 0 para a animação não mostrar a Attack
+static void FixNormalDeoxysSecondFrame(void *pointer, s32 species, bool8 isFrontPic)
+{
+    if (species == SPECIES_DEOXYS && isFrontPic)
+        CpuCopy32(pointer, pointer + 0x800, 0x800);
 }
 
 static void Unused_LZDecompressWramIndirect(const void **src, void *dest)
@@ -327,6 +341,7 @@ void DecompressPicFromTable_DontHandleDeoxys(const struct CompressedSpriteSheet 
         LZ77UnCompWram(gMonFrontPicTable[0].data, buffer);
     else
         LZ77UnCompWram(src->data, buffer);
+    FixNormalDeoxysSecondFrame(buffer, species, src == &gMonFrontPicTable[species]); // HACK
 }
 
 void HandleLoadSpecialPokePic_DontHandleDeoxys(const struct CompressedSpriteSheet *src, void *dest, s32 species, u32 personality)
@@ -364,5 +379,6 @@ void LoadSpecialPokePic_DontHandleDeoxys(const struct CompressedSpriteSheet *src
     {
         LZ77UnCompWram(src->data, dest);
     }
+    FixNormalDeoxysSecondFrame(dest, species, isFrontPic); // HACK
     DrawSpindaSpots(species, personality, dest, isFrontPic);
 }

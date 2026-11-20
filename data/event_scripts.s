@@ -28,6 +28,7 @@
 #include "constants/cable_club.h"
 #include "constants/field_tasks.h"
 #include "constants/field_weather.h"
+#include "constants/debug.h"
 #include "constants/weather.h"
 #include "constants/union_room.h"
 #include "constants/trade.h"
@@ -897,6 +898,14 @@ Text_TakeYourPkmnForFewSeconds::
 Text_WeHopeToSeeYouAgain::
 	.string "We hope to see you again!$"
 
+@ HACK: fala do Pokémon Legends Z-A, quando o time já está todo curado
+Text_PkmnAlreadyHealthy::
+	.string "Your POKéMON are already\n"
+	.string "perfectly healthy.$"
+
+Text_PkmnCenterChansey::
+	.string "CHANSEY: Chaaan-sey!$"
+
 Text_RestoredPkmnToFullHealth::
 	.string "Thank you for waiting.\n"
 	.string "We've restored your POKéMON to\l"
@@ -1073,6 +1082,9 @@ EventScript_ResetAllMapFlags::
 
 	.include "data/scripts/hall_of_fame.inc"
 	.include "data/scripts/pkmn_center_nurse.inc"
+.if DEBUG_MENU
+	.include "data/scripts/debug.inc" @ HACK: menu de debug
+.endif
 	.include "data/scripts/obtain_item.inc"
 	.include "data/scripts/pc.inc"
 

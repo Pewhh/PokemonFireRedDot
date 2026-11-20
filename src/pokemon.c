@@ -1,6 +1,7 @@
 #define IS_POKEMON_C
 
 #include "global.h"
+#include "pokedex_screen.h"
 #include "load_save.h"
 #include "gflib.h"
 #include "random.h"
@@ -1413,6 +1414,21 @@ static const u16 *GetLevelUpLearnset(u16 species)
     return gLevelUpLearnsets[species];
 }
 
+// HACK: acesso para a Pokédex (mesmas tabelas que o jogo usa)
+const u16 *GetSpeciesLevelUpLearnset(u16 species)
+{
+    return GetLevelUpLearnset(species);
+}
+
+bool8 CanSpeciesLearnTMHM(u16 species, u8 tm)
+{
+    if (species == SPECIES_NONE || species >= NUM_SPECIES)
+        return FALSE;
+    if (tm < 32)
+        return (sTMHMLearnsets[species][0] & (1u << tm)) != 0;
+    return (sTMHMLearnsets[species][1] & (1u << (tm - 32))) != 0;
+}
+
 static const s8 sPokeblockFlavorCompatibilityTable[NUM_NATURES * FLAVOR_COUNT] =
 {
     // Cool, Beauty, Cute, Smart, Tough
@@ -2802,6 +2818,13 @@ void SetMultiuseSpriteTemplateToPokemon(u16 speciesTag, u8 battlerPosition)
     }
     gMultiuseSpriteTemplate.paletteTag = speciesTag;
     gMultiuseSpriteTemplate.anims = gAnims_MonPic;
+    // HACK: Pokémon de frente usam as animações de 2 quadros do Emerald (anim 0 = parado)
+    if (battlerPosition == B_POSITION_OPPONENT_LEFT || battlerPosition == B_POSITION_OPPONENT_RIGHT)
+    {
+        u16 species = speciesTag > SPECIES_SHINY_TAG ? speciesTag - SPECIES_SHINY_TAG : speciesTag;
+        if (species < NUM_SPECIES)
+            gMultiuseSpriteTemplate.anims = gMonFrontAnimsPtrTable[species];
+    }
 }
 
 void SetMultiuseSpriteTemplateToTrainerBack(u16 trainerSpriteId, u8 battlerPosition)
@@ -3720,6 +3743,8 @@ void CopyMon(void *dest, void *src, size_t size)
 u8 GiveMonToPlayer(struct Pokemon *mon)
 {
     s32 i;
+
+    DexUnlock_FromMon(mon); // HACK: habilidade e item do Pokémon recebido aparecem na Pokédex
 
     SetMonData(mon, MON_DATA_OT_NAME, gSaveBlock2Ptr->playerName);
     SetMonData(mon, MON_DATA_OT_GENDER, &gSaveBlock2Ptr->playerGender);

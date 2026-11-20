@@ -1,4 +1,5 @@
 #include "global.h"
+#include "pokedex_screen.h"
 #include "gflib.h"
 #include "battle.h"
 #include "battle_anim.h"
@@ -1986,6 +1987,7 @@ u32 BattleStringExpandPlaceholders(const u8 *src, u8 *dst)
                     toCpy = gMoveNames[sBattleMsgDataPtr->originallyUsedMove];
                 break;
             case B_TXT_LAST_ITEM: // last used item
+                DexUnlock_ItemSeenInBattle(gLastUsedItem); // HACK: item mostrado em batalha aparece na Pokédex
                 if (gBattleTypeFlags & BATTLE_TYPE_LINK)
                 {
                     if (gLastUsedItem == ITEM_ENIGMA_BERRY)
@@ -2029,18 +2031,23 @@ u32 BattleStringExpandPlaceholders(const u8 *src, u8 *dst)
                 }
                 break;
             case B_TXT_LAST_ABILITY: // last used ability
+                DexUnlock_AbilitySeenInBattle(gLastUsedAbility); // HACK: habilidade mostrada em batalha aparece na Pokédex
                 toCpy = gAbilityNames[gLastUsedAbility];
                 break;
             case B_TXT_ATK_ABILITY: // attacker ability
+                DexUnlock_AbilitySeenInBattle(sBattlerAbilities[gBattlerAttacker]);
                 toCpy = gAbilityNames[sBattlerAbilities[gBattlerAttacker]];
                 break;
             case B_TXT_DEF_ABILITY: // target ability
+                DexUnlock_AbilitySeenInBattle(sBattlerAbilities[gBattlerTarget]);
                 toCpy = gAbilityNames[sBattlerAbilities[gBattlerTarget]];
                 break;
             case B_TXT_SCR_ACTIVE_ABILITY: // scripting active ability
+                DexUnlock_AbilitySeenInBattle(sBattlerAbilities[gBattleScripting.battler]);
                 toCpy = gAbilityNames[sBattlerAbilities[gBattleScripting.battler]];
                 break;
             case B_TXT_EFF_ABILITY: // effect battlerId ability
+                DexUnlock_AbilitySeenInBattle(sBattlerAbilities[gEffectBattler]);
                 toCpy = gAbilityNames[sBattlerAbilities[gEffectBattler]];
                 break;
             case B_TXT_TRAINER1_CLASS: // trainer class name

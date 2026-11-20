@@ -458,4 +458,23 @@ gSpecials::
 	def_special GetBadgeCountForScript
 	def_special ChooseGymLeaderBattleParty
 	def_special GetRandomOakLabMon
+	def_special IsPartyFullyHealed
+.if DEBUG_MENU
+	@ HACK: menu de debug (só na versão de teste)
+	def_special Debug_ShowList
+	def_special Debug_InputNumber
+	def_special Debug_ToggleNoClip
+	def_special Debug_ToggleEncounters
+	def_special Debug_ToggleTrainerSight
+	def_special Debug_SetBadges
+	def_special Debug_SetDifficulty
+	def_special Debug_ToggleEvent
+	def_special Debug_GiveMon
+	def_special Debug_HurtParty
+	def_special Debug_ToggleDeadFirst
+	def_special Debug_GiveItem
+	def_special Debug_AddMoney
+	def_special Debug_PrepareWildBattle
+	def_special Debug_PrepareTrainerBattle
+.endif
 gSpecialsEnd::

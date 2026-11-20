@@ -218,7 +218,7 @@ static const struct WindowTemplate sStandardBattleWindowTemplates[] = {
         .tilemapTop = 57,
         .width = 8,
         .height = 2,
-        .paletteNum = 5,
+        .paletteNum = 13, // HACK: etiqueta de tipo (paleta dos ícones de tipo)
         .baseBlock = 0x296
     },
     [B_WIN_PP_REMAINING] = {
@@ -364,6 +364,25 @@ static const struct WindowTemplate sStandardBattleWindowTemplates[] = {
         .height = 4,
         .paletteNum = 7,
         .baseBlock = 0x090
+    },
+    // HACK: ficam acima da caixa de golpes (só aparecem com a tela na escolha de golpe)
+    [B_WIN_MOVE_DESC] = { // HACK: miolo da caixa da descrição (a moldura é desenhada em volta)
+        .bg = 0,
+        .tilemapLeft = 1,
+        .tilemapTop = 47,
+        .width = 16,
+        .height = 6,
+        .paletteNum = 5,
+        .baseBlock = 0x340
+    },
+    [B_WIN_INFO_TAB] = { // HACK: miolo da caixinha Info (a moldura é desenhada em volta)
+        .bg = 0,
+        .tilemapLeft = 1,
+        .tilemapTop = 50,
+        .width = 3,
+        .height = 3,
+        .paletteNum = 5,
+        .baseBlock = 0x3b8
     },
     DUMMY_WIN_TEMPLATE
 };
@@ -698,6 +717,13 @@ void LoadBattleMenuWindowGfx(void)
     gPlttBufferUnfaded[BG_PLTT_ID(5) + 14] = RGB(31, 31, 31);
     gPlttBufferUnfaded[BG_PLTT_ID(5) + 15] = RGB( 26,  26,  25);
     CpuCopy16(&gPlttBufferUnfaded[BG_PLTT_ID(5) + 12], &gPlttBufferFaded[BG_PLTT_ID(5) + 12], PLTT_SIZEOF(4));
+    // HACK: paleta das etiquetas de tipo na escolha de golpe (mesma da tela de resumo)
+    LoadPalette(gMenuInfoElements2_Pal, BG_PLTT_ID(13), PLTT_SIZE_4BPP);
+    // HACK: cores do ícone do botão START na caixinha Info (iguais às do resto do jogo)
+    gPlttBufferUnfaded[BG_PLTT_ID(5) + 1] = RGB(31, 31, 31);
+    gPlttBufferUnfaded[BG_PLTT_ID(5) + 2] = RGB(12, 12, 12);
+    gPlttBufferUnfaded[BG_PLTT_ID(5) + 3] = RGB(26, 26, 25);
+    CpuCopy16(&gPlttBufferUnfaded[BG_PLTT_ID(5) + 1], &gPlttBufferFaded[BG_PLTT_ID(5) + 1], PLTT_SIZEOF(3));
 
     if (gBattleTypeFlags & (BATTLE_TYPE_FIRST_BATTLE | BATTLE_TYPE_POKEDUDE))
     {

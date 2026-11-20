@@ -36,7 +36,10 @@
 #define TRAINER_LEADER_KOGA_6                       32
 #define TRAINER_LEADER_SABRINA_4                    33
 #define TRAINER_LEADER_SABRINA_5                    34
-// Números livres para novos treinadores: 35, 36, 37, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81
+// BILL: batalha depois do S.S. TICKET e revanche depois de cada vitória na ELITE 4
+#define TRAINER_BILL_1                              35
+#define TRAINER_BILL_2                              36
+// Números livres para novos treinadores: 37, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81
 #define TRAINER_ELITE_FOUR_SIDNEY                 25
 #define TRAINER_ELITE_FOUR_PHOEBE                 26
 #define TRAINER_LEADER_ROXANNE                    27

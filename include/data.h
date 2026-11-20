@@ -35,6 +35,7 @@ extern const struct CompressedSpriteSheet gTrainerFrontPicTable[];
 extern const struct CompressedSpriteSheet gTrainerBackPicTable[];
 extern const struct CompressedSpritePalette gTrainerFrontPicPaletteTable[];
 extern const union AnimCmd *const *const gTrainerBackAnimsPtrTable[];
+extern const union AnimCmd *const *const gMonFrontAnimsPtrTable[]; // HACK: animações de 2 quadros do Emerald
 extern const struct MonCoords gTrainerBackPicCoords[];
 extern const struct CompressedSpritePalette gTrainerBackPicPaletteTable[];
 

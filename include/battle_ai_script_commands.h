@@ -18,4 +18,7 @@ void RecordItemEffectBattle(u8 bank, u8 itemEffect);
 void ClearBankItemEffectHistory(u8 bank);
 u8 BattleAI_ChooseMoveOrAction(void);
 
+u8 GetTrainerAIProfile(u16 trainerId);
+u32 GetTrainerAIFlags(u16 trainerId);
+
 #endif // GUARD_BATTLE_AI_SCRIPT_COMMANDS_H

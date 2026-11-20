@@ -689,13 +689,30 @@ static bool8 Transition_StartMain(struct Task *task)
     return FALSE;
 }
 
+// HACK: transições de batalha mais rápidas (duram 80% do original). A cada 4 quadros,
+// a animação principal (espiral, listras, Poké Ball etc.) avança um passo extra. Vale
+// para todos os tipos de transição; as piscadas do início não mudam.
+#define TRANSITION_EXTRA_STEP_EVERY 4
+#define tExtraStepTimer data[2]
+
 static bool8 Transition_WaitForMain(struct Task *task)
 {
+    u8 mainTaskId;
+
     task->tTransitionDone = FALSE;
-    if (FindTaskIdByFunc(sTasks_Main[task->tTransitionId]) == TASK_NONE)
+    mainTaskId = FindTaskIdByFunc(sTasks_Main[task->tTransitionId]);
+    if (mainTaskId != TASK_NONE && ++task->tExtraStepTimer >= TRANSITION_EXTRA_STEP_EVERY)
+    {
+        task->tExtraStepTimer = 0;
+        gTasks[mainTaskId].func(mainTaskId);
+        mainTaskId = FindTaskIdByFunc(sTasks_Main[task->tTransitionId]);
+    }
+    if (mainTaskId == TASK_NONE)
         task->tTransitionDone = TRUE;
     return FALSE;
 }
+
+#undef tExtraStepTimer
 
 #undef tTransitionId
 #undef tTransitionDone

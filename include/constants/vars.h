@@ -89,7 +89,7 @@
 #define VAR_PEWTER_MUSEUM_WHICH_FOSSIL     0x402A // ITEM_HELIX_FOSSIL or ITEM_DOME_FOSSIL
 #define VAR_RIVAL_EEVEE_WINS               0x402B // vitórias sobre o rival no laboratório e na 1ª batalha da Rota 22 (0-2)
 #define VAR_STARTER_OTHER_SPECIES          0x402C // espécie do inicial quando o jogador escolhe com o Oak (PIKACHU/EEVEE/SURPRESA)
-#define VAR_0x402D                         0x402D
+#define VAR_BILL_BATTLE                    0x402D // HACK: 0 nada, 1 esperando fora da casa, 2 ofereceu (recusou/perdeu), 3 venceu
 #define VAR_0x402E                         0x402E
 
 #define VAR_0x402F                         0x402F

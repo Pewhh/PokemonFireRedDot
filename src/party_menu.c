@@ -825,15 +825,15 @@ static void DisplayPartyPokemonDataForChooseMultiple(u8 slot)
         DisplayPartyPokemonDescriptionData(slot, PARTYBOX_DESC_NOT_ABLE);
     else
     {
-        if (gPartyMenu.chooseMonsBattleType == CHOOSE_MONS_FOR_UNION_ROOM_BATTLE)
-            maxBattlers = 2;
-        else
-            maxBattlers = 3;
+        // Union Room usa 2, as seleções antigas 3 e a do líder (Expert) até 5
+        maxBattlers = GetPartySelectionMaxMons();
+        if (maxBattlers > 5)
+            maxBattlers = 5;
         for (i = 0; i < maxBattlers; ++i)
         {
             if (order[i] != 0 && (order[i] - 1) == slot)
             {
-                DisplayPartyPokemonDescriptionData(slot, i + PARTYBOX_DESC_FIRST);
+                DisplayPartyPokemonDescriptionData(slot, GetPartySelectionDescriptionId(i));
                 return;
             }
         }
@@ -1934,6 +1934,17 @@ static bool8 CanLearnTutorMove(u16 species, u8 tutor)
         else
             return FALSE;
     }
+}
+
+// HACK: acesso para a Pokédex
+u16 GetTutorMoveForDex(u8 tutor)
+{
+    return GetTutorMove(tutor);
+}
+
+bool8 CanSpeciesLearnTutorMoveForDex(u16 species, u8 tutor)
+{
+    return CanLearnTutorMove(species, tutor);
 }
 
 // Tutorial battle messages

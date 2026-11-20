@@ -1850,6 +1850,7 @@ void UpdateHealthboxAttribute(u8 healthboxSpriteId, struct Pokemon *mon, u8 elem
 #define B_HEALTHBAR_NUM_TILES  (B_HEALTHBAR_NUM_PIXELS / 8)
 #define B_EXPBAR_NUM_PIXELS    64
 #define B_EXPBAR_NUM_TILES     (B_EXPBAR_NUM_PIXELS / 8)
+#define HEALTHBAR_DRAIN_FRAMES (B_HEALTHBAR_NUM_PIXELS / 2) // HACK: 24 quadros para a barra cheia
 
 s32 MoveBattleBar(u8 battlerId, u8 healthboxSpriteId, u8 whichBar, u8 unused)
 {
@@ -1857,12 +1858,18 @@ s32 MoveBattleBar(u8 battlerId, u8 healthboxSpriteId, u8 whichBar, u8 unused)
 
     if (whichBar == HEALTH_BAR)
     {
+        // HACK: barra de HP mais rápida. Anda 2 pixels por quadro em vez de 1 HP por
+        // quadro: a barra cheia esvazia em 24 quadros, qualquer que seja o HP máximo.
+        // (Pokémon com HP máximo abaixo de 48 seguem a mesma regra em CalcNewBarValue.)
+        s32 hpIncrement = gBattleSpritesDataPtr->battleBars[battlerId].maxValue / HEALTHBAR_DRAIN_FRAMES;
+        if (hpIncrement < 1)
+            hpIncrement = 1;
         currentBarValue = CalcNewBarValue(gBattleSpritesDataPtr->battleBars[battlerId].maxValue,
                                           gBattleSpritesDataPtr->battleBars[battlerId].oldValue,
                                           gBattleSpritesDataPtr->battleBars[battlerId].receivedValue,
                                           &gBattleSpritesDataPtr->battleBars[battlerId].currValue,
                                           B_HEALTHBAR_NUM_TILES,
-                                          1);
+                                          hpIncrement);
     }
     else // exp bar
     {
@@ -1989,7 +1996,8 @@ static s32 CalcNewBarValue(s32 maxValue, s32 oldValue, s32 receivedValue, s32 *c
 
     if (maxValue < totalPixels) // handle cases of max var having less pixels than the whole bar
     {
-        s32 incrementInQ = Q_24_8(maxValue) / totalPixels;
+        // HACK: na barra de HP, o dobro da velocidade original (a de EXP não muda)
+        s32 incrementInQ = Q_24_8(maxValue) / ((totalPixels == B_HEALTHBAR_NUM_PIXELS) ? HEALTHBAR_DRAIN_FRAMES : totalPixels);
 
         if (receivedValue < 0) // fill bar right
         {

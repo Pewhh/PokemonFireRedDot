@@ -10985,6 +10985,53 @@ static const struct TrainerMonNoItemDefaultMoves sParty_ChampionRematchFlareon[]
     },
 };
 
+// ---- BILL: depois do S.S. TICKET (entre MISTY e LT. SURGE) e revanche depois da ELITE 4
+static const struct TrainerMonNoItemDefaultMoves sParty_Bill1[] = {
+    {
+        .iv = 100,
+        .lvl = 18,
+        .species = SPECIES_VULPIX,
+    },
+    {
+        .iv = 100,
+        .lvl = 18,
+        .species = SPECIES_EXEGGCUTE,
+    },
+    {
+        .iv = 100,
+        .lvl = 20,
+        .species = SPECIES_FARFETCHD,
+    },
+};
+
+static const struct TrainerMonNoItemDefaultMoves sParty_Bill2[] = {
+    {
+        .iv = 200,
+        .lvl = 62,
+        .species = SPECIES_FARFETCHD,
+    },
+    {
+        .iv = 200,
+        .lvl = 63,
+        .species = SPECIES_NINETALES,
+    },
+    {
+        .iv = 200,
+        .lvl = 63,
+        .species = SPECIES_EXEGGUTOR,
+    },
+    {
+        .iv = 200,
+        .lvl = 64,
+        .species = SPECIES_ESPEON,
+    },
+    {
+        .iv = 200,
+        .lvl = 65,
+        .species = SPECIES_UMBREON,
+    },
+};
+
 // ---- Líderes por posição (4º, 5º, 6º). Os times sem número são a posição original:
 // sParty_LeaderErika = 4º, sParty_LeaderKoga = 5º, sParty_LeaderSabrina = 6º.
 // ERIKA como 5º ginásio (provisório: time original +14 níveis)

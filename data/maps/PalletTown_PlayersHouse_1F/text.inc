@@ -1,6 +1,6 @@
 PalletTown_PlayersHouse_1F_Text_OhSon::
     .string "MOM: Oh, {PLAYER}!\n"
-    .string "Hold on a second!$"
+    .string "Come over here a second, dear!$"
 
 PalletTown_PlayersHouse_1F_Text_DeliveringRunningShoes::
     .string "MOM: Going out already?\p"
@@ -21,7 +21,7 @@ PalletTown_PlayersHouse_1F_Text_MomTakeCare::
 
 PalletTown_PlayersHouse_1F_Text_ExplainRunningShoes::
     .string "Press the B Button to run.\n"
-    .string "But only where there's room to run!$"
+    .string "You can run anywhere!$"
 
 PalletTown_PlayersHouse_1F_Text_AllBoysLeaveOakLookingForYou::
     .string "MOM: …Right.\n"
